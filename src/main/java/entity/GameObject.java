@@ -9,14 +9,14 @@ public class GameObject {
     private String name;
     private boolean active;
     private ArrayList<Property> properties;
-    private Environent environents;
+    private Environment environents;
 
     public GameObject(String id, String name, boolean active, ArrayList<Property> properties, Environment environments) {
         this.id =id;
         this.name=name;
         this.active=true;
         this.properties=new ArrayList<Property>();
-        this.environents=environments
+        this.environents=environments;
     }
 
 }
