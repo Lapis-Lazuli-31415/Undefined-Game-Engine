@@ -1,6 +1,8 @@
 package entity;
 
-import java.awt.*;
+//import java.awt.*;    I dont think we need this import in JavaFX
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 public class SpriteRenderer {
 
