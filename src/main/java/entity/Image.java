@@ -1,13 +1,12 @@
 package entity;
 
-public class Image {
-    final String path;
-    final int width;
-    final int height;
+import java.nio.file.Path;
 
-    public Image(String path, int width, int height) {
-        this.path = path;
-        this.width = width;
-        this.height = height;
+public class Image extends Asset {
+    private int width;
+    private int height;
+
+    protected Image(Path path) {
+        super(path);
     }
 }

@@ -10,6 +10,7 @@ public class GameObject {
     private boolean active;
     private ArrayList<Property> properties;
     private Environment environents;
+    private Asset sprites;
 
     public GameObject(String id, String name, boolean active, ArrayList<Property> properties, Environment environments) {
         this.id =id;

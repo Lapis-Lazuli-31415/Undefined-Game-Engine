@@ -2,13 +2,13 @@ package entity;
 
 import java.awt.*;
 
-public class SpriteRenderer {
+public class SpriteRenderer extends Component {
 
-    final Image image;
+    private Image sprite;
     final boolean visible;
 
-    public SpriteRenderer(Image image, boolean visible) {
-        this.image = image;
+    public SpriteRenderer(Image sprite, boolean visible) {
+        this.sprite = sprite;
         this.visible = visible;
     }
 }
