@@ -1,28 +1,92 @@
 package use_case.Sprites;
 
 import entity.AssetLib;
-import entity.AssetRepository;
+import entity.Image;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
-public class ImportSpriteInteractor {
+public class ImportSpriteInteractor implements SpriteInputBoundary {
 
-    private final AssetRepository assetRepo;
-    private final AssetLib assetLib;;
+    private static final long MAX_FILE_SIZE = 250L * 1024 * 1024; // 250 MB in bytes
+    private static final List<String> VALID_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg", ".gif", ".bmp");
 
-    public ImportSpriteInteractor(AssetRepository repo, AssetLib library) {
-        this.assetRepo = repo;
+    private final SpriteUserDataAccessInterface dataAccess;
+    private final SpriteOutputBoundary outputBoundary;
+    private final AssetLib assetLib;
+
+    public ImportSpriteInteractor(SpriteUserDataAccessInterface dataAccess,
+                                  SpriteOutputBoundary outputBoundary,
+                                  AssetLib library) {
+        this.dataAccess = dataAccess;
+        this.outputBoundary = outputBoundary;
         this.assetLib = library;
     }
 
-//    @Override
-    public void execute()  {
-        // 1. validate extension
+    @Override
+    public void execute(ImportSpriteRequest request) {
+        File spriteFile = request.spriteFile;
 
-        // 2. validate file type
-        // 3. call assetRepo.saveImage()
-        // 4. add to assetLibrary
-        // 5. return response model
+        // 1. validate the existence of the selected file
+        if (spriteFile == null || !spriteFile.exists()) {
+            outputBoundary.prepareFailView("File does not exist.");
+            return;
+        }
 
+        // 2. validate file type using extension
+        String fileName = spriteFile.getName();
+        String extension = getFileExtension(fileName);
+        if (!isValidExtension(extension)) {
+            outputBoundary.prepareFailView("Invalid file extension. Supported formats: " + VALID_EXTENSIONS);
+            return;
+        }
 
+        // 3. validate file size, currently set to 250 MB
+        if (spriteFile.length() > MAX_FILE_SIZE) {
+            outputBoundary.prepareFailView("File size exceeds 250 MB limit.");
+            return;
+        }
+
+        // 4. check if the sprite already exists in the uploads directory
+        if (dataAccess.existsByName(fileName)) {
+            outputBoundary.prepareFailView("A sprite with this name already exists.");
+            return;
+        }
+
+        try {
+            // 5. save to uploads directory
+            Path savedPath = dataAccess.saveSprite(spriteFile, fileName);
+
+            // 6. create new Image entity
+            Image importedImage = new Image(savedPath);
+
+            // 7. Add to asset library
+            assetLib.add(importedImage);
+
+            // 8. Prepare and return success response
+            ImportSpriteResponse response = new ImportSpriteResponse();
+            response.success = true;
+            response.message = "Sprite imported successfully: " + fileName;
+            response.importedSprite = importedImage;
+
+            outputBoundary.prepareSuccessView(response);
+
+        } catch (IOException e) {
+            outputBoundary.prepareFailView("Failed to import sprite: " + e.getMessage());
+        }
     }
 
+    private String getFileExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            return "";
+        }
+        return fileName.substring(lastDotIndex).toLowerCase();
+    }
+
+    private boolean isValidExtension(String extension) {
+        return VALID_EXTENSIONS.contains(extension);
+    }
 }
