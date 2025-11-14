@@ -1,5 +1,7 @@
 package entity;
 
+import entity.scripting.Environment;
+
 import java.util.ArrayList;
 // import entity.Property;
 import java.util.List;
