@@ -2,5 +2,5 @@ package entity;
 
 public class GameController {
 
-    final Environment environment;
+//    final Environment environment;    Commented out cuz it causes errors
 }
