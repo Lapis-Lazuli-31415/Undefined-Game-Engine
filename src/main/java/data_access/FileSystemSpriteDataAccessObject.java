@@ -55,7 +55,6 @@ public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInt
         return Files.exists(targetPath);
     }
 
-    @Override
     public Path saveSprite(File sourceFile, String targetFileName) throws IOException {
         // Ensure uploads directory exists
         ensureUploadsDirectoryExists();
@@ -70,7 +69,6 @@ public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInt
         return targetPath;
     }
 
-    @Override
     public Path getUploadsDirectory() {
         return uploadsDirectory;
     }
