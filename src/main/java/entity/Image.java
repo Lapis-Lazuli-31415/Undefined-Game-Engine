@@ -10,13 +10,11 @@ public class Image extends Asset {
     private int width;
     private int height;
     BufferedImage bimg = ImageIO.read(new File(this.localpath.toString()));
-
-    protected Image(Path path) throws IOException {
+    public Image(Path path) throws IOException {
         super(path);
         this.height = bimg.getHeight();
         this.width = bimg.getWidth();
     }
-
     public int getWidth() {
         return width;
     }

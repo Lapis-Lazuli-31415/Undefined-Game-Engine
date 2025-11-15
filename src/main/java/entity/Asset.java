@@ -14,7 +14,15 @@ public abstract class Asset {
     Path localpath;     // note: not sure if i should keep path or switch to string/other datatype
 
     protected Asset(Path path) {
+        this.id = UUID.randomUUID();
         this.localpath = path;
         this.name = path.getFileName().toString();
+    }
+
+    public UUID getId() {
+        return id;
+    }
+    public String getName() {
+        return name;
     }
 }
