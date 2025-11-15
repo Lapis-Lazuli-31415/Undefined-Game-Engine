@@ -2,6 +2,10 @@ package entity;
 
 import java.util.*;
 
+/**
+ * A library to manage assets.
+ */
+
 public class AssetLib {
     private Map<UUID, Asset> assets = new HashMap<>();
 

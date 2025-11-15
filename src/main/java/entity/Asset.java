@@ -3,6 +3,10 @@ package entity;
 import java.nio.file.Path;
 import java.util.UUID;
 
+/**
+ * An abstract class representing a generic asset.
+ */
+
 public abstract class Asset {
 
     private UUID id;
