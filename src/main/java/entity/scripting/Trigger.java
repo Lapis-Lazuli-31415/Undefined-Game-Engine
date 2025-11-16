@@ -12,8 +12,8 @@ public class Trigger {
     private ArrayList<Condition> conditions;
     private ArrayList<Action> actions;
 
-    public Trigger(String eventName) {
-        event = new EmptyEvent();
+    public Trigger(Event event) {
+        this.event = event;
         conditions = new ArrayList<>();
         actions = new ArrayList<>();
     }
