@@ -1,6 +1,6 @@
 package entity;
 
-import entity.scripting.Environment;
+import entity.scripting.environment.Environment;
 
 public class GameController {
 

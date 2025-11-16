@@ -1,13 +1,13 @@
 package entity.scripting.event;
 
 public abstract class Event {
-    private String eventName;
+    private String eventLabel;
 
-    public Event(String eventName) {
-        this.eventName = eventName;
+    public Event(String eventLabel) {
+        this.eventLabel = eventLabel;
     }
 
-    public String getEventName(){
-        return eventName;
+    public String getEventLabel(){
+        return eventLabel;
     };
 }
