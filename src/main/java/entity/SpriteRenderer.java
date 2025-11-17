@@ -2,12 +2,12 @@ package entity;
 
 import java.awt.*;
 
-public class SpriteRenderer {
+public class SpriteRenderer extends Property{
 
-    final Image image;
-    final Color tint;
-    final int zIndex;
-    final boolean visible;
+    public final Image image;
+    public final Color tint;
+    public final int zIndex;
+    public final boolean visible;
 
     public SpriteRenderer(Image image, Color tint, int zIndex, boolean visible) {
         this.image = image;

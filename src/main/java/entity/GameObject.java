@@ -5,6 +5,7 @@ import entity.scripting.environment.Environment;
 import java.util.ArrayList;
 // import entity.Property;
 import java.util.List;
+import entity.scripting.TriggerManager;
 
 
 /**
@@ -22,6 +23,7 @@ public class GameObject {
     private ArrayList<Property> properties;
     private Environment environments;
     private Transform transform;
+    private TriggerManager triggerManager;
 
     public GameObject(String id,
                       String name,
@@ -31,6 +33,7 @@ public class GameObject {
         this.id =id;
         this.name=name;
         this.active=active;
+        this.triggerManager = new TriggerManager();
 
         // keep signature, but handle null safely
         if (properties != null) {
@@ -86,7 +89,9 @@ public class GameObject {
     public List<Property> getProperties() {
         return new ArrayList<>(properties);
     }
-
+    public TriggerManager getTriggerManager() {
+        return triggerManager;
+    }
     public void addProperty(Property property) {
         // If your Property has a key, you can de-duplicate by key:
         properties.add(property);
