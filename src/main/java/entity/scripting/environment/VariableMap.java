@@ -1,13 +1,13 @@
 package entity.scripting.environment;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class VariableMap<T> {
     private Map<String, T> variables;
 
     public VariableMap() {
-        variables = new HashMap<>();
+        variables = new LinkedHashMap<>();
     }
 
     public void set(String name, T value){
@@ -18,7 +18,11 @@ public class VariableMap<T> {
         return variables.get(name);
     }
 
-    public void delete(String name){
+    public void unset(String name){
         variables.remove(name);
+    }
+
+    public boolean contains(String name){
+        return variables.containsKey(name);
     }
 }
