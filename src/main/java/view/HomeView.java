@@ -125,12 +125,6 @@ public class HomeView extends javax.swing.JFrame {
         tabBar.setPreferredSize(new Dimension(0, 35));
         tabBar.setBackground(new Color(60,60,60));
 
-        JLabel tabLabel = new JLabel("   Start");
-        tabLabel.setForeground(Color.WHITE);
-
-        JButton addTabButton = new JButton("+");
-        addTabButton.setPreferredSize(new Dimension(45,35));
-
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
 
