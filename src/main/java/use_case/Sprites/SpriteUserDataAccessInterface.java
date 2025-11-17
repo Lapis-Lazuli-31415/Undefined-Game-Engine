@@ -11,24 +11,24 @@ import java.nio.file.Path;
 public interface SpriteUserDataAccessInterface {
 
     /**
-     * Checks if a sprite with the given name already exists.
+     * checks if a sprite with the given name already exists.
      * @param spriteName the name of the sprite to check
      * @return true if the sprite exists, false otherwise
      */
     boolean existsByName(String spriteName);
 
     /**
-     * Saves the imported sprite file to the uploads directory.
+     * saves the imported sprite file to the uploads directory (in the backend).
      * @param sourceFile the source file to save
      * @param targetFileName the target file name
-     * @return the Path to the saved file
+     * @return the path to the saved file
      * @throws IOException if an error occurs during file operations
      */
     Path saveSprite(File sourceFile, String targetFileName) throws IOException;
 
     /**
-     * Gets the uploads directory path.
-     * @return the Path to the uploads directory
+     * gets the uploads directory path.
+     * @return the path to the uploads directory
      */
     Path getUploadsDirectory();
 }

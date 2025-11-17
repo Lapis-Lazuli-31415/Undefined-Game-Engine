@@ -11,7 +11,7 @@ import java.util.List;
 public class ImportSpriteInteractor implements SpriteInputBoundary {
 
     private static final long MAX_FILE_SIZE = 250L * 1024 * 1024; // 250 MB in bytes
-    private static final List<String> VALID_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg", ".gif", ".bmp");
+    private static final List<String> VALID_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg");
 
     private final SpriteUserDataAccessInterface dataAccess;
     private final SpriteOutputBoundary outputBoundary;
@@ -31,7 +31,7 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
 
         // 1. validate the existence of the selected file
         if (spriteFile == null || !spriteFile.exists()) {
-            outputBoundary.prepareFailView("File does not exist.");
+            outputBoundary.prepareFailView("File does not exist. Please try again.");
             return;
         }
 
@@ -39,7 +39,7 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
         String fileName = spriteFile.getName();
         String extension = getFileExtension(fileName);
         if (!isValidExtension(extension)) {
-            outputBoundary.prepareFailView("Invalid file extension. Supported formats: " + VALID_EXTENSIONS);
+            outputBoundary.prepareFailView("Invalid file extension. Supported formats are: " + VALID_EXTENSIONS);
             return;
         }
 
@@ -51,7 +51,7 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
 
         // 4. check if the sprite already exists in the uploads directory
         if (dataAccess.existsByName(fileName)) {
-            outputBoundary.prepareFailView("A sprite with this name already exists.");
+            outputBoundary.prepareFailView("A sprite with this name already exists. Please try again.");
             return;
         }
 
@@ -62,10 +62,10 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
             // 6. create new Image entity
             Image importedImage = new Image(savedPath);
 
-            // 7. Add to asset library
+            // 7. add sprite to asset library
             assetLib.add(importedImage);
 
-            // 8. Prepare and return success response
+            // 8. prepare and return success response
             ImportSpriteResponse response = new ImportSpriteResponse();
             response.success = true;
             response.message = "Sprite imported successfully: " + fileName;

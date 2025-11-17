@@ -10,8 +10,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Data Access Object for managing sprite files in the file system.
- * This implementation saves imported sprites to an "uploads" directory in the project.
+ * DAO for managing sprite files in the file system.
+ * This implementation saves imported sprites to an "uploads" directory in the root directory of the project.
  */
 public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInterface {
 
@@ -19,7 +19,7 @@ public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInt
 
     /**
      * Constructor that creates a FileSystemSpriteDataAccessObject with the default uploads directory.
-     * The uploads directory will be created in the project root if it doesn't exist.
+     * The uploads directory will be created in the project root if it doesn't already exist.
      *
      * @throws IOException if the uploads directory cannot be created
      */
