@@ -79,5 +79,4 @@ public class ScenePanel extends JPanel {
             g2.dispose(); // restore original Graphics
         }
     }
-
 }
