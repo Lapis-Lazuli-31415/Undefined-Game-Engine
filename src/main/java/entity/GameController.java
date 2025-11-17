@@ -1,6 +1,12 @@
 package entity;
 
+import entity.scripting.environment.Environment;
+
 public class GameController {
 
-//    final Environment environment;    Commented out cuz it causes errors
+    final Environment environment;
+
+    public GameController(Environment environment) {
+        this.environment = environment;
+    }
 }

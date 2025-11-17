@@ -1,5 +1,7 @@
 package entity;
 
+import entity.scripting.environment.Environment;
+
 import java.util.ArrayList;
 
 public class Project {
@@ -15,7 +17,8 @@ public class Project {
         this.name = name;
         this.scenes = new ArrayList<>();
         this.assets = new ArrayList<>();
-        this.gameController = new GameController();
+        Environment globalEnvironment = new Environment();
+        this.gameController = new GameController(globalEnvironment);
     }
     public String getId() {
         return id;
