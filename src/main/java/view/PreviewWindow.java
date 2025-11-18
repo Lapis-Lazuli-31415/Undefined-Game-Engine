@@ -1,13 +1,16 @@
 package view;
 
 import entity.Scene;
+import entity.GameObject;
 import entity.scripting.environment.Environment;
+import entity.scripting.Trigger;
+import entity.scripting.TriggerManager;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * PreviewWindow - Window for previewing and testing the game
+ * PreviewWindow - Auto-starts when opened via Play button
  *
  * @author Wanru Cheng
  */
@@ -19,21 +22,18 @@ public class PreviewWindow {
     private RuntimeEnvironment runtime;
     private Environment globalEnvironment;
 
-    private JButton playButton;
-    private JButton stopButton;
     private JLabel statusLabel;
+    private JLabel sceneInfoLabel;
 
     /**
      * Create a PreviewWindow
-     *
-     * @param scene The scene to preview
-     * @param globalEnvironment The global environment for triggers
      */
     public PreviewWindow(Scene scene, Environment globalEnvironment) {
         this.scene = scene;
         this.globalEnvironment = globalEnvironment;
 
         initializeUI();
+        loadScene();
     }
 
     /**
@@ -45,89 +45,138 @@ public class PreviewWindow {
         frame.setSize(900, 700);
         frame.setLayout(new BorderLayout());
 
+        // Add window listener to stop runtime when closed
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                close();
+            }
+        });
+
         // Create canvas
         canvas = new GameCanvas();
-        canvas.setGameObjects(scene.getGameObjects());
 
-        // Create control panel
-        JPanel controlPanel = createControlPanel();
+        // Create info panel
+        JPanel infoPanel = createInfoPanel();
+
+        // Create status panel
+        JPanel statusPanel = createStatusPanel();
 
         // Add components
+        frame.add(infoPanel, BorderLayout.NORTH);
         frame.add(canvas, BorderLayout.CENTER);
-        frame.add(controlPanel, BorderLayout.SOUTH);
+        frame.add(statusPanel, BorderLayout.SOUTH);
 
         // Setup runtime
         setupRuntime();
     }
 
     /**
-     * Create control panel with play/stop buttons
+     * Create info panel showing scene information
      */
-    private JPanel createControlPanel() {
+    private JPanel createInfoPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        panel.setBackground(new Color(50, 50, 50));
+        panel.setPreferredSize(new Dimension(900, 40));
+
+        sceneInfoLabel = new JLabel();
+        sceneInfoLabel.setForeground(Color.WHITE);
+        sceneInfoLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        updateSceneInfo();
+
+        panel.add(sceneInfoLabel);
+
+        return panel;
+    }
+
+    /**
+     * Create status panel at bottom
+     */
+    private JPanel createStatusPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT));
         panel.setBackground(new Color(60, 60, 60));
-        panel.setPreferredSize(new Dimension(900, 50));
+        panel.setPreferredSize(new Dimension(900, 40));
 
-        // Play button
-        playButton = new JButton("▶ Play");
-        playButton.addActionListener(e -> startPreview());
+        statusLabel = new JLabel("▶ Running...");
+        statusLabel.setForeground(Color.GREEN);
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
-        // Stop button
-        stopButton = new JButton("⏹ Stop");
-        stopButton.setEnabled(false);
-        stopButton.addActionListener(e -> stopPreview());
+        JLabel instructionLabel = new JLabel("  |  Press keys or click objects to test triggers");
+        instructionLabel.setForeground(Color.LIGHT_GRAY);
+        instructionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
 
-        // Status label
-        statusLabel = new JLabel("Ready");
-        statusLabel.setForeground(Color.WHITE);
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
-
-        panel.add(playButton);
-        panel.add(stopButton);
         panel.add(statusLabel);
+        panel.add(instructionLabel);
 
         return panel;
+    }
+
+    /**
+     * Update scene info display
+     */
+    private void updateSceneInfo() {
+        int objectCount = scene.getGameObjects().size();
+        int activeCount = (int) scene.getGameObjects().stream()
+                .filter(GameObject::isActive).count();
+        int triggerCount = countTotalTriggers();
+
+        String info = String.format(
+                "📋 Scene: %s | 🎮 Objects: %d (%d active) | ⚡ Triggers: %d",
+                scene.getName(), objectCount, activeCount, triggerCount
+        );
+
+        sceneInfoLabel.setText(info);
+    }
+
+    /**
+     * Count total triggers in scene
+     */
+    private int countTotalTriggers() {
+        int count = 0;
+        for (GameObject obj : scene.getGameObjects()) {
+            TriggerManager tm = obj.getTriggerManager();
+            if (tm != null) {
+                count += tm.getAllTriggers().size();
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Load scene into preview
+     */
+    private void loadScene() {
+        System.out.println("\n=== Loading Scene: " + scene.getName() + " ===");
+
+        // Load GameObjects
+        System.out.println("Loading " + scene.getGameObjects().size() + " GameObjects...");
+        canvas.setGameObjects(scene.getGameObjects());
+
+        // Count triggers
+        int triggerCount = countTotalTriggers();
+        System.out.println("Found " + triggerCount + " triggers");
+
+        // Check for background music
+        if (scene.getBackgroundMusic() != null) {
+            System.out.println("Background music: " + scene.getBackgroundMusic());
+        } else {
+            System.out.println("No background music");
+        }
+
+        System.out.println("=== Scene Loaded ===\n");
     }
 
     /**
      * Setup RuntimeEnvironment
      */
     private void setupRuntime() {
-        // ✅ Pass 3 arguments: scene, canvas, globalEnvironment
         runtime = new RuntimeEnvironment(scene, canvas, globalEnvironment);
     }
 
     /**
-     * Start the preview
-     */
-    private void startPreview() {
-        runtime.start();
-
-        playButton.setEnabled(false);
-        stopButton.setEnabled(true);
-        statusLabel.setText("Running...");
-        statusLabel.setForeground(Color.GREEN);
-
-        System.out.println("Preview started");
-    }
-
-    /**
-     * Stop the preview
-     */
-    private void stopPreview() {
-        runtime.stop();
-
-        playButton.setEnabled(true);
-        stopButton.setEnabled(false);
-        statusLabel.setText("Stopped");
-        statusLabel.setForeground(Color.RED);
-
-        System.out.println("Preview stopped");
-    }
-
-    /**
-     * Display the preview window
+     * Display the preview window and auto-start
      */
     public void display() {
         frame.setLocationRelativeTo(null);
@@ -135,14 +184,23 @@ public class PreviewWindow {
 
         // Request focus for keyboard input
         canvas.requestFocus();
+
+        // Auto-start the game loop
+        runtime.start();
+
+        System.out.println("Preview window displayed and started");
+        System.out.println("Canvas has focus: " + canvas.hasFocus());
+        System.out.println("\nTry pressing keys or clicking objects!");
+        System.out.println("Watch console for trigger outputs\n");
     }
 
     /**
-     * Close the preview window
+     * Close the preview window and stop runtime
      */
     public void close() {
         if (runtime != null && runtime.isRunning()) {
             runtime.stop();
+            System.out.println("Runtime stopped");
         }
 
         if (canvas != null) {
@@ -152,6 +210,8 @@ public class PreviewWindow {
         if (frame != null) {
             frame.dispose();
         }
+
+        System.out.println("Preview window closed\n");
     }
 
     /**

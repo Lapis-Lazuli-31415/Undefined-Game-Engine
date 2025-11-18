@@ -58,4 +58,8 @@ public class Scene {
     public void removeGameObject(GameObject gameObject) {
         gameObjects.remove(gameObject);
     }
+
+    public Music getBackgroundMusic() { return backgroundMusic;
+
+    }
 }

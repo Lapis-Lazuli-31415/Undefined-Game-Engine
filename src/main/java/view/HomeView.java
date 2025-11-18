@@ -10,6 +10,14 @@ import interface_adapter.transform.TransformPresenter;
 import interface_adapter.transform.TransformController;
 import use_case.transform.UpdateTransformInteractor;
 
+// ===== ADDED BY CHENG: Imports for preview functionality =====
+import entity.Scene;
+import entity.scripting.environment.Environment;
+import use_case.validate_scene.ValidateSceneInputBoundary;
+import use_case.validate_scene.ValidateSceneInteractor;
+import use_case.validate_scene.ValidationResult;
+// ===== END ADDED BY CHENG =====
+
 public class HomeView extends javax.swing.JFrame {
 
     // ====== FIELDS ======
@@ -25,8 +33,14 @@ public class HomeView extends javax.swing.JFrame {
     private TransformViewModel transformViewModel;
     private TransformController transformController;
 
+    // ===== ADDED BY CHENG: Preview system fields =====
+    private ValidateSceneInputBoundary sceneValidator;
+    private PreviewWindow currentPreview;  // Track current preview window
+    // ===== END ADDED BY CHENG =====
+
     public HomeView() {
         initComponents();
+        initializePreviewSystem();  // ===== ADDED BY CHENG =====
     }
 
     @SuppressWarnings("unchecked")
@@ -154,6 +168,7 @@ public class HomeView extends javax.swing.JFrame {
         playButton.setFocusPainted(false);
         playButton.setOpaque(true);
         playButton.setBorderPainted(false);
+        playButton.addActionListener(e -> onPlayClicked());  // ===== MODIFIED BY CHENG =====
 
         JButton stopButton = new JButton("■");
         stopButton.setBackground(new Color(200, 0, 0));   // red
@@ -161,6 +176,7 @@ public class HomeView extends javax.swing.JFrame {
         stopButton.setFocusPainted(false);
         stopButton.setOpaque(true);
         stopButton.setBorderPainted(false);
+        stopButton.addActionListener(e -> onStopClicked());  // ===== MODIFIED BY CHENG =====
 
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
@@ -257,6 +273,171 @@ public class HomeView extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }
+
+    // ========== PREVIEW SYSTEM METHODS - ADDED BY CHENG ==========
+
+    /**
+     * Initialize the preview system
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     */
+    private void initializePreviewSystem() {
+        sceneValidator = new ValidateSceneInteractor();
+        currentPreview = null;
+    }
+
+    /**
+     * Handle Play button click
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * Workflow:
+     * 1. Get current scene
+     * 2. Validate scene (check ID, name, GameObjects, music)
+     * 3. Show error/warning dialogs if needed
+     * 4. Open PreviewWindow and start game loop
+     */
+    private void onPlayClicked() {
+        try {
+            // 1. Get current scene
+            Scene scene = getCurrentScene();
+
+            if (scene == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No scene is currently open.\nPlease open or create a scene first.",
+                        "Cannot Start Preview",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            // 2. Validate scene (Use Case: ValidateScene)
+            ValidationResult result = sceneValidator.validate(scene);
+
+            if (result.isError()) {
+                // Critical error: cannot proceed
+                JOptionPane.showMessageDialog(
+                        this,
+                        result.getMessage(),
+                        "Cannot Start Preview",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            if (result.isWarning()) {
+                // Warning: ask user if they want to continue
+                int choice = JOptionPane.showConfirmDialog(
+                        this,
+                        result.getMessage(),
+                        "Preview Warning",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                if (choice != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
+            // 3. Create global environment for triggers
+            Environment globalEnv = createGlobalEnvironment();
+
+            // 4. Open preview window
+            currentPreview = new PreviewWindow(scene, globalEnv);
+            currentPreview.display();
+
+            System.out.println("✅ Preview started");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to start preview: " + ex.getMessage(),
+                    "Preview Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    /**
+     * Handle Stop button click
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * Stops the game loop and closes the preview window
+     */
+    private void onStopClicked() {
+        if (currentPreview != null) {
+            // Stop the preview
+            currentPreview.close();
+            currentPreview = null;
+
+            System.out.println("⏹ Preview stopped");
+        } else {
+            System.out.println("No preview is running");
+        }
+    }
+
+    /**
+     * Get current scene from scene manager
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * TODO: Replace with actual SceneManager implementation when available
+     * Currently returns a test scene for development
+     */
+    private Scene getCurrentScene() {
+        // TODO: Replace with actual implementation
+        // Example: return sceneManager.getCurrentScene();
+
+        // For testing: create a test scene using Lynn's demoObject
+        return createTestScene();
+    }
+
+    /**
+     * Create global environment for triggers
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * The global environment stores variables that are shared across
+     * all GameObjects (e.g., game score, level, player health)
+     */
+    private Environment createGlobalEnvironment() {
+        Environment env = new Environment();
+
+        // Add initial global variables here if needed
+        // Example:
+        // try {
+        //     env.set("game", "score", Integer.class, 0);
+        //     env.set("game", "level", Integer.class, 1);
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+
+        return env;
+    }
+
+    /**
+     * Create test scene (temporary implementation)
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * This method creates a test scene using Lynn's demoObject
+     * TODO: Remove this when getCurrentScene() is properly implemented
+     */
+    private Scene createTestScene() {
+        java.util.ArrayList<GameObject> objects = new java.util.ArrayList<>();
+
+        // Reuse Lynn's demoObject for testing
+        if (demoObject != null) {
+            objects.add(demoObject);
+        }
+
+        return new Scene(
+                "demo-scene",      // Scene ID
+                "Demo Scene",      // Scene name
+                objects,           // GameObjects list
+                null               // Background music (null will trigger warning)
+        );
+    }
+
+    // ========== END PREVIEW SYSTEM METHODS - ADDED BY CHENG ==========
 
     // ====== MAIN METHOD ======
     public static void main(String[] args) {
