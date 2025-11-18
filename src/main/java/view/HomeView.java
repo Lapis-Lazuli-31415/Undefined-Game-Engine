@@ -3,7 +3,27 @@ package view;
 import java.awt.*;
 import javax.swing.*;
 
+import entity.GameObject;
+import entity.Transform;
+import interface_adapter.transform.TransformViewModel;
+import interface_adapter.transform.TransformPresenter;
+import interface_adapter.transform.TransformController;
+import use_case.transform.UpdateTransformInteractor;
+
 public class HomeView extends javax.swing.JFrame {
+
+    // ====== FIELDS ======
+    private JPanel leftSidebar;
+    private JPanel assetsPanel;
+    private JPanel filesystemPanel;
+    private JPanel centerPanel;
+    private JPanel propertiesPanel;
+
+    // Demo wiring
+    private ScenePanel scenePanel;
+    private GameObject demoObject;
+    private TransformViewModel transformViewModel;
+    private TransformController transformController;
 
     public HomeView() {
         initComponents();
@@ -29,13 +49,14 @@ public class HomeView extends javax.swing.JFrame {
         setJMenuBar(menuBar);
 
         // ====== LEFT SIDEBAR (Assets + Filesystem) ======
-        JPanel leftSidebar = new JPanel();
+        // NOTE: use the fields, not new local variables
+        leftSidebar = new JPanel();
         leftSidebar.setLayout(new BoxLayout(leftSidebar, BoxLayout.Y_AXIS));
         leftSidebar.setPreferredSize(new Dimension(200, 700));
         leftSidebar.setBackground(new Color(45, 45, 45));
 
         // ====== ASSETS PANEL ======
-        JPanel assetsPanel = new JPanel();
+        assetsPanel = new JPanel();
         assetsPanel.setLayout(new BoxLayout(assetsPanel, BoxLayout.Y_AXIS));
         assetsPanel.setBorder(
                 BorderFactory.createTitledBorder(
@@ -63,7 +84,6 @@ public class HomeView extends javax.swing.JFrame {
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
 
-        // The list inside the scroll (placeholder)
         JPanel spritesContent = new JPanel();
         spritesContent.setLayout(new BoxLayout(spritesContent, BoxLayout.Y_AXIS));
         spritesContent.setBackground(new Color(70, 70, 70));
@@ -71,11 +91,9 @@ public class HomeView extends javax.swing.JFrame {
         JScrollPane spritesScroll = new JScrollPane(spritesContent);
         spritesScroll.setPreferredSize(new Dimension(180, 140));
 
-        // Add header + scroll
         assetsPanel.add(spritesHeader);
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
-
 
         // ---- AUDIO SCROLL PANEL ----
         JPanel audioHeader = new JPanel(new BorderLayout());
@@ -91,7 +109,6 @@ public class HomeView extends javax.swing.JFrame {
         audioHeader.add(audioLabel, BorderLayout.WEST);
         audioHeader.add(audioAddButton, BorderLayout.EAST);
 
-        // The list inside the scroll (placeholder)
         JPanel audioContent = new JPanel();
         audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
         audioContent.setBackground(new Color(70, 70, 70));
@@ -99,13 +116,11 @@ public class HomeView extends javax.swing.JFrame {
         JScrollPane audioScroll = new JScrollPane(audioContent);
         audioScroll.setPreferredSize(new Dimension(180, 140));
 
-        // Add header + scroll
         assetsPanel.add(audioHeader);
         assetsPanel.add(audioScroll);
 
-
         // ====== FILESYSTEM PANEL ======
-        JPanel filesystemPanel = new JPanel();
+        filesystemPanel = new JPanel();
         filesystemPanel.setLayout(new BorderLayout());
         filesystemPanel.setBorder(BorderFactory.createTitledBorder("FileSystem"));
         filesystemPanel.add(new JTextField("Search Files"), BorderLayout.NORTH);
@@ -115,21 +130,20 @@ public class HomeView extends javax.swing.JFrame {
         leftSidebar.add(Box.createVerticalStrut(10));
         leftSidebar.add(filesystemPanel);
 
-
         // ====== CENTER PANEL ======
-        JPanel centerPanel = new JPanel();
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout());
 
         // Top tab bar
         JPanel tabBar = new JPanel(new BorderLayout());
         tabBar.setPreferredSize(new Dimension(0, 35));
-        tabBar.setBackground(new Color(60,60,60));
+        tabBar.setBackground(new Color(60, 60, 60));
 
         JLabel tabLabel = new JLabel("   Start");
         tabLabel.setForeground(Color.WHITE);
 
         JButton addTabButton = new JButton("+");
-        addTabButton.setPreferredSize(new Dimension(45,35));
+        addTabButton.setPreferredSize(new Dimension(45, 35));
 
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
@@ -148,7 +162,6 @@ public class HomeView extends javax.swing.JFrame {
         stopButton.setOpaque(true);
         stopButton.setBorderPainted(false);
 
-
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
 
@@ -156,10 +169,10 @@ public class HomeView extends javax.swing.JFrame {
         tabBar.add(addTabButton, BorderLayout.CENTER);
         tabBar.add(rightTabControls, BorderLayout.EAST);
 
-        // Center content
+        // Center placeholder content (Open Folder)
         JPanel openFolderPanel = new JPanel();
         openFolderPanel.setLayout(new BoxLayout(openFolderPanel, BoxLayout.Y_AXIS));
-        openFolderPanel.setBackground(new Color(55,55,55));
+        openFolderPanel.setBackground(new Color(55, 55, 55));
 
         JLabel folderIcon = new JLabel("\uD83D\uDCC1"); // folder emoji
         folderIcon.setFont(new Font("Arial", Font.PLAIN, 120));
@@ -179,14 +192,62 @@ public class HomeView extends javax.swing.JFrame {
         centerPanel.add(openFolderPanel, BorderLayout.CENTER);
 
         // ====== RIGHT PROPERTIES PANEL ======
-        JPanel propertiesPanel = new JPanel();
-        propertiesPanel.setLayout(new BorderLayout());
-        propertiesPanel.setPreferredSize(new Dimension(200, 700));
-        propertiesPanel.setBorder(BorderFactory.createTitledBorder("Properties"));
+        propertiesPanel = new PropertiesPanel();
 
-        JLabel propertiesPlaceholder = new JLabel("Select Object");
-        propertiesPlaceholder.setHorizontalAlignment(JLabel.CENTER);
-        propertiesPanel.add(propertiesPlaceholder, BorderLayout.CENTER);
+        // ====== DEMO ENTITY + LAYERS WIRING ======
+
+        // 1. Create entity Transform & GameObject
+        java.util.Vector<Double> pos = new java.util.Vector<>();
+        pos.add(100.0); // x
+        pos.add(100.0); // y
+
+        java.util.Vector<Double> scale = new java.util.Vector<>();
+        scale.add(1.0); // scaleX
+        scale.add(1.0); // scaleY
+
+        Transform transform = new Transform(pos, 0f, scale);
+
+        demoObject = new GameObject(
+                "demo-1",
+                "Demo Sprite",
+                true,
+                new java.util.ArrayList<>(),
+                null
+        );
+        demoObject.setTransform(transform);
+
+        // 2. Interface adapter: ViewModel + Presenter
+        transformViewModel = new TransformViewModel();
+        TransformPresenter presenter = new TransformPresenter(transformViewModel);
+
+        // Initialize the view model once
+        presenter.presentTransform(transform);
+
+        // 3. Use case interactor
+        UpdateTransformInteractor interactor =
+                new UpdateTransformInteractor(demoObject, presenter);
+
+        // 4. Controller
+        transformController = new TransformController(interactor);
+
+        // 5. ScenePanel uses ViewModel (no entity)
+        scenePanel = new ScenePanel(transformViewModel);
+
+
+        // ✅ Replace only the openFolderPanel, keep the tabBar
+        centerPanel.remove(openFolderPanel);
+        centerPanel.add(scenePanel, BorderLayout.CENTER);
+        centerPanel.revalidate();
+        centerPanel.repaint();
+
+        // 6. Bind properties panel to VM + controller
+        if (propertiesPanel instanceof PropertiesPanel props) {
+            props.bind(
+                    transformViewModel,
+                    transformController,
+                    () -> scenePanel.repaint()
+            );
+        }
 
         // ====== ADDING PANELS TO FRAME ======
         getContentPane().add(leftSidebar, BorderLayout.WEST);
@@ -197,14 +258,6 @@ public class HomeView extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }
 
-    // ====== VARIABLES DECLARATION (NETBEANS STYLE) ======
-    // (Normally autogenerated, included here for structure consistency)
-    private JPanel leftSidebar;
-    private JPanel assetsPanel;
-    private JPanel filesystemPanel;
-    private JPanel centerPanel;
-    private JPanel propertiesPanel;
-
     // ====== MAIN METHOD ======
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -214,4 +267,3 @@ public class HomeView extends javax.swing.JFrame {
         });
     }
 }
-
