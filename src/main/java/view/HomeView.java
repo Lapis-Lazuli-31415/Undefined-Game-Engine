@@ -196,7 +196,6 @@ public class HomeView extends javax.swing.JFrame {
 
         // ====== DEMO ENTITY + LAYERS WIRING ======
 
-        // 1. Create entity Transform & GameObject
         java.util.Vector<Double> pos = new java.util.Vector<>();
         pos.add(100.0); // x
         pos.add(100.0); // y
@@ -216,25 +215,19 @@ public class HomeView extends javax.swing.JFrame {
         );
         demoObject.setTransform(transform);
 
-        // 2. Interface adapter: ViewModel + Presenter
         transformViewModel = new TransformViewModel();
         TransformPresenter presenter = new TransformPresenter(transformViewModel);
 
-        // Initialize the view model once
         presenter.presentTransform(transform);
 
-        // 3. Use case interactor
         UpdateTransformInteractor interactor =
                 new UpdateTransformInteractor(demoObject, presenter);
 
-        // 4. Controller
         transformController = new TransformController(interactor);
 
-        // 5. ScenePanel uses ViewModel (no entity)
         scenePanel = new ScenePanel(transformViewModel);
 
 
-        // ✅ Replace only the openFolderPanel, keep the tabBar
         centerPanel.remove(openFolderPanel);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
         centerPanel.revalidate();
@@ -249,7 +242,6 @@ public class HomeView extends javax.swing.JFrame {
             );
         }
 
-        // ====== ADDING PANELS TO FRAME ======
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);
         getContentPane().add(propertiesPanel, BorderLayout.EAST);
@@ -258,7 +250,6 @@ public class HomeView extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }
 
-    // ====== MAIN METHOD ======
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
