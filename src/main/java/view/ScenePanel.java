@@ -12,7 +12,6 @@ public class ScenePanel extends JPanel {
     private final Image sprite;
 
 
-
     public ScenePanel(TransformViewModel viewModel) {
         this.viewModel = viewModel;
 
@@ -34,7 +33,7 @@ public class ScenePanel extends JPanel {
 
         if (sprite == null) return;
 
-        // We need Graphics2D for rotation
+        // need Graphics2D for rotation
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             // --- 1. Read from view model ---
@@ -72,7 +71,7 @@ public class ScenePanel extends JPanel {
             // --- 5. Draw image (under rotation) ---
             g2.drawImage(sprite, drawX, drawY, drawW, drawH, this);
 
-            // Optional: draw the bounding box so you can see the rotated bounds
+            // Optional bounding box to see the rotated bounds
             g2.setColor(Color.RED);
             g2.drawRect(drawX, drawY, drawW, drawH);
         } finally {

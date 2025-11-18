@@ -2,7 +2,6 @@ package interface_adapter.transform;
 
 /**
  * Simple view model representing the Transform data
- * in the interface_adapter layer. No Swing or entity imports.
  */
 public class TransformViewModel {
 

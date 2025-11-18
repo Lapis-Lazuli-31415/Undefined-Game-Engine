@@ -19,24 +19,25 @@ public class PropertiesPanel extends JPanel {
     private JTextField posYField;
     private JTextField rotationField;
     private JTextField scaleField;
-    // Trigger / scripting models
-    private DefaultListModel<String> conditionsModel;
-    private JList<String> conditionsList;
 
-    private DefaultListModel<String> actionsModel;
-    private JList<String> actionsList;
-
-    // Trigger
-    private JComboBox<String> eventCombo;
-    private JTextField keyField;
-
-    // Bound view model / controller
+    // View model / Controller
     private TransformViewModel viewModel;
     private TransformController controller;
     private Runnable onChangeCallback;
 
     // Sprite renderer
     private JTextField imageField;
+
+    // Trigger
+    private JComboBox<String> eventCombo;
+    private JTextField keyField;
+
+    // Trigger / scripting models
+    private DefaultListModel<String> conditionsModel;
+    private JList<String> conditionsList;
+
+    private DefaultListModel<String> actionsModel;
+    private JList<String> actionsList;
 
     // Variables
     private JTextField intNameField;
@@ -75,7 +76,7 @@ public class PropertiesPanel extends JPanel {
         panel.add(posLabel, gbc);
 
         gbc.gridx = 1;
-        posXField = smallField("250");
+        posXField = smallField("0");
 
         JPanel posRow = new JPanel();
         posRow.setOpaque(false);
@@ -89,7 +90,7 @@ public class PropertiesPanel extends JPanel {
         posRow.add(posXField);
         posRow.add(Box.createHorizontalStrut(6));
 
-        posYField = smallField("250");
+        posYField = smallField("0");
         posRow.add(yLabel);
         posRow.add(Box.createHorizontalStrut(3));
         posRow.add(posYField);
@@ -116,7 +117,7 @@ public class PropertiesPanel extends JPanel {
         panel.add(scaleLabel, gbc);
 
         gbc.gridx = 1;
-        scaleField = smallField("100");
+        scaleField = smallField("10");
         panel.add(scaleField, gbc);
 
         attachTransformListeners();
@@ -133,7 +134,6 @@ public class PropertiesPanel extends JPanel {
 
         gbc.gridx = 1;
         imageField = new JTextField("bear.png");
-        // allow this one to be wider than the numeric fields
         imageField.setBackground(new Color(60, 60, 60));
         imageField.setForeground(Color.WHITE);
         imageField.setCaretColor(Color.WHITE);
@@ -389,7 +389,7 @@ public class PropertiesPanel extends JPanel {
 
     // ---------- helper UI methods ----------
 
-    // Common border creator with white title text
+    // border creator with white title text
     private TitledBorder makeSectionBorder(String title) {
         return BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(80, 80, 80)),
@@ -540,9 +540,7 @@ public class PropertiesPanel extends JPanel {
         }
     }
 
-    // =======================
     //  Trigger getters
-    // =======================
 
     public String getSelectedEvent() {
         return eventCombo != null && eventCombo.getSelectedItem() != null

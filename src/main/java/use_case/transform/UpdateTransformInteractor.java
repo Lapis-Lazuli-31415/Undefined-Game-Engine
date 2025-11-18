@@ -5,7 +5,6 @@ import entity.Transform;
 
 /**
  * Use case: update the Transform of a GameObject.
- * This sits in the use_case layer and only depends on entities and boundaries.
  */
 public class UpdateTransformInteractor implements UpdateTransformInputBoundary {
 
@@ -22,7 +21,6 @@ public class UpdateTransformInteractor implements UpdateTransformInputBoundary {
     public void updateTransform(UpdateTransformInputData data) {
         Transform t = gameObject.getTransform();
         if (t == null) {
-            // If somehow null, you could create one here or just return.
             return;
         }
 
