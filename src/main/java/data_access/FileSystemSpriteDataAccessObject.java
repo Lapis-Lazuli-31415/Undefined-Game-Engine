@@ -10,8 +10,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
- * DAO for managing sprite files in the file system.
- * This implementation saves imported sprites to an "uploads" directory in the root directory of the project.
+ * Implementation of SpriteUserDataAccessInterface that saves sprites to the local file system.
+ * This class saves imported sprites to an "uploads" directory in the root directory of the project.
  */
 public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInterface {
 
@@ -63,8 +63,23 @@ public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInt
         Path targetPath = uploadsDirectory.resolve(targetFileName);
 
         // Copy the file to the uploads directory
-        // REPLACE_EXISTING will overwrite if file exists (though we check this in interactor)
+        // REPLACE_EXISTING will overwrite if file exists (checked in interactor)
         Files.copy(sourceFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+        return targetPath;
+    }
+
+    @Override
+    public Path saveSpriteFromStream(java.io.InputStream inputStream, String targetFileName) throws IOException {
+        // Ensure uploads directory exists
+        ensureUploadsDirectoryExists();
+
+        // Resolve the target path
+        Path targetPath = uploadsDirectory.resolve(targetFileName);
+
+        // Copy the stream to the uploads directory
+        // REPLACE_EXISTING will overwrite if file exists (cheecked in interactor)
+        Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
 
         return targetPath;
     }
