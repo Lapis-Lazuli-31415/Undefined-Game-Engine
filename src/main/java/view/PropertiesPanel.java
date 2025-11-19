@@ -7,12 +7,22 @@ import java.awt.*;
 
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import javax.swing.DefaultListModel;
+import javax.swing.SwingUtilities;
 
-public class PropertiesPanel extends JPanel {
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+public class PropertiesPanel extends JPanel implements PropertyChangeListener {
+
+    private static final double DEFAULT_X = 0.0;
+    private static final double DEFAULT_Y = 0.0;
+    private static final double DEFAULT_SCALE = 1.0;
+    private static final float  DEFAULT_ROTATION = 0.0f;
 
     // Transform fields
     private JTextField posXField;
@@ -24,6 +34,9 @@ public class PropertiesPanel extends JPanel {
     private TransformViewModel viewModel;
     private TransformController controller;
     private Runnable onChangeCallback;
+
+    // Prevent recursion when we update the UI from the model
+    private boolean isUpdatingUI = false;
 
     // Sprite renderer
     private JTextField imageField;
@@ -76,7 +89,6 @@ public class PropertiesPanel extends JPanel {
         panel.add(posLabel, gbc);
 
         gbc.gridx = 1;
-        posXField = smallField("0");
 
         JPanel posRow = new JPanel();
         posRow.setOpaque(false);
@@ -85,19 +97,18 @@ public class PropertiesPanel extends JPanel {
         JLabel xLabel = createInlineLabel("X:");
         JLabel yLabel = createInlineLabel("Y:");
 
+        posXField = smallField(String.valueOf(DEFAULT_X));
+        posYField = smallField(String.valueOf(DEFAULT_Y));
+
         posRow.add(xLabel);
         posRow.add(Box.createHorizontalStrut(3));
         posRow.add(posXField);
         posRow.add(Box.createHorizontalStrut(6));
-
-        posYField = smallField("0");
         posRow.add(yLabel);
         posRow.add(Box.createHorizontalStrut(3));
         posRow.add(posYField);
 
-        // keep row from stretching too tall
         posRow.setMaximumSize(posRow.getPreferredSize());
-
         panel.add(posRow, gbc);
 
         // Rotation row
@@ -107,7 +118,7 @@ public class PropertiesPanel extends JPanel {
         panel.add(rotLabel, gbc);
 
         gbc.gridx = 1;
-        rotationField = smallField("0");
+        rotationField = smallField(String.valueOf(DEFAULT_ROTATION));
         panel.add(rotationField, gbc);
 
         // Scale row
@@ -117,13 +128,14 @@ public class PropertiesPanel extends JPanel {
         panel.add(scaleLabel, gbc);
 
         gbc.gridx = 1;
-        scaleField = smallField("10");
+        scaleField = smallField(String.valueOf(DEFAULT_SCALE));
         panel.add(scaleField, gbc);
 
         attachTransformListeners();
 
         return panel;
     }
+
 
     private JPanel createSpriteRendererSection() {
         JPanel panel = createSectionPanel("Sprite Renderer");
@@ -213,7 +225,7 @@ public class PropertiesPanel extends JPanel {
 
         panel.add(condButtons, gbc);
 
-        // --- CONDITIONS LISTENER LOGIC ---
+        // Conditions Listener
         addCondBtn.addActionListener(e -> {
             String expr = JOptionPane.showInputDialog(
                     this,
@@ -248,7 +260,7 @@ public class PropertiesPanel extends JPanel {
             }
         });
 
-        //  ACTIONS LIST
+        // Actions List
         gbc.gridy++;
         JLabel actionsLabel = createFieldLabel("Actions:");
         panel.add(actionsLabel, gbc);
@@ -281,7 +293,7 @@ public class PropertiesPanel extends JPanel {
 
         panel.add(actionsButtons, gbc);
 
-        // --- ACTIONS LISTENER LOGIC ---
+        // Actions Listener
         addActionBtn.addActionListener(e -> {
             String action = JOptionPane.showInputDialog(
                     this,
@@ -463,58 +475,71 @@ public class PropertiesPanel extends JPanel {
         combo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
     }
 
-    private JTextArea createCodeArea(String text) {
-        JTextArea area = new JTextArea(text, 3, 12);
-        area.setLineWrap(true);
-        area.setWrapStyleWord(true);
-        area.setBackground(new Color(40, 40, 40));
-        area.setForeground(Color.WHITE);
-        area.setCaretColor(Color.WHITE);
-        area.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
-        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-        return area;
-    }
-
-
     // --- Public API for binding from HomeView ---
 
     public void bind(TransformViewModel viewModel,
                      TransformController controller,
                      Runnable onChangeCallback) {
+
+        if (this.viewModel != null) {
+            this.viewModel.removePropertyChangeListener(this);
+        }
         this.viewModel = viewModel;
         this.controller = controller;
         this.onChangeCallback = onChangeCallback;
 
         if (viewModel == null) {
+            isUpdatingUI = true;
             posXField.setText("");
             posYField.setText("");
             rotationField.setText("");
             scaleField.setText("");
+            isUpdatingUI = false;
             return;
         }
 
-        posXField.setText(String.valueOf((int) viewModel.getX()));
-        posYField.setText(String.valueOf((int) viewModel.getY()));
-        rotationField.setText(String.valueOf(viewModel.getRotation()));
-        scaleField.setText(String.valueOf(viewModel.getScale()));
+        // Listen to VM changes
+        this.viewModel.addPropertyChangeListener(this);
+
+        // Initial sync FROM VM TO UI
+        syncFromViewModel();
+    }
+
+    private void syncFromViewModel() {
+        if (viewModel == null) return;
+
+        isUpdatingUI = true;
+        try {
+            posXField.setText(String.valueOf(viewModel.getX()));
+            posYField.setText(String.valueOf(viewModel.getY()));
+            rotationField.setText(String.valueOf(viewModel.getRotation()));
+            scaleField.setText(String.valueOf(viewModel.getScale()));
+        } finally {
+            isUpdatingUI = false;
+        }
     }
 
     private void attachTransformListeners() {
-        DocumentListener listener = new DocumentListener() {
+        // When a field loses focus, push changes into the use case.
+        FocusAdapter focusAdapter = new FocusAdapter() {
             @Override
-            public void insertUpdate(DocumentEvent e) { updateTransformFromFields(); }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) { updateTransformFromFields(); }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) { updateTransformFromFields(); }
+            public void focusLost(FocusEvent e) {
+                updateTransformFromFields();
+            }
         };
 
-        posXField.getDocument().addDocumentListener(listener);
-        posYField.getDocument().addDocumentListener(listener);
-        rotationField.getDocument().addDocumentListener(listener);
-        scaleField.getDocument().addDocumentListener(listener);
+        // When user presses Enter in a field, also commit.
+        ActionListener actionListener = e -> updateTransformFromFields();
+
+        posXField.addFocusListener(focusAdapter);
+        posYField.addFocusListener(focusAdapter);
+        rotationField.addFocusListener(focusAdapter);
+        scaleField.addFocusListener(focusAdapter);
+
+        posXField.addActionListener(actionListener);
+        posYField.addActionListener(actionListener);
+        rotationField.addActionListener(actionListener);
+        scaleField.addActionListener(actionListener);
     }
 
     private void updateTransformFromFields() {
@@ -522,23 +547,47 @@ public class PropertiesPanel extends JPanel {
             return;
         }
 
+        // no triggering another update if in the middle of syncFromViewModel
+        if (isUpdatingUI) {
+            return;
+        }
         try {
             double x = Double.parseDouble(posXField.getText());
             double y = Double.parseDouble(posYField.getText());
             float rot = Float.parseFloat(rotationField.getText());
             double scale = Double.parseDouble(scaleField.getText());
 
-            // Call controller / use case instead of touching entities
             controller.updateTransform(x, y, scale, rot);
 
-            // ViewModel is updated by presenter; we just trigger a repaint hook
             if (onChangeCallback != null) {
                 onChangeCallback.run();
             }
         } catch (NumberFormatException ex) {
-            // ignore while the user is mid-typing invalid values
+            // invalid input → reset everything to defaults
+            resetToDefaults();
         }
     }
+
+    private void resetToDefaults() {
+        isUpdatingUI = true;
+        try {
+            posXField.setText(String.valueOf(DEFAULT_X));
+            posYField.setText(String.valueOf(DEFAULT_Y));
+            rotationField.setText(String.valueOf(DEFAULT_ROTATION));
+            scaleField.setText(String.valueOf(DEFAULT_SCALE));
+        } finally {
+            isUpdatingUI = false;
+        }
+
+        // push defaults through the controller so entity & ViewModel match
+        if (controller != null) {
+            controller.updateTransform(DEFAULT_X, DEFAULT_Y, DEFAULT_SCALE, DEFAULT_ROTATION);
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
+        }
+    }
+
 
     //  Trigger getters
 
@@ -562,6 +611,14 @@ public class PropertiesPanel extends JPanel {
         return java.util.Collections.list(actionsModel.elements());
     }
 
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("state".equals(evt.getPropertyName())) {
+            // Defer the UI update until after the current event finishes to avoid
+            // "Attempt to mutate in notification"
+            SwingUtilities.invokeLater(this::syncFromViewModel);
+        }
+    }
 
 
 

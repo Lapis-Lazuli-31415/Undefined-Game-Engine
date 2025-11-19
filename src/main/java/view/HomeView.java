@@ -6,9 +6,8 @@ import javax.swing.*;
 import entity.GameObject;
 import entity.Transform;
 import interface_adapter.transform.TransformViewModel;
-import interface_adapter.transform.TransformPresenter;
 import interface_adapter.transform.TransformController;
-import use_case.transform.UpdateTransformInteractor;
+import app.TransformUseCaseFactory;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -194,11 +193,11 @@ public class HomeView extends javax.swing.JFrame {
         // ====== RIGHT PROPERTIES PANEL ======
         propertiesPanel = new PropertiesPanel();
 
-        // ====== DEMO ENTITY + LAYERS WIRING ======
 
+        // ====== DEMO ENTITY + LAYERS WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
-        pos.add(100.0); // x
-        pos.add(100.0); // y
+        pos.add(0.0); // x
+        pos.add(0.0); // y
 
         java.util.Vector<Double> scale = new java.util.Vector<>();
         scale.add(1.0); // scaleX
@@ -215,17 +214,35 @@ public class HomeView extends javax.swing.JFrame {
         );
         demoObject.setTransform(transform);
 
+        // Create view model
         transformViewModel = new TransformViewModel();
-        TransformPresenter presenter = new TransformPresenter(transformViewModel);
 
-        presenter.presentTransform(transform);
+        // Use app-layer factory to wire up use case
+        transformController = TransformUseCaseFactory.create(demoObject, transformViewModel);
 
-        UpdateTransformInteractor interactor =
-                new UpdateTransformInteractor(demoObject, presenter);
-
-        transformController = new TransformController(interactor);
-
+        // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);
+
+        transformController.updateTransform(
+                transform.getX(),
+                transform.getY(),
+                transform.getScaleX(),
+                transform.getRotation()
+        );
+
+        centerPanel.remove(openFolderPanel);
+        centerPanel.add(scenePanel, BorderLayout.CENTER);
+        centerPanel.revalidate();
+        centerPanel.repaint();
+
+        if (propertiesPanel instanceof PropertiesPanel props) {
+            props.bind(
+                    transformViewModel,
+                    transformController,
+                    () -> scenePanel.repaint()
+            );
+        }
+
 
 
         centerPanel.remove(openFolderPanel);
@@ -233,7 +250,7 @@ public class HomeView extends javax.swing.JFrame {
         centerPanel.revalidate();
         centerPanel.repaint();
 
-        // 6. Bind properties panel to VM + controller
+        // Bind properties panel to VM + controller
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.bind(
                     transformViewModel,

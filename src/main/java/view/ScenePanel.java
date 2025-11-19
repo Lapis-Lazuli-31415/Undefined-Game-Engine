@@ -4,13 +4,14 @@ import interface_adapter.transform.TransformViewModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 
-public class ScenePanel extends JPanel {
+public class ScenePanel extends JPanel implements PropertyChangeListener {
 
     private final TransformViewModel viewModel;
     private final Image sprite;
-
 
     public ScenePanel(TransformViewModel viewModel) {
         this.viewModel = viewModel;
@@ -25,6 +26,9 @@ public class ScenePanel extends JPanel {
             sprite = null;
             System.out.println("[ScenePanel] ERROR: Could not find bear.png on classpath");
         }
+
+        // Listen to changes in the view model
+        this.viewModel.addPropertyChangeListener(this);
     }
 
     @Override
@@ -33,11 +37,9 @@ public class ScenePanel extends JPanel {
 
         if (sprite == null) return;
 
-        // need Graphics2D for rotation
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            // --- 1. Read from view model ---
-            double scale = viewModel.getScale();      // assuming this is like 100 = 100%
+            double scale = viewModel.getScale();
             float rotationDeg = viewModel.getRotation();
 
             int panelW = getWidth();
@@ -46,11 +48,9 @@ public class ScenePanel extends JPanel {
             int spriteW = sprite.getWidth(this);
             int spriteH = sprite.getHeight(this);
 
-            // --- 2. Scaled size ---
             int drawW = (int) (spriteW * scale / 100.0);
             int drawH = (int) (spriteH * scale / 100.0);
 
-            // --- 3. Base position: centered + offsets from view model ---
             int centerX = (panelW - drawW) / 2;
             int centerY = (panelH - drawH) / 2;
 
@@ -60,22 +60,24 @@ public class ScenePanel extends JPanel {
             int drawX = centerX + offsetX;
             int drawY = centerY + offsetY;
 
-            // --- 4. Apply rotation around the sprite’s center ---
             double theta = Math.toRadians(rotationDeg);
-
             int pivotX = drawX + drawW / 2;
             int pivotY = drawY + drawH / 2;
 
             g2.rotate(theta, pivotX, pivotY);
-
-            // --- 5. Draw image (under rotation) ---
             g2.drawImage(sprite, drawX, drawY, drawW, drawH, this);
 
-            // Optional bounding box to see the rotated bounds
             g2.setColor(Color.RED);
             g2.drawRect(drawX, drawY, drawW, drawH);
         } finally {
-            g2.dispose(); // restore original Graphics
+            g2.dispose();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("state".equals(evt.getPropertyName())) {
+            repaint();
         }
     }
 }
