@@ -2,6 +2,7 @@ package use_case.Sprites;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
@@ -25,6 +26,16 @@ public interface SpriteUserDataAccessInterface {
      * @throws IOException if an error occurs during file operations
      */
     Path saveSprite(File sourceFile, String targetFileName) throws IOException;
+
+    /**
+     * saves a sprite from an InputStream to the uploads directory (in the backend).
+     * This is useful for saving images downloaded from external sources.
+     * @param inputStream the input stream containing the image data
+     * @param targetFileName the target file name
+     * @return the path to the saved file
+     * @throws IOException if an error occurs during file operations
+     */
+    Path saveSpriteFromStream(InputStream inputStream, String targetFileName) throws IOException;
 
     /**
      * gets the uploads directory path.
