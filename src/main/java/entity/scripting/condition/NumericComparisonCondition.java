@@ -32,22 +32,15 @@ public class NumericComparisonCondition extends Condition{
         double leftValue = left.evaluate(globalEnvironment, localEnvironment);
         double rightValue = right.evaluate(globalEnvironment, localEnvironment);
 
-        switch (comparator) {
-            case ">":
-                return leftValue > rightValue;
-            case "=":
-                return leftValue == rightValue;
-            case "<":
-                return leftValue < rightValue;
-            case ">=":
-                return leftValue >= rightValue;
-            case "<=":
-                return leftValue <= rightValue;
-            case "!=":
-                return leftValue != rightValue;
-            default:
-                throw new NumericComparisonException("Invalid comparator: " + comparator);
-        }
+        return switch (comparator) {
+            case ">" -> leftValue > rightValue;
+            case "=" -> leftValue == rightValue;
+            case "<" -> leftValue < rightValue;
+            case ">=" -> leftValue >= rightValue;
+            case "<=" -> leftValue <= rightValue;
+            case "!=" -> leftValue != rightValue;
+            default -> throw new NumericComparisonException("Invalid comparator: " + comparator);
+        };
     }
 
 }
