@@ -1,6 +1,6 @@
 package entity.Eventlistener;
 
-import app.InputManager;
+import entity.InputManager;
 import entity.scripting.event.OnKeyPressEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

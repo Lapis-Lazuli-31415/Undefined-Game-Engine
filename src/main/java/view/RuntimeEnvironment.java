@@ -11,9 +11,8 @@ import entity.scripting.condition.Condition;
 import entity.scripting.action.Action;
 import entity.scripting.environment.Environment;
 import entity.Eventlistener.EventListener;
-import entity.Eventlistener.KeyPressListener;
-import entity.Eventlistener.ClickListener;
-import app.InputManager;
+import entity.InputManager;
+import interface_adapter.preview.EventListenerFactory;
 
 import javax.swing.Timer;
 import java.util.HashMap;
@@ -21,13 +20,17 @@ import java.util.Map;
 
 /**
  * RuntimeEnvironment - Game loop engine for preview/testing
+ * Part of View layer (blue ring in CA diagram).
  *
  * Responsibilities:
- * - Initialize event listeners for all triggers
  * - Run 60 FPS game loop
  * - Check trigger conditions
  * - Execute trigger actions
  * - Manage input state
+ * - Coordinate with EventListenerFactory for listener creation
+ *
+ * OPTIMIZED: Now uses Factory pattern to create listeners
+ * instead of direct instantiation.
  *
  * @author Wanru Cheng
  */
@@ -37,6 +40,7 @@ public class RuntimeEnvironment {
     private final GameCanvas canvas;
     private final Environment globalEnvironment;
     private final InputManager inputManager;
+    private final EventListenerFactory listenerFactory;
 
     private final Map<Trigger, EventListener> listeners;
     private Timer gameLoopTimer;
@@ -47,17 +51,25 @@ public class RuntimeEnvironment {
     private int currentFps;
 
     /**
-     * Create a RuntimeEnvironment
+     * Create a RuntimeEnvironment.
      *
      * @param scene The scene to run
      * @param canvas The canvas to render on
      * @param globalEnvironment The global environment for triggers
+     * @param listenerFactory Factory for creating event listeners
      */
-    public RuntimeEnvironment(Scene scene, GameCanvas canvas, Environment globalEnvironment) {
+    public RuntimeEnvironment(Scene scene, GameCanvas canvas,
+                              Environment globalEnvironment,
+                              EventListenerFactory listenerFactory) {
         this.scene = scene;
         this.canvas = canvas;
         this.globalEnvironment = globalEnvironment;
-        this.inputManager = new InputManager();
+        this.inputManager = listenerFactory != null
+                ? new InputManager()
+                : new InputManager(); // Create InputManager here
+        this.listenerFactory = listenerFactory != null
+                ? listenerFactory
+                : new EventListenerFactory(this.inputManager); // Create factory if not provided
         this.listeners = new HashMap<>();
         this.running = false;
 
@@ -68,10 +80,22 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Start the runtime
+     * Convenience constructor that creates its own InputManager and Factory.
+     * Used for simpler initialization from PreviewWindow.
+     *
+     * @param scene The scene to run
+     * @param canvas The canvas to render on
+     * @param globalEnvironment The global environment for triggers
+     */
+    public RuntimeEnvironment(Scene scene, GameCanvas canvas, Environment globalEnvironment) {
+        this(scene, canvas, globalEnvironment, null);
+    }
+
+    /**
+     * Start the runtime.
      *
      * Workflow:
-     * 1. Initialize all event listeners
+     * 1. Initialize all event listeners using Factory
      * 2. Attach InputManager to canvas
      * 3. Start 60 FPS game loop
      */
@@ -83,10 +107,10 @@ public class RuntimeEnvironment {
 
         System.out.println("\n=== Starting RuntimeEnvironment ===");
 
-        // 1. Initialize listeners
+        // 1. Initialize listeners using Factory
         initializeListeners();
 
-        // 2. Attach InputManager to canvas (FIXED: directly add, not using getter)
+        // 2. Attach InputManager to canvas
         canvas.addKeyListener(inputManager);
         canvas.setFocusable(true);
         canvas.requestFocus();
@@ -106,10 +130,11 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Initialize event listeners for all triggers
+     * Initialize event listeners for all triggers.
+     * OPTIMIZED: Uses EventListenerFactory instead of direct instantiation.
      *
      * Scans all GameObjects and creates appropriate listeners
-     * for each trigger's event type
+     * for each trigger's event type using the Factory.
      */
     private void initializeListeners() {
         System.out.println("Initializing event listeners...");
@@ -127,21 +152,22 @@ public class RuntimeEnvironment {
                 Event event = trigger.getEvent();
                 EventListener listener = null;
 
-                // Create appropriate listener based on event type
+                // Use Factory to create appropriate listener
                 if (event instanceof OnKeyPressEvent) {
                     OnKeyPressEvent keyEvent = (OnKeyPressEvent) event;
-                    listener = new KeyPressListener(keyEvent, inputManager);
+                    listener = listenerFactory.createKeyPressListener(keyEvent);
                     keyListenerCount++;
                     System.out.println("  ✓ Created KeyPressListener for key: " + keyEvent.getKey());
 
                 } else if (event instanceof OnClickEvent) {
-                    // Get the ClickListener from GameCanvas
+                    // For click events, get listener from canvas
+                    // (Canvas manages the UI buttons and their click listeners)
                     listener = canvas.getClickListener(obj);
                     if (listener != null) {
                         clickListenerCount++;
-                        System.out.println("  ✓ Created ClickListener for: " + obj.getName());
+                        System.out.println("  ✓ Retrieved ClickListener for: " + obj.getName());
                     } else {
-                        System.err.println("  ✗ Failed to create ClickListener for: " + obj.getName());
+                        System.err.println("  ✗ Failed to get ClickListener for: " + obj.getName());
                     }
                 }
 
@@ -159,7 +185,7 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Main game loop (called every ~16ms for 60 FPS)
+     * Main game loop (called every ~16ms for 60 FPS).
      *
      * Workflow:
      * 1. Check all event listeners
@@ -195,7 +221,7 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Execute a trigger
+     * Execute a trigger.
      *
      * @param trigger The trigger to execute
      * @param obj The GameObject that owns this trigger
@@ -232,7 +258,7 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Find the GameObject that owns a trigger
+     * Find the GameObject that owns a trigger.
      */
     private GameObject getGameObjectForTrigger(Trigger trigger) {
         for (GameObject obj : scene.getGameObjects()) {
@@ -245,7 +271,7 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Update FPS counter
+     * Update FPS counter.
      */
     private void updateFps() {
         frameCount++;
@@ -265,7 +291,7 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Stop the runtime
+     * Stop the runtime.
      */
     public void stop() {
         if (!running) {
@@ -292,23 +318,30 @@ public class RuntimeEnvironment {
     }
 
     /**
-     * Check if runtime is running
+     * Check if runtime is running.
      */
     public boolean isRunning() {
         return running;
     }
 
     /**
-     * Get current FPS
+     * Get current FPS.
      */
     public int getFps() {
         return currentFps;
     }
 
     /**
-     * Get the input manager
+     * Get the input manager.
      */
     public InputManager getInputManager() {
         return inputManager;
+    }
+
+    /**
+     * Get the listener factory.
+     */
+    public EventListenerFactory getListenerFactory() {
+        return listenerFactory;
     }
 }

@@ -5,12 +5,24 @@ import entity.GameObject;
 import entity.scripting.environment.Environment;
 import entity.scripting.Trigger;
 import entity.scripting.TriggerManager;
+import entity.InputManager;
+import interface_adapter.preview.EventListenerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * PreviewWindow - Auto-starts when opened via Play button
+ * PreviewWindow - Auto-starts when opened via Play button.
+ * Part of View layer (blue ring in CA diagram).
+ *
+ * Responsibilities:
+ * - Display preview window UI
+ * - Create and coordinate GameCanvas and RuntimeEnvironment
+ * - Show scene information
+ * - Handle window lifecycle
+ *
+ * OPTIMIZED: Now creates EventListenerFactory and passes to components
+ * following dependency injection pattern.
  *
  * @author Wanru Cheng
  */
@@ -21,23 +33,32 @@ public class PreviewWindow {
     private GameCanvas canvas;
     private RuntimeEnvironment runtime;
     private Environment globalEnvironment;
+    private EventListenerFactory listenerFactory;
+    private InputManager inputManager;
 
     private JLabel statusLabel;
     private JLabel sceneInfoLabel;
 
     /**
-     * Create a PreviewWindow
+     * Create a PreviewWindow.
+     *
+     * @param scene The scene to preview
+     * @param globalEnvironment The global environment for triggers
      */
     public PreviewWindow(Scene scene, Environment globalEnvironment) {
         this.scene = scene;
         this.globalEnvironment = globalEnvironment;
+
+        // Create InputManager and Factory (Interface Adapter layer)
+        this.inputManager = new InputManager();
+        this.listenerFactory = new EventListenerFactory(inputManager);
 
         initializeUI();
         loadScene();
     }
 
     /**
-     * Initialize the UI
+     * Initialize the UI components.
      */
     private void initializeUI() {
         frame = new JFrame("Preview - " + scene.getName());
@@ -55,6 +76,7 @@ public class PreviewWindow {
 
         // Create canvas
         canvas = new GameCanvas();
+        canvas.setListenerFactory(listenerFactory); // Inject factory into canvas
 
         // Create info panel
         JPanel infoPanel = createInfoPanel();
@@ -72,7 +94,9 @@ public class PreviewWindow {
     }
 
     /**
-     * Create info panel showing scene information
+     * Create info panel showing scene information.
+     *
+     * @return The info panel
      */
     private JPanel createInfoPanel() {
         JPanel panel = new JPanel();
@@ -91,7 +115,9 @@ public class PreviewWindow {
     }
 
     /**
-     * Create status panel at bottom
+     * Create status panel at bottom.
+     *
+     * @return The status panel
      */
     private JPanel createStatusPanel() {
         JPanel panel = new JPanel();
@@ -114,7 +140,7 @@ public class PreviewWindow {
     }
 
     /**
-     * Update scene info display
+     * Update scene info display.
      */
     private void updateSceneInfo() {
         int objectCount = scene.getGameObjects().size();
@@ -131,7 +157,9 @@ public class PreviewWindow {
     }
 
     /**
-     * Count total triggers in scene
+     * Count total triggers in scene.
+     *
+     * @return Total number of triggers
      */
     private int countTotalTriggers() {
         int count = 0;
@@ -145,7 +173,7 @@ public class PreviewWindow {
     }
 
     /**
-     * Load scene into preview
+     * Load scene into preview.
      */
     private void loadScene() {
         System.out.println("\n=== Loading Scene: " + scene.getName() + " ===");
@@ -169,14 +197,21 @@ public class PreviewWindow {
     }
 
     /**
-     * Setup RuntimeEnvironment
+     * Setup RuntimeEnvironment.
+     * OPTIMIZED: Injects EventListenerFactory into RuntimeEnvironment.
      */
     private void setupRuntime() {
-        runtime = new RuntimeEnvironment(scene, canvas, globalEnvironment);
+        // Create RuntimeEnvironment with factory
+        runtime = new RuntimeEnvironment(
+                scene,
+                canvas,
+                globalEnvironment,
+                listenerFactory  // Inject factory
+        );
     }
 
     /**
-     * Display the preview window and auto-start
+     * Display the preview window and auto-start.
      */
     public void display() {
         frame.setLocationRelativeTo(null);
@@ -195,7 +230,7 @@ public class PreviewWindow {
     }
 
     /**
-     * Close the preview window and stop runtime
+     * Close the preview window and stop runtime.
      */
     public void close() {
         if (runtime != null && runtime.isRunning()) {
@@ -215,7 +250,9 @@ public class PreviewWindow {
     }
 
     /**
-     * Check if preview is running
+     * Check if preview is running.
+     *
+     * @return true if running
      */
     public boolean isRunning() {
         return runtime != null && runtime.isRunning();

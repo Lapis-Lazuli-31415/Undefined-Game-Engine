@@ -13,9 +13,11 @@ import use_case.transform.UpdateTransformInteractor;
 // ===== ADDED BY CHENG: Imports for preview functionality =====
 import entity.Scene;
 import entity.scripting.environment.Environment;
-import use_case.validate_scene.ValidateSceneInputBoundary;
-import use_case.validate_scene.ValidateSceneInteractor;
-import use_case.validate_scene.ValidationResult;
+import interface_adapter.preview.PreviewController;
+import interface_adapter.preview.PreviewViewModel;
+import interface_adapter.preview.PreviewState;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 // ===== END ADDED BY CHENG =====
 
 public class HomeView extends javax.swing.JFrame {
@@ -34,9 +36,10 @@ public class HomeView extends javax.swing.JFrame {
     private TransformController transformController;
 
     // ===== ADDED BY CHENG: Preview system fields =====
-    private ValidateSceneInputBoundary sceneValidator;
+    private PreviewController previewController;
+    private PreviewViewModel previewViewModel;
     private PreviewWindow currentPreview;  // Track current preview window
-    // ===== END ADDED BY CHENG =====
+// ===== END ADDED BY CHENG =====
 
     public HomeView() {
         initComponents();
@@ -238,9 +241,40 @@ public class HomeView extends javax.swing.JFrame {
     /**
      * Initialize the preview system
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * Sets up Clean Architecture components:
+     * - ViewModel (observable state)
+     * - Presenter (formats Use Case output)
+     * - Interactor (business logic)
+     * - Controller (receives View input)
      */
     private void initializePreviewSystem() {
-        sceneValidator = new ValidateSceneInteractor();
+        // Create Use Case components
+        use_case.validate_scene.ValidateSceneInteractor validator =
+                new use_case.validate_scene.ValidateSceneInteractor();
+
+        // Create Interface Adapter components
+        previewViewModel = new PreviewViewModel();
+        interface_adapter.preview.PreviewPresenter presenter =
+                new interface_adapter.preview.PreviewPresenter(previewViewModel);
+
+        // Create Use Case Interactor
+        use_case.preview.PreviewInteractor interactor =
+                new use_case.preview.PreviewInteractor(validator, presenter);
+
+        // Create Controller
+        previewController = new PreviewController(interactor);
+
+        // Register this view as observer of ViewModel
+        previewViewModel.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if ("state".equals(evt.getPropertyName())) {
+                    handlePreviewStateChange((PreviewState) evt.getNewValue());
+                }
+            }
+        });
+
         currentPreview = null;
     }
 
@@ -248,15 +282,15 @@ public class HomeView extends javax.swing.JFrame {
      * Handle Play button click
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      *
-     * Workflow:
-     * 1. Get current scene
-     * 2. Validate scene (check ID, name, GameObjects, music)
-     * 3. Show error/warning dialogs if needed
-     * 4. Open PreviewWindow and start game loop
+     * Following Clean Architecture:
+     * 1. Get current scene (UI responsibility)
+     * 2. Delegate to Controller (Interface Adapter)
+     * 3. Controller → Interactor → Presenter → ViewModel
+     * 4. View observes ViewModel and updates UI
      */
     private void onPlayClicked() {
         try {
-            // 1. Get current scene
+            // 1. Get current scene (UI responsibility)
             Scene scene = getCurrentScene();
 
             if (scene == null) {
@@ -269,43 +303,8 @@ public class HomeView extends javax.swing.JFrame {
                 return;
             }
 
-            // 2. Validate scene (Use Case: ValidateScene)
-            ValidationResult result = sceneValidator.validate(scene);
-
-            if (result.isError()) {
-                // Critical error: cannot proceed
-                JOptionPane.showMessageDialog(
-                        this,
-                        result.getMessage(),
-                        "Cannot Start Preview",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-
-            if (result.isWarning()) {
-                // Warning: ask user if they want to continue
-                int choice = JOptionPane.showConfirmDialog(
-                        this,
-                        result.getMessage(),
-                        "Preview Warning",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE
-                );
-
-                if (choice != JOptionPane.YES_OPTION) {
-                    return;
-                }
-            }
-
-            // 3. Create global environment for triggers
-            Environment globalEnv = createGlobalEnvironment();
-
-            // 4. Open preview window
-            currentPreview = new PreviewWindow(scene, globalEnv);
-            currentPreview.display();
-
-            System.out.println("✅ Preview started");
+            // 2. Delegate to Controller (Clean Architecture flow starts here)
+            previewController.execute(scene);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -333,6 +332,49 @@ public class HomeView extends javax.swing.JFrame {
             System.out.println("⏹ Preview stopped");
         } else {
             System.out.println("No preview is running");
+        }
+    }
+
+    /**
+     * Handle preview state changes from ViewModel
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * This method is called when ViewModel updates (Observer pattern)
+     * Updates UI based on the new state
+     */
+    private void handlePreviewStateChange(PreviewState state) {
+        // Handle error
+        if (state.getError() != null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    state.getError(),
+                    "Cannot Start Preview",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // Handle warning
+        if (state.getWarning() != null) {
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    state.getWarning() + "\n\nContinue anyway?",
+                    "Preview Warning",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (choice != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        // Open preview if ready
+        if (state.isReadyToPreview() && state.getScene() != null) {
+            Environment globalEnv = createGlobalEnvironment();
+            currentPreview = new PreviewWindow(state.getScene(), globalEnv);
+            currentPreview.display();
+            System.out.println("✅ Preview started");
         }
     }
 
