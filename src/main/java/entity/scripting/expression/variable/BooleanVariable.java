@@ -5,8 +5,8 @@ import entity.scripting.error.EnvironmentException;
 import entity.scripting.expression.BooleanExpression;
 
 public class BooleanVariable extends BooleanExpression implements Variable<Boolean> {
-    private String name;
-    private boolean isGlobal;
+    private final String name;
+    private final boolean isGlobal;
     public final static String VARIABLE_TYPE = "Boolean";
     private final static Class<Boolean> VALUE_TYPE = Boolean.class;
 
@@ -38,9 +38,9 @@ public class BooleanVariable extends BooleanExpression implements Variable<Boole
     @Override
     public Boolean evaluate(Environment globalEnvironment, Environment localEnvironment) throws EnvironmentException {
         if (isGlobal){
-            return globalEnvironment.get(VARIABLE_TYPE, name, VALUE_TYPE);
+            return globalEnvironment.get(this);
         } else {
-            return localEnvironment.get(VARIABLE_TYPE, name, VALUE_TYPE);
+            return localEnvironment.get(this);
         }
     }
 }

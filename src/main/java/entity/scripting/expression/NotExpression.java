@@ -9,6 +9,14 @@ public class NotExpression extends BooleanExpression {
         this.expression = expression;
     }
 
+    public void setExpression(BooleanExpression expression) {
+        this.expression = expression;
+    }
+
+    public BooleanExpression getExpression() {
+        return expression;
+    }
+
     @Override
     public Boolean evaluate(Environment globalEnvironment, Environment localEnvironment) throws Exception {
         boolean value = expression.evaluate(globalEnvironment, localEnvironment);
