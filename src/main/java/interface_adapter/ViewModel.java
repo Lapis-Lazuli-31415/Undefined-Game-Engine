@@ -28,6 +28,9 @@ public abstract class ViewModel<T> {
         return state;
     }
 
+    public void notifyListeners() {
+        firePropertyChanged();
+    }
 
     public void setState(T state) {
         this.state = state;

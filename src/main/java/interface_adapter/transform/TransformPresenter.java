@@ -16,9 +16,14 @@ public class TransformPresenter implements UpdateTransformOutputBoundary {
 
     @Override
     public void presentTransform(Transform transform) {
-        viewModel.setX(transform.getX());
-        viewModel.setY(transform.getY());
-        viewModel.setScale(transform.getScaleX()); // assuming uniform scale
-        viewModel.setRotation(transform.getRotation());
+        TransformState state = viewModel.getState();
+
+        state.setX(transform.getX());
+        state.setY(transform.getY());
+        state.setScale(transform.getScaleX()); // assuming uniform scale
+        state.setRotation(transform.getRotation());
+
+        // Notify observers once after updating the entire state
+        viewModel.notifyListeners();
     }
 }

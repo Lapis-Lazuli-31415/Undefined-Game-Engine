@@ -5,6 +5,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
+import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 
@@ -508,12 +509,14 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     private void syncFromViewModel() {
         if (viewModel == null) return;
 
+        TransformState s = viewModel.getState();
+
         isUpdatingUI = true;
         try {
-            posXField.setText(String.valueOf(viewModel.getX()));
-            posYField.setText(String.valueOf(viewModel.getY()));
-            rotationField.setText(String.valueOf(viewModel.getRotation()));
-            scaleField.setText(String.valueOf(viewModel.getScale()));
+            posXField.setText(String.valueOf(s.getX()));
+            posYField.setText(String.valueOf(s.getY()));
+            rotationField.setText(String.valueOf(s.getRotation()));
+            scaleField.setText(String.valueOf(s.getScale()));
         } finally {
             isUpdatingUI = false;
         }

@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 
 import javax.swing.*;
@@ -39,8 +40,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
 
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            double scale = viewModel.getScale();
-            float rotationDeg = viewModel.getRotation();
+
+            TransformState state = viewModel.getState();
+            double scale = state.getScale();
+            float rotationDeg = state.getRotation();
+            int offsetX = (int) state.getX();
+            int offsetY = (int) state.getY();
 
             int panelW = getWidth();
             int panelH = getHeight();
@@ -53,9 +58,6 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
 
             int centerX = (panelW - drawW) / 2;
             int centerY = (panelH - drawH) / 2;
-
-            int offsetX = (int) viewModel.getX();
-            int offsetY = (int) viewModel.getY();
 
             int drawX = centerX + offsetX;
             int drawY = centerY + offsetY;
