@@ -1,10 +1,10 @@
-package interface_adapter;
+package interface_adapter.Sprites;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 /**
- * View Model for the Import Sprite feature.
+ * View Model for import sprite.
  * Follows the Observer pattern to notify views when the state changes.
  * TODO: may need to make changes according to the final view implementation.
  */

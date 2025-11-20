@@ -1,7 +1,7 @@
-package interface_adapter;
+package interface_adapter.Sprites;
 
 /**
- * State object for the Import Sprite feature.
+ * State object for the Import Sprite view model.
  * Contains all the data needed to display the result of sprite import.
  */
 public class ImportSpriteState {

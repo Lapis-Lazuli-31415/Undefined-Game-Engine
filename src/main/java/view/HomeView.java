@@ -54,7 +54,7 @@ public class HomeView extends javax.swing.JFrame {
         spritesHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
         spritesHeader.setOpaque(false);
 
-        JLabel spritesLabel = new JLabel("Sprites");
+        JLabel spritesLabel = new JLabel("interface_adapter/Sprites");
         spritesLabel.setForeground(Color.WHITE);
 
         JButton spritesAddButton = new JButton("+");

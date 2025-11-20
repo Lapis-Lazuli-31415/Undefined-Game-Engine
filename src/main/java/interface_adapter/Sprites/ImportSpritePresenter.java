@@ -1,4 +1,4 @@
-package interface_adapter;
+package interface_adapter.Sprites;
 
 import use_case.Sprites.ImportSpriteResponse;
 import use_case.Sprites.SpriteOutputBoundary;
