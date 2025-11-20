@@ -1,6 +1,7 @@
 package entity.scripting.environment;
 
 import entity.scripting.error.EnvironmentException;
+import entity.scripting.expression.variable.Variable;
 
 import java.util.TreeMap;
 import java.util.Map;
@@ -12,12 +13,16 @@ public class Environment {
         variables = new TreeMap<>();
     }
 
-    <T> void set(String variableType, String name, Class<T> valueType, T value) throws EnvironmentException {
+    protected <T> void set(Variable<T> variable, T value) throws EnvironmentException {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+        Class<T> valueType = variable.getValueType();
+
         if (!valueType.isInstance(value)){
             throw new EnvironmentException(
-                "Invalid value for variable " + name + ": expected type "
-                + valueType.getSimpleName() + " but received "
-                + value.getClass().getSimpleName()
+                    "Invalid value for variable " + name + ": expected type "
+                            + valueType.getSimpleName() + " but received "
+                            + value.getClass().getSimpleName()
             );
         }
 
@@ -31,7 +36,11 @@ public class Environment {
         variableMap.set(name, value);
     }
 
-    public <T> T get(String variableType, String name, Class<T> valueType) throws EnvironmentException {
+    public <T> T get(Variable<T> variable) throws EnvironmentException {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+        Class<T> valueType = variable.getValueType();
+
         if (!variables.containsKey(variableType)){
             throw new EnvironmentException("Unknown/Empty variable category: " + variableType);
         }
@@ -46,9 +55,9 @@ public class Environment {
 
         if (!valueType.isInstance(rawValue)){
             throw new EnvironmentException(
-                "Type mismatch for variable " + name + ": expected "
-                + valueType.getSimpleName() + " but found "
-                + rawValue.getClass().getSimpleName()
+                    "Type mismatch for variable " + name + ": expected "
+                            + valueType.getSimpleName() + " but found "
+                            + rawValue.getClass().getSimpleName()
             );
         }
 
@@ -57,7 +66,10 @@ public class Environment {
         return value;
     }
 
-    public <T> void unset(String variableType, String name) throws EnvironmentException {
+    public <T> void delete(Variable<T> variable) throws EnvironmentException {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+
         if (!variables.containsKey(variableType)){
             throw new EnvironmentException("Unknown/Empty variable category: " + variableType);
         }

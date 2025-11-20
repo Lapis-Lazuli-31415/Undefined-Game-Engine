@@ -12,6 +12,22 @@ public class OrExpression extends BooleanExpression{
         this.right = right;
     }
 
+    public void setLeft(BooleanExpression left) {
+        this.left = left;
+    }
+
+    public void setRight(BooleanExpression right) {
+        this.right = right;
+    }
+
+    public BooleanExpression getLeft() {
+        return left;
+    }
+
+    public BooleanExpression getRight() {
+        return right;
+    }
+
     @Override
     public Boolean evaluate(Environment globalEnvironment, Environment localEnvironment) throws Exception {
         boolean leftValue = left.evaluate(globalEnvironment, localEnvironment);

@@ -15,22 +15,45 @@ public class SimpleArithmeticOperation extends NumericExpression{
         this.right = right;
     }
 
+    public void setLeft(NumericExpression left) {
+        this.left = left;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public void setRight(NumericExpression right) {
+        this.right = right;
+    }
+
+    public NumericExpression getLeft() {
+        return left;
+    }
+    public String getOperator() {
+        return operator;
+    }
+
+    public NumericExpression getRight() {
+        return right;
+    }
+
     @Override
     public Double evaluate(Environment globalEnvironment, Environment localEnvironment) throws Exception {
         double leftValue = left.evaluate(globalEnvironment, localEnvironment);
         double rightValue = right.evaluate(globalEnvironment, localEnvironment);
 
-        switch (operator){
-            case "+":
-                return leftValue + rightValue;
-            case "-":
-                return leftValue - rightValue;
-            case "*":
-                return leftValue * rightValue;
-            case "/":
-                return leftValue / rightValue;
-            default:
-                throw new SimpleArithmeticException("Invalid operator: " + operator);
-        }
+        return switch (operator) {
+            case "+" -> leftValue + rightValue;
+            case "-" -> leftValue - rightValue;
+            case "*" -> leftValue * rightValue;
+            case "/" -> {
+                if (rightValue == 0) {
+                    throw new SimpleArithmeticException("Invalid operation: division by 0");
+                }
+                yield leftValue / rightValue;
+            }
+            default -> throw new SimpleArithmeticException("Invalid operator: " + operator);
+        };
     }
 }

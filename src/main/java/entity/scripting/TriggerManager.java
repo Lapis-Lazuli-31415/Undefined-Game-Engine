@@ -1,15 +1,16 @@
 package entity.scripting;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public class TriggerManager {
-    private ArrayList<Trigger> triggers;
+    private List<Trigger> triggers;
 
     public TriggerManager() {
         triggers = new ArrayList<>();
     }
 
-    public ArrayList<Trigger> getAllTriggers() {
+    public List<Trigger> getAllTriggers() {
         return triggers;
     }
 }
