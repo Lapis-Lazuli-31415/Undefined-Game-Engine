@@ -25,4 +25,8 @@ public abstract class Asset {
     public String getName() {
         return name;
     }
+
+    public Path getLocalpath() {
+        return localpath;
+    }
 }

@@ -155,8 +155,9 @@ public class HomeView extends javax.swing.JFrame {
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
 
+        // gallery grid view NEED TO ADD SCROLLING
         spritesContent = new JPanel();
-        spritesContent.setLayout(new BoxLayout(spritesContent, BoxLayout.Y_AXIS));
+        spritesContent.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         spritesContent.setBackground(new Color(70, 70, 70));
 
         JScrollPane spritesScroll = new JScrollPane(spritesContent);
@@ -358,23 +359,81 @@ public class HomeView extends javax.swing.JFrame {
     }
 
     private void addSpriteToUI(entity.Image image) {
-        JLabel spriteLabel = new JLabel("📷 " + image.getName());
-        spriteLabel.setForeground(Color.WHITE);
-        spriteLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
-        spriteLabel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
+        JPanel cardPanel = new JPanel();
+        cardPanel.setLayout(new BorderLayout());
+        cardPanel.setPreferredSize(new Dimension(80, 100));
+        cardPanel.setBackground(new Color(60, 60, 60));
+        cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
+
+        // load + scale the image thumbnail
+        try {
+            java.awt.image.BufferedImage originalImage = javax.imageio.ImageIO.read(
+                new java.io.File(image.getLocalpath().toString())
+            );
+
+            // calc thumbnail size
+            int thumbWidth = 70;
+            int thumbHeight = 70;
+            double aspectRatio = (double) originalImage.getWidth() / originalImage.getHeight();
+
+            if (aspectRatio > 1) {
+                thumbHeight = (int) (thumbWidth / aspectRatio);
+            } else {
+                thumbWidth = (int) (thumbHeight * aspectRatio);
+            }
+
+            // scale image
+            java.awt.Image scaledImage = originalImage.getScaledInstance(
+                thumbWidth, thumbHeight, java.awt.Image.SCALE_SMOOTH
+            );
+
+            // create image label with centered icon
+            JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+            imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+            imageLabel.setPreferredSize(new Dimension(80, 70));
+
+            cardPanel.add(imageLabel, BorderLayout.CENTER);
+
+        } catch (Exception e) {
+            // fallback if image fails to load
+            JLabel iconLabel = new JLabel("image");
+            iconLabel.setFont(new Font("Arial", Font.PLAIN, 30));
+            iconLabel.setForeground(Color.WHITE);
+            iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            cardPanel.add(iconLabel, BorderLayout.CENTER);
+        }
+
+        // add name label to the bottom
+        String displayName = image.getName();
+        if (displayName.length() > 10) {
+            displayName = displayName.substring(0, 8) + "...";
+        }
+        JLabel nameLabel = new JLabel(displayName);
+        nameLabel.setForeground(Color.WHITE);
+        nameLabel.setFont(new Font("Arial", Font.PLAIN, 9));
+        nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        cardPanel.add(nameLabel, BorderLayout.SOUTH);
 
         // Add hover effect
-        spriteLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+        cardPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                spriteLabel.setBackground(new Color(100, 100, 100));
-                spriteLabel.setOpaque(true);
+                cardPanel.setBackground(new Color(80, 80, 80));
+                cardPanel.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 2));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                spriteLabel.setOpaque(false);
+                cardPanel.setBackground(new Color(60, 60, 60));
+                cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
+            }
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                System.out.println("Selected sprite: " + image.getName());
             }
         });
 
-        spritesContent.add(spriteLabel);
+        cardPanel.setToolTipText(image.getName());
+
+        spritesContent.add(cardPanel);
         spritesContent.revalidate();
         spritesContent.repaint();
     }
