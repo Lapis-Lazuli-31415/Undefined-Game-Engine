@@ -1,4 +1,5 @@
 package use_case.saving;
 
-public class SaveProjectInputBoundary {
+public interface SaveProjectInputBoundary {
+    void execute(SaveProjectInputData inputData);
 }

@@ -1,4 +1,7 @@
 package use_case.saving;
 
-public interface SaveProjectDataAccessInterface {
+public interface SaveProjectOutputBoundary {
+    void prepareSuccessView(SaveProjectOutputData outputData);
+
+    void prepareFailView(String error);
 }
