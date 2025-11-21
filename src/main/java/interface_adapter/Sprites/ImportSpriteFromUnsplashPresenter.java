@@ -10,9 +10,12 @@ import use_case.Sprites.SpriteOutputBoundary;
 public class ImportSpriteFromUnsplashPresenter implements SpriteOutputBoundary {
 
     private final ImportSpriteFromUnsplashViewModel viewModel;
+    private final interface_adapter.assets.AssetLibViewModel assetLibViewModel;
 
-    public ImportSpriteFromUnsplashPresenter(ImportSpriteFromUnsplashViewModel viewModel) {
+    public ImportSpriteFromUnsplashPresenter(ImportSpriteFromUnsplashViewModel viewModel,
+                                             interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
         this.viewModel = viewModel;
+        this.assetLibViewModel = assetLibViewModel;
     }
 
     @Override
@@ -33,6 +36,11 @@ public class ImportSpriteFromUnsplashPresenter implements SpriteOutputBoundary {
         // Update the view model
         viewModel.setState(state);
         viewModel.firePropertyChanged();
+
+        // Notify AssetLibViewModel so HomeView can update its UI
+        // The asset was already added to entity AssetLib by the interactor,
+        // but we need to fire the PropertyChange event for views to update
+        assetLibViewModel.notifyAssetAdded(response.importedSprite);
     }
 
     @Override

@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class UnsplashApiDataAccessObject implements UnsplashImageDataAccessInterface {
 
-    private static final String BASE_URL = "https://api.unsplash.com";      // TODO: might need to change this
+    private static final String BASE_URL = "https://api.unsplash.com";
     private static final String SEARCH_ENDPOINT = "/search/photos";
     private static final String PHOTO_ENDPOINT = "/photos";
 

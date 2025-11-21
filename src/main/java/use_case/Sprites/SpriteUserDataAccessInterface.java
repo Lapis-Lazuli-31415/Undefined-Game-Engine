@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
- * DAO for accessing and managing sprite data.
+ * Data Access Interface for accessing and managing sprite data.
  */
 
 public interface SpriteUserDataAccessInterface {

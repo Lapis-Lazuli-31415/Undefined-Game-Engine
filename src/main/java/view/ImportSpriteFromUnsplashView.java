@@ -10,8 +10,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * View for importing sprites from Unsplash.
- * This view allows users to search for images on Unsplash and import them as sprites.
+ * unsplash tab
  */
 public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChangeListener {
 
@@ -21,10 +20,10 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
 
     // UI Components
     private final JTextField searchQueryField;
-    private final JTextField imageIdField;
+    private final JTextField imageIdField;      // TODO: probably delete this feature
     private final JTextField fileNameField;
     private final JButton searchButton;
-    private final JButton importByIdButton;
+    private final JButton importByIdButton;     // TODO: probably delete this feature
     private final JLabel statusLabel;
     private final JProgressBar progressBar;
 
@@ -34,17 +33,17 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         this.controller = controller;
         this.viewModel.addPropertyChangeListener(this);
 
-        // Set up the panel
+        // panel setup
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title Panel
+        // title panel
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Import Sprite from Unsplash");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
 
-        // Input Panel
+        // input panel
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
         inputPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -52,7 +51,7 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
 
-        // Search Query Section
+        // search query section
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.add(new JLabel("Search Query:"));
         searchQueryField = new JTextField(20);
@@ -60,7 +59,7 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         searchButton = new JButton("Search & Import");
         searchPanel.add(searchButton);
 
-        // Image ID Section
+        // image id section
         JPanel imageIdPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         imageIdPanel.add(new JLabel("Image ID:"));
         imageIdField = new JTextField(20);
@@ -68,7 +67,7 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         importByIdButton = new JButton("Import by ID");
         imageIdPanel.add(importByIdButton);
 
-        // File Name Section
+        // file renname section
         JPanel fileNamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         fileNamePanel.add(new JLabel("File Name (optional):"));
         fileNameField = new JTextField(20);
@@ -80,7 +79,7 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         inputPanel.add(Box.createVerticalStrut(10));
         inputPanel.add(fileNamePanel);
 
-        // Status Panel
+        // status panel
         JPanel statusPanel = new JPanel();
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
         statusPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -99,16 +98,16 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         statusPanel.add(Box.createVerticalStrut(10));
         statusPanel.add(progressBar);
 
-        // Add panels to main panel
+        // adding panels into main
         add(titlePanel, BorderLayout.NORTH);
         add(inputPanel, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
 
-        // Add action listeners
+        // action listeners
         searchButton.addActionListener(e -> handleSearchAndImport());
         importByIdButton.addActionListener(e -> handleImportById());
 
-        // Add enter key listeners
+        // key listeners
         searchQueryField.addActionListener(e -> handleSearchAndImport());
         imageIdField.addActionListener(e -> handleImportById());
     }
@@ -125,11 +124,11 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
             return;
         }
 
-        // Set loading state
+        // loading state
         setLoading(true);
         statusLabel.setText("Searching for images...");
 
-        // Execute the use case in a background thread to keep UI responsive
+        // execute the use case in a background thread to keep UI responsive
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
@@ -152,11 +151,11 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
             return;
         }
 
-        // Set loading state
+        // loading state
         setLoading(true);
         statusLabel.setText("Importing image...");
 
-        // Execute the use case in a background thread to keep UI responsive
+        // execute the use case in a background thread to keep UI responsive
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
@@ -186,13 +185,13 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
     }
 
     private void updateView(ImportSpriteFromUnsplashState state) {
-        // Update loading state
+        // update loading state
         setLoading(state.isLoading());
 
-        // Update status message
+        // update status message
         statusLabel.setText(state.getMessage());
 
-        // Show success or error dialog
+        // success or error
         if (!state.isLoading()) {
             if (state.isSuccess()) {
                 JOptionPane.showMessageDialog(this,
@@ -200,7 +199,7 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE);
 
-                // Clear input fields after successful import
+                // input clearing
                 searchQueryField.setText("");
                 imageIdField.setText("");
                 fileNameField.setText("");

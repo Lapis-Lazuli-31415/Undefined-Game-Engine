@@ -1,5 +1,6 @@
 package interface_adapter.Sprites;
 
+import interface_adapter.assets.AssetLibViewModel;
 import use_case.Sprites.ImportSpriteResponse;
 import use_case.Sprites.SpriteOutputBoundary;
 
@@ -11,9 +12,11 @@ import use_case.Sprites.SpriteOutputBoundary;
 public class ImportSpritePresenter implements SpriteOutputBoundary {
 
     private final ImportSpriteViewModel viewModel;
+    private final AssetLibViewModel assetLibViewModel;
 
-    public ImportSpritePresenter(ImportSpriteViewModel viewModel) {
+    public ImportSpritePresenter(ImportSpriteViewModel viewModel, AssetLibViewModel assetLibViewModel) {
         this.viewModel = viewModel;
+        this.assetLibViewModel = assetLibViewModel;
     }
 
     @Override
@@ -28,6 +31,9 @@ public class ImportSpritePresenter implements SpriteOutputBoundary {
         // Update the view model
         viewModel.setState(state);
         viewModel.firePropertyChanged();
+
+        // notify AssetLibViewModel that an asset was added
+        assetLibViewModel.notifyAssetAdded(response.importedSprite);
     }
 
     @Override
