@@ -1,0 +1,41 @@
+{
+  "project_name" : {
+    "id" : "proj-001",
+    "name" : "project_name",
+    "scenes" : [ {
+      "id" : "scene-01",
+      "name" : "Forest Level",
+      "game_objects" : [ {
+        "id" : "obj-bear",
+        "name" : "Bear",
+        "active" : true,
+        "properties" : [ {
+          "image" : {
+            "path" : "bear.png"
+          },
+          "tint" : {
+            "red" : 255,
+            "green" : 0,
+            "blue" : 0
+          },
+          "visible" : true,
+          "zindex" : 9
+        } ],
+        "transform" : {
+          "rotation" : 45.0,
+          "x" : 100.0,
+          "y" : 200.0,
+          "scale_x" : 1.0,
+          "scale_y" : 1.0
+        },
+        "environment" : {
+          "variables" : { }
+        }
+      } ]
+    } ],
+    "assets" : [ ],
+    "global_environment" : {
+      "variables" : { }
+    }
+  }
+}

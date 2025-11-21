@@ -78,4 +78,9 @@ public class Environment {
 
         variableMap.unset(name);
     }
+
+    // needed for Jackson to see and save the internal map
+    public Map<String, VariableMap<?>> getVariables() {
+        return variables;
+    }
 }

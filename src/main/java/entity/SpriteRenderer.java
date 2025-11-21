@@ -33,4 +33,22 @@ public class SpriteRenderer extends Property {
     public void setVisible(boolean visiblity) {
         this.visible = visiblity;
     }
+
+    // for Jackson saving part
+    public Image getImage() {
+        return image;
+    }
+
+    public Color getTint() {
+        return tint;
+    }
+
+    public int getZIndex() {
+        return zIndex;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
 }

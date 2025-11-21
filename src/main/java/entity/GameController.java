@@ -9,4 +9,10 @@ public class GameController {
     public GameController(Environment environment) {
         this.environment = environment;
     }
+
+    // Jackson needs this to read the data
+    public Environment getEnvironment() {
+        return environment;
+    }
+
 }

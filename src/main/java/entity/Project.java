@@ -3,6 +3,8 @@ package entity;
 import entity.scripting.environment.Environment;
 
 import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Project {
 
@@ -15,10 +17,10 @@ public class Project {
     public Project(String id, String name, ArrayList<Scene> scenes, ArrayList<Asset> assets, GameController gameController) {
         this.id = id;
         this.name = name;
-        this.scenes = new ArrayList<>();
-        this.assets = new ArrayList<>();
+        this.scenes = scenes;
+        this.assets = assets;
         Environment globalEnvironment = new Environment();
-        this.gameController = new GameController(globalEnvironment);
+        this.gameController = gameController;
     }
     public String getId() {
         return id;
@@ -35,8 +37,17 @@ public class Project {
         return assets;
     }
 
+    @JsonIgnore // stops "game_controller" from appearing in the file
     public GameController getGameController() {
         return gameController;
+    }
+
+    @JsonProperty("global_environment") // creates the "global_environment" key
+    public Environment getGlobalEnvironment() {
+        if (gameController != null) {
+            return gameController.getEnvironment();
+        }
+        return null;
     }
 
 
