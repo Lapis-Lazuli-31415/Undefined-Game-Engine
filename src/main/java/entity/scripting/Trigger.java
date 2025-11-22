@@ -5,12 +5,14 @@ import entity.scripting.condition.Condition;
 import entity.scripting.event.Event;
 import entity.scripting.event.EmptyEvent;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public class Trigger {
     private Event event;
-    private ArrayList<Condition> conditions;
-    private ArrayList<Action> actions;
+    private List<Condition> conditions;
+    private List<Action> actions;
+    private boolean active;
 
     public Trigger(Event event) {
         this.event = event;
@@ -22,11 +24,11 @@ public class Trigger {
         return event;
     }
 
-    public ArrayList<Condition> getConditions() {
+    public List<Condition> getConditions() {
         return conditions;
     }
 
-    public ArrayList<Action> getActions() {
+    public List<Action> getActions() {
         return actions;
     }
 
@@ -44,5 +46,13 @@ public class Trigger {
 
     public void deleteAction(Action action) {
         actions.remove(action);
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
