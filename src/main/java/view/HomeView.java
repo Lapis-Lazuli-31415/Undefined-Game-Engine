@@ -18,6 +18,15 @@ public class HomeView extends javax.swing.JFrame {
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
+    // asset manager
+    private interface_adapter.assets.AssetLibViewModel assetLibViewModel;
+    private JPanel spritesContent;
+    private JButton spritesAddButton;
+
+    // sprite import
+    private interface_adapter.Sprites.ImportSpriteController importSpriteController;
+    private interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel;
+
     // Demo wiring
     private ScenePanel scenePanel;
     private GameObject demoObject;
@@ -25,7 +34,69 @@ public class HomeView extends javax.swing.JFrame {
     private TransformController transformController;
 
     public HomeView() {
+        this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
+    }
+
+    public HomeView(interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
+        this.assetLibViewModel = assetLibViewModel;
+
+        wireImportSpriteUseCase();
         initComponents();
+        setupAssetLibListener();
+        setupImportSpriteListener();
+    }
+
+    private void wireImportSpriteUseCase() {
+        try {
+            // init DAO
+            data_access.FileSystemSpriteDataAccessObject spriteDAO =
+                new data_access.FileSystemSpriteDataAccessObject();
+
+            // create view model
+            importSpriteViewModel = new interface_adapter.Sprites.ImportSpriteViewModel();
+
+            // create presenter
+            interface_adapter.Sprites.ImportSpritePresenter presenter =
+                new interface_adapter.Sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
+
+            // create interactor
+            use_case.Sprites.ImportSpriteInteractor interactor =
+                new use_case.Sprites.ImportSpriteInteractor(
+                    spriteDAO,
+                    presenter,
+                    assetLibViewModel.getAssetLib()
+                );
+
+            // create controller
+            importSpriteController = new interface_adapter.Sprites.ImportSpriteController(interactor);
+
+        } catch (java.io.IOException e) {
+            JOptionPane.showMessageDialog(null,
+                "Failed to initialize sprite import: " + e.getMessage(),
+                "Initialization Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void setupImportSpriteListener() {
+        importSpriteViewModel.addPropertyChangeListener(evt -> {
+            if (interface_adapter.Sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
+                interface_adapter.Sprites.ImportSpriteState state =
+                    (interface_adapter.Sprites.ImportSpriteState) evt.getNewValue();
+
+                if (state.isSuccess()) {
+                    JOptionPane.showMessageDialog(this,
+                        state.getMessage(),
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                        state.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -77,14 +148,16 @@ public class HomeView extends javax.swing.JFrame {
         JLabel spritesLabel = new JLabel("Sprites");
         spritesLabel.setForeground(Color.WHITE);
 
-        JButton spritesAddButton = new JButton("+");
+        spritesAddButton = new JButton("+");
         spritesAddButton.setMargin(new Insets(0, 4, 0, 4));
+        spritesAddButton.addActionListener(e -> openLocalSpriteImport());
 
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
 
-        JPanel spritesContent = new JPanel();
-        spritesContent.setLayout(new BoxLayout(spritesContent, BoxLayout.Y_AXIS));
+        // gallery grid view NEED TO ADD SCROLLING
+        spritesContent = new JPanel();
+        spritesContent.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         spritesContent.setBackground(new Color(70, 70, 70));
 
         JScrollPane spritesScroll = new JScrollPane(spritesContent);
@@ -94,29 +167,29 @@ public class HomeView extends javax.swing.JFrame {
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
 
-        // ---- AUDIO SCROLL PANEL ----
-        JPanel audioHeader = new JPanel(new BorderLayout());
-        audioHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
-        audioHeader.setOpaque(false);
-
-        JLabel audioLabel = new JLabel("Audio");
-        audioLabel.setForeground(Color.WHITE);
-
-        JButton audioAddButton = new JButton("+");
-        audioAddButton.setMargin(new Insets(0, 4, 0, 4));
-
-        audioHeader.add(audioLabel, BorderLayout.WEST);
-        audioHeader.add(audioAddButton, BorderLayout.EAST);
-
-        JPanel audioContent = new JPanel();
-        audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
-        audioContent.setBackground(new Color(70, 70, 70));
-
-        JScrollPane audioScroll = new JScrollPane(audioContent);
-        audioScroll.setPreferredSize(new Dimension(180, 140));
-
-        assetsPanel.add(audioHeader);
-        assetsPanel.add(audioScroll);
+//        // ---- AUDIO SCROLL PANEL ---- remove for now, might add back later
+//        JPanel audioHeader = new JPanel(new BorderLayout());
+//        audioHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+//        audioHeader.setOpaque(false);
+//
+//        JLabel audioLabel = new JLabel("Audio");
+//        audioLabel.setForeground(Color.WHITE);
+//
+//        JButton audioAddButton = new JButton("+");
+//        audioAddButton.setMargin(new Insets(0, 4, 0, 4));
+//
+//        audioHeader.add(audioLabel, BorderLayout.WEST);
+//        audioHeader.add(audioAddButton, BorderLayout.EAST);
+//
+//        JPanel audioContent = new JPanel();
+//        audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
+//        audioContent.setBackground(new Color(70, 70, 70));
+//
+//        JScrollPane audioScroll = new JScrollPane(audioContent);
+//        audioScroll.setPreferredSize(new Dimension(180, 140));
+//
+//        assetsPanel.add(audioHeader);
+//        assetsPanel.add(audioScroll);
 
         // ====== FILESYSTEM PANEL ======
         filesystemPanel = new JPanel();
@@ -265,6 +338,122 @@ public class HomeView extends javax.swing.JFrame {
 
         pack();
         setLocationRelativeTo(null);
+    }
+
+    private void setupAssetLibListener() {
+        assetLibViewModel.addPropertyChangeListener(evt -> {
+            if (interface_adapter.assets.AssetLibViewModel.ASSET_ADDED.equals(evt.getPropertyName())) {
+                entity.Asset newAsset = (entity.Asset) evt.getNewValue();
+                if (newAsset instanceof entity.Image) {
+                    addSpriteToUI((entity.Image) newAsset);
+                }
+            }
+        });
+
+        // display existing assets
+        for (entity.Asset asset : assetLibViewModel.getAssetLib().getAll()) {
+            if (asset instanceof entity.Image) {
+                addSpriteToUI((entity.Image) asset);
+            }
+        }
+    }
+
+    private void addSpriteToUI(entity.Image image) {
+        JPanel cardPanel = new JPanel();
+        cardPanel.setLayout(new BorderLayout());
+        cardPanel.setPreferredSize(new Dimension(80, 100));
+        cardPanel.setBackground(new Color(60, 60, 60));
+        cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
+
+        // load + scale the image thumbnail
+        try {
+            java.awt.image.BufferedImage originalImage = javax.imageio.ImageIO.read(
+                new java.io.File(image.getLocalpath().toString())
+            );
+
+            // calc thumbnail size
+            int thumbWidth = 70;
+            int thumbHeight = 70;
+            double aspectRatio = (double) originalImage.getWidth() / originalImage.getHeight();
+
+            if (aspectRatio > 1) {
+                thumbHeight = (int) (thumbWidth / aspectRatio);
+            } else {
+                thumbWidth = (int) (thumbHeight * aspectRatio);
+            }
+
+            // scale image
+            java.awt.Image scaledImage = originalImage.getScaledInstance(
+                thumbWidth, thumbHeight, java.awt.Image.SCALE_SMOOTH
+            );
+
+            // create image label with centered icon
+            JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+            imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+            imageLabel.setPreferredSize(new Dimension(80, 70));
+
+            cardPanel.add(imageLabel, BorderLayout.CENTER);
+
+        } catch (Exception e) {
+            // fallback if image fails to load
+            JLabel iconLabel = new JLabel("image");
+            iconLabel.setFont(new Font("Arial", Font.PLAIN, 30));
+            iconLabel.setForeground(Color.WHITE);
+            iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            cardPanel.add(iconLabel, BorderLayout.CENTER);
+        }
+
+        // add name label to the bottom
+        String displayName = image.getName();
+        if (displayName.length() > 10) {
+            displayName = displayName.substring(0, 8) + "...";
+        }
+        JLabel nameLabel = new JLabel(displayName);
+        nameLabel.setForeground(Color.WHITE);
+        nameLabel.setFont(new Font("Arial", Font.PLAIN, 9));
+        nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        cardPanel.add(nameLabel, BorderLayout.SOUTH);
+
+        // Add hover effect
+        cardPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cardPanel.setBackground(new Color(80, 80, 80));
+                cardPanel.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 2));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cardPanel.setBackground(new Color(60, 60, 60));
+                cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
+            }
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                System.out.println("Selected sprite: " + image.getName());
+            }
+        });
+
+        cardPanel.setToolTipText(image.getName());
+
+        spritesContent.add(cardPanel);
+        spritesContent.revalidate();
+        spritesContent.repaint();
+    }
+
+    private void openLocalSpriteImport() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Import Sprite");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Image Files", "jpg", "jpeg", "png"));
+
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            // call controller to import sprite
+            importSpriteController.importSprite(selectedFile);
+        }
+    }
+
+    public interface_adapter.assets.AssetLibViewModel getAssetLibViewModel() {
+        return assetLibViewModel;
     }
 
     public static void main(String[] args) {
