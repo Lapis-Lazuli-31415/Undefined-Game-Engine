@@ -76,6 +76,6 @@ public class Environment {
 
         VariableMap<?> variableMap = variables.get(variableType);
 
-        variableMap.unset(name);
+        variableMap.delete(name);
     }
 }
