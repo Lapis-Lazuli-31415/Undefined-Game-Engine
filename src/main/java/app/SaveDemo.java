@@ -72,6 +72,9 @@ public class SaveDemo {
         Vector<Double> scale = new Vector<>(); scale.add(1.0); scale.add(1.0);
         Transform transform = new Transform(pos, 45.0f, scale);
 
+        // asset library list
+        AssetLib assetLib = new AssetLib();
+
         // properties (Sprite)
         ArrayList<Property> properties = new ArrayList<>();
 
@@ -79,6 +82,9 @@ public class SaveDemo {
             // pass the path to the image
             java.nio.file.Path bearPath = java.nio.file.Path.of("src/main/resources/bear.png");
             Image image = new Image(bearPath);
+
+            // add the image to the assetLib
+            assetLib.add(image);
 
             properties.add(new SpriteRenderer(image, true));
 
@@ -102,6 +108,6 @@ public class SaveDemo {
         ArrayList<Scene> scenes = new ArrayList<>();
         scenes.add(scene);
 
-        return new Project("proj-001", "project_name", scenes, new ArrayList<>(), gameController);
+        return new Project("proj-001", "project_name", scenes, assetLib, gameController);
     }
 }

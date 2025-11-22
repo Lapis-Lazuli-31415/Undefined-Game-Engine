@@ -5,16 +5,19 @@ import entity.scripting.environment.Environment;
 import java.util.ArrayList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+
+@JsonPropertyOrder({ "id", "name", "global_environment", "assets", "scenes" }) // force the order of keys in database.json
 public class Project {
 
     private final String id;
     private final String name;
     private final ArrayList<Scene> scenes;
-    private final ArrayList<Asset> assets;
+    private final AssetLib assets;
     private final GameController gameController;
 
-    public Project(String id, String name, ArrayList<Scene> scenes, ArrayList<Asset> assets, GameController gameController) {
+    public Project(String id, String name, ArrayList<Scene> scenes, AssetLib assets, GameController gameController) {
         this.id = id;
         this.name = name;
         this.scenes = scenes;
@@ -33,7 +36,7 @@ public class Project {
     public ArrayList<Scene> getScenes() {
         return scenes;
     }
-    public ArrayList<Asset> getAssets() {
+    public AssetLib getAssets() {
         return assets;
     }
 
