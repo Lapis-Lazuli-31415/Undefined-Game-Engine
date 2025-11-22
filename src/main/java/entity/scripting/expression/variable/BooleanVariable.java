@@ -4,25 +4,12 @@ import entity.scripting.environment.Environment;
 import entity.scripting.error.EnvironmentException;
 import entity.scripting.expression.BooleanExpression;
 
-public class BooleanVariable extends BooleanExpression implements Variable<Boolean> {
-    private final String name;
-    private final boolean isGlobal;
+public class BooleanVariable extends Variable<Boolean> implements BooleanExpression {
     public final static String VARIABLE_TYPE = "Boolean";
     private final static Class<Boolean> VALUE_TYPE = Boolean.class;
 
     public BooleanVariable(String name, boolean isGlobal) {
-        this.name = name;
-        this.isGlobal = isGlobal;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public boolean isGlobal() {
-        return isGlobal;
+        super(name, isGlobal);
     }
 
     @Override

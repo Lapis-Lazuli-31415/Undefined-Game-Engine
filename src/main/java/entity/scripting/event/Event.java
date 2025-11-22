@@ -1,7 +1,7 @@
 package entity.scripting.event;
 
 public abstract class Event {
-    private String eventLabel;
+    private final String eventLabel;
 
     public Event(String eventLabel) {
         this.eventLabel = eventLabel;
