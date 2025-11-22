@@ -78,4 +78,17 @@ public class Environment {
 
         variableMap.delete(name);
     }
+
+    public <T> boolean contains(Variable<T> variable) {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+
+        if (!variables.containsKey(variableType)){
+            return false;
+        }
+
+        VariableMap<?> variableMap = variables.get(variableType);
+
+        return variableMap.contains(name);
+    }
 }
