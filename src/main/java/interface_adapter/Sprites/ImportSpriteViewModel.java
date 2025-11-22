@@ -1,5 +1,7 @@
 package interface_adapter.Sprites;
 
+import interface_adapter.ViewModel;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -10,7 +12,7 @@ import java.beans.PropertyChangeSupport;
  */
 public class ImportSpriteViewModel {
 
-    public static final String IMPORT_SPRITE_PROPERTY = "importSprite";
+    public static final String IMPORT_SPRITE_PROPERTY = "importSprite"; // add abstract class view model extension
 
     private ImportSpriteState state = new ImportSpriteState();
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
