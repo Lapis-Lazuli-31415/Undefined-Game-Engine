@@ -74,9 +74,18 @@ public class SaveDemo {
 
         // properties (Sprite)
         ArrayList<Property> properties = new ArrayList<>();
-        Color tint = new Color(255, 0, 0);
-        Image image = new Image();
-        properties.add(new SpriteRenderer(image, tint , 9, true));
+
+        try {
+            // pass the path to the image
+            java.nio.file.Path bearPath = java.nio.file.Path.of("src/main/resources/bear.png");
+            Image image = new Image(bearPath);
+
+            properties.add(new SpriteRenderer(image, true));
+
+        } catch (java.io.IOException e) {
+            System.err.println("Could not load image for demo: " + e.getMessage());
+            // create a dummy property or exit if image fails
+        }
 
         // gameObject
         GameObject bear = new GameObject(

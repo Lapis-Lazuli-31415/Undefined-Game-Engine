@@ -10,16 +10,16 @@
         "name" : "Bear",
         "active" : true,
         "properties" : [ {
-          "image" : {
-            "path" : "bear.png"
-          },
-          "tint" : {
-            "red" : 255,
-            "green" : 0,
-            "blue" : 0
-          },
           "visible" : true,
-          "zindex" : 9
+          "opacity" : 100,
+          "zindex" : 0,
+          "image" : {
+            "id" : "1763879a-f822-4f89-990c-a7c609058bf1",
+            "name" : "bear.png",
+            "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png",
+            "width" : 2670,
+            "height" : 2028
+          }
         } ],
         "transform" : {
           "rotation" : 45.0,
