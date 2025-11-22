@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class VariableMap<T> {
-    private Map<String, T> variables;
+    private final Map<String, T> variables;
 
     public VariableMap() {
         variables = new LinkedHashMap<>();
@@ -18,7 +18,7 @@ public class VariableMap<T> {
         return variables.get(name);
     }
 
-    public void unset(String name){
+    public void delete(String name){
         variables.remove(name);
     }
 

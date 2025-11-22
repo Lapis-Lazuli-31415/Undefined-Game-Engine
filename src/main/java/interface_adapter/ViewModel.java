@@ -28,13 +28,8 @@ public abstract class ViewModel<T> {
         return state;
     }
 
-    public void notifyListeners() {
-        firePropertyChanged();
-    }
-
     public void setState(T state) {
         this.state = state;
-        firePropertyChanged();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -47,7 +42,11 @@ public abstract class ViewModel<T> {
 
      // Notify observers that the state has changed.
 
-    protected void firePropertyChanged() {
+    public void firePropertyChange() {
         support.firePropertyChange("state", null, this.state);
+    }
+
+    public void firePropertyChange(String propertyName) {
+        this.support.firePropertyChange(propertyName, null, this.state);
     }
 }
