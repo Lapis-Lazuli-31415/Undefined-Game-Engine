@@ -2,24 +2,26 @@ package entity;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class Image extends Asset {
-    private int width;
-    private int height;
-    BufferedImage bimg = ImageIO.read(new File(this.localpath.toString()));
-    public Image(Path path) throws IOException {
-        super(path);
-        this.height = bimg.getHeight();
-        this.width = bimg.getWidth();
+    private final int width;
+    private final int height;
+    private final BufferedImage image;
+
+    public Image(Path imagePath) throws IOException {
+        super(imagePath);
+        this.image = ImageIO.read(imagePath.toFile());
+        this.width = image != null ? image.getWidth() : 0;
+        this.height = image != null ? image.getHeight() : 0;
     }
-    public int getWidth() {
+
+    protected int getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    protected int getHeight() {
         return height;
     }
 }
