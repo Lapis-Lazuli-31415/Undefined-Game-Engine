@@ -1,9 +1,11 @@
 package interface_adapter.Sprites;
 
+import use_case.Sprites.Import.DeleteSpriteRequest;
 import use_case.Sprites.Import.ImportSpriteRequest;
 import use_case.Sprites.Import.SpriteInputBoundary;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Controller for importing sprites from a local file.
@@ -26,6 +28,11 @@ public class ImportSpriteController {
         ImportSpriteRequest request = new ImportSpriteRequest();
         request.spriteFile = file;
         interactor.execute(request);
+    }
+
+    public void deleteSprite(File file) throws IOException {
+        DeleteSpriteRequest request = new DeleteSpriteRequest();
+        interactor.executeDelete(request);
     }
 }
 

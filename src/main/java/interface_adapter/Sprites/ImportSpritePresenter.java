@@ -51,11 +51,19 @@ public class ImportSpritePresenter implements SpriteOutputBoundary {
 
     @Override
     public void prepareDeleteFailView(String errorMessage) {
-        // TODO: implement
+        ImportSpriteState state = viewModel.getState();
+        state.setSuccess(false);
+        state.setMessage(errorMessage);
+        viewModel.firePropertyChanged();
     }
 
     @Override
     public void prepareDeleteSuccessView(DeleteSpriteResponse response) {
-        // TODO: implement
+        ImportSpriteState state = viewModel.getState();
+        state.setSuccess(true);
+        state.setMessage(response.message);
+        viewModel.firePropertyChanged();
+
+        assetLibViewModel.notifyAssetRemoved(response.deletedSprite);
     }
 }
