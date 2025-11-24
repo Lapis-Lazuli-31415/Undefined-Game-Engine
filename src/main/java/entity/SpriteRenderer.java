@@ -33,4 +33,5 @@ public class SpriteRenderer extends Property {
     public void setVisible(boolean visiblity) {
         this.visible = visiblity;
     }
+
 }

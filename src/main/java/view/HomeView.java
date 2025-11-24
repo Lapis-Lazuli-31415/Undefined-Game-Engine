@@ -660,13 +660,11 @@ public class HomeView extends javax.swing.JFrame {
      * Create test scene (temporary implementation)
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      *
-     * This method creates a test scene using Lynn's demoObject
      * TODO: Remove this when getCurrentScene() is properly implemented
      */
     private Scene createTestScene() {
         java.util.ArrayList<GameObject> objects = new java.util.ArrayList<>();
 
-        // Reuse Lynn's demoObject for testing
         if (demoObject != null) {
             objects.add(demoObject);
         }

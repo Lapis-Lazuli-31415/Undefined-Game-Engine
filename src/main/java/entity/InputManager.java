@@ -1,218 +1,288 @@
 package entity;
+
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * InputManager - Manages keyboard input for the game
+ * InputManager - Manages keyboard and mouse input state.
+ * Part of Entity layer - contains input state business rules.
  *
  * Features:
- * - Case-insensitive key tracking (W = w)
- * - Distinguishes between "held" and "just pressed"
- * - Supports all keyboard keys
- * - 60 FPS compatible with proper state management
+ * - Keyboard: pressed keys, just pressed keys
+ * - Mouse: click position, button state
+ * - Frame-based state management
  *
- * Key States:
- * - pressedKeys: Keys currently held down
- * - justPressedKeys: Keys pressed this frame (cleared each frame)
+ * ENHANCED: Now supports mouse input for click detection
  *
  * @author Wanru Cheng
  */
-public class InputManager implements KeyListener {
+public class InputManager extends KeyAdapter {
 
-    private final Set<String> pressedKeys;      // Keys currently held
-    private final Set<String> justPressedKeys;  // Keys just pressed this frame
+    // ===== Keyboard State =====
+    private final Set<String> pressedKeys;
+    private final Set<String> justPressedKeys;
+
+    // ===== Mouse State =====
+    private int mouseX;
+    private int mouseY;
+    private boolean mouseClicked;
+    private boolean mouseJustClicked;
+    private int mouseButton;  // 1=left, 2=middle, 3=right
 
     /**
-     * Create an InputManager
+     * Constructor.
      */
     public InputManager() {
         this.pressedKeys = new HashSet<>();
         this.justPressedKeys = new HashSet<>();
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.mouseClicked = false;
+        this.mouseJustClicked = false;
+        this.mouseButton = 0;
     }
+
+    // ========== KEYBOARD METHODS ==========
 
     /**
-     * Check if a key is currently pressed (held down)
+     * Handle key pressed event.
      *
-     * Case-insensitive: "W" and "w" are treated the same
-     *
-     * @param key The key name (case insensitive)
-     * @return true if the key is held down
+     * @param e Key event
      */
-    public boolean isKeyPressed(String key) {
-        if (key == null) return false;
-
-        // Normalize to uppercase for comparison
-        String normalizedKey = key.toUpperCase().trim();
-        return pressedKeys.contains(normalizedKey);
-    }
-
-    /**
-     * Check if a key was just pressed this frame
-     *
-     * This returns true only ONCE per key press, even if held down.
-     * Perfect for single-trigger actions like jumping or shooting.
-     *
-     * Case-insensitive: "W" and "w" are treated the same
-     *
-     * @param key The key name (case insensitive)
-     * @return true if the key was pressed this frame
-     */
-    public boolean isKeyJustPressed(String key) {
-        if (key == null) return false;
-
-        // Normalize to uppercase for comparison
-        String normalizedKey = key.toUpperCase().trim();
-        boolean result = justPressedKeys.contains(normalizedKey);
-
-        // Debug output (can be removed in production)
-        if (result) {
-            System.out.println("  [InputManager] Key just pressed: " + normalizedKey);
-        }
-
-        return result;
-    }
-
-    /**
-     * Get a normalized key name from KeyEvent
-     *
-     * Converts KeyEvent key codes to standardized uppercase names:
-     * - Letters: A, B, C, etc.
-     * - Numbers: 0, 1, 2, etc.
-     * - Special: SPACE, ENTER, ESCAPE, etc.
-     * - Arrows: UP, DOWN, LEFT, RIGHT
-     * - Function: F1, F2, etc.
-     *
-     * @param e The KeyEvent
-     * @return Normalized key name (uppercase)
-     */
-    private String getKeyName(KeyEvent e) {
-        int keyCode = e.getKeyCode();
-
-        // Get the key text and normalize it
-        String keyText = KeyEvent.getKeyText(keyCode);
-
-        // Convert to uppercase and trim
-        String normalized = keyText.toUpperCase().trim();
-
-        // Handle special cases where Java returns unexpected names
-        normalized = handleSpecialCases(keyCode, normalized);
-
-        return normalized;
-    }
-
-    /**
-     * Handle special key code cases
-     *
-     * Some keys have inconsistent names from KeyEvent.getKeyText(),
-     * so we standardize them here.
-     */
-    private String handleSpecialCases(int keyCode, String defaultName) {
-        switch (keyCode) {
-            // Space key
-            case KeyEvent.VK_SPACE:
-                return "SPACE";
-
-            // Enter/Return
-            case KeyEvent.VK_ENTER:
-                return "ENTER";
-
-            // Escape
-            case KeyEvent.VK_ESCAPE:
-                return "ESCAPE";
-
-            // Tab
-            case KeyEvent.VK_TAB:
-                return "TAB";
-
-            // Backspace
-            case KeyEvent.VK_BACK_SPACE:
-                return "BACKSPACE";
-
-            // Arrow keys
-            case KeyEvent.VK_UP:
-                return "UP";
-            case KeyEvent.VK_DOWN:
-                return "DOWN";
-            case KeyEvent.VK_LEFT:
-                return "LEFT";
-            case KeyEvent.VK_RIGHT:
-                return "RIGHT";
-
-            // Shift, Control, Alt
-            case KeyEvent.VK_SHIFT:
-                return "SHIFT";
-            case KeyEvent.VK_CONTROL:
-                return "CONTROL";
-            case KeyEvent.VK_ALT:
-                return "ALT";
-
-            // Default: use the provided name
-            default:
-                return defaultName;
-        }
-    }
-
     @Override
     public void keyPressed(KeyEvent e) {
-        String key = getKeyName(e);
+        String key = getKeyText(e);
 
-        // If this is a new key press (not held from before)
+        // Add to pressed keys
         if (!pressedKeys.contains(key)) {
+            pressedKeys.add(key);
             justPressedKeys.add(key);
-            System.out.println("[InputManager] Key pressed: " + key);
         }
-
-        // Add to currently pressed keys
-        pressedKeys.add(key);
     }
 
+    /**
+     * Handle key released event.
+     *
+     * @param e Key event
+     */
     @Override
     public void keyReleased(KeyEvent e) {
-        String key = getKeyName(e);
-
-        // Remove from pressed keys
+        String key = getKeyText(e);
         pressedKeys.remove(key);
-
-        System.out.println("[InputManager] Key released: " + key);
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // Not used, but required by KeyListener interface
     }
 
     /**
-     * Update the input state
+     * Check if a key is currently pressed.
      *
-     * MUST be called once per frame at the end of the game loop
-     * to clear "just pressed" states for the next frame
+     * @param key Key name (case-insensitive)
+     * @return true if pressed
+     */
+    public boolean isKeyPressed(String key) {
+        return pressedKeys.contains(key.toUpperCase());
+    }
+
+    /**
+     * Check if a key was just pressed this frame.
+     *
+     * @param key Key name (case-insensitive)
+     * @return true if just pressed
+     */
+    public boolean isKeyJustPressed(String key) {
+        return justPressedKeys.contains(key.toUpperCase());
+    }
+
+    /**
+     * Get normalized key text from KeyEvent.
+     *
+     * @param e Key event
+     * @return Normalized key name
+     */
+    private String getKeyText(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        String keyText = KeyEvent.getKeyText(keyCode);
+        return keyText.toUpperCase();
+    }
+
+    // ========== MOUSE METHODS ==========
+
+    /**
+     * Get mouse listener for attaching to canvas.
+     * This allows InputManager to receive mouse events.
+     *
+     * @return MouseAdapter that updates mouse state
+     */
+    public MouseAdapter getMouseListener() {
+        return new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                handleMousePressed(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                handleMouseReleased(e);
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                handleMouseMoved(e);
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                handleMouseMoved(e);
+            }
+        };
+    }
+
+    /**
+     * Handle mouse pressed event.
+     *
+     * @param e Mouse event
+     */
+    private void handleMousePressed(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+        mouseButton = e.getButton();
+
+        if (!mouseClicked) {
+            mouseClicked = true;
+            mouseJustClicked = true;
+        }
+    }
+
+    /**
+     * Handle mouse released event.
+     *
+     * @param e Mouse event
+     */
+    private void handleMouseReleased(MouseEvent e) {
+        mouseClicked = false;
+        mouseButton = 0;
+    }
+
+    /**
+     * Handle mouse moved event.
+     *
+     * @param e Mouse event
+     */
+    private void handleMouseMoved(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
+
+    /**
+     * Get current mouse X position.
+     *
+     * @return Mouse X coordinate
+     */
+    public int getMouseX() {
+        return mouseX;
+    }
+
+    /**
+     * Get current mouse Y position.
+     *
+     * @return Mouse Y coordinate
+     */
+    public int getMouseY() {
+        return mouseY;
+    }
+
+    /**
+     * Check if mouse is currently clicked.
+     *
+     * @return true if mouse button is down
+     */
+    public boolean isMouseClicked() {
+        return mouseClicked;
+    }
+
+    /**
+     * Check if mouse was just clicked this frame.
+     *
+     * @return true if just clicked
+     */
+    public boolean isMouseJustClicked() {
+        return mouseJustClicked;
+    }
+
+    /**
+     * Get which mouse button was clicked.
+     *
+     * @return 1=left, 2=middle, 3=right, 0=none
+     */
+    public int getMouseButton() {
+        return mouseButton;
+    }
+
+    /**
+     * Check if left mouse button was just clicked.
+     *
+     * @return true if left button just clicked
+     */
+    public boolean isLeftClickJustPressed() {
+        return mouseJustClicked && mouseButton == MouseEvent.BUTTON1;
+    }
+
+    /**
+     * Check if right mouse button was just clicked.
+     *
+     * @return true if right button just clicked
+     */
+    public boolean isRightClickJustPressed() {
+        return mouseJustClicked && mouseButton == MouseEvent.BUTTON3;
+    }
+
+    // ========== LIFECYCLE METHODS ==========
+
+    /**
+     * Update input state (call once per frame).
+     * Clears "just pressed" states.
      */
     public void update() {
-        // Clear just pressed keys for next frame
+        // Clear just pressed keys
         justPressedKeys.clear();
+
+        // Clear just clicked state
+        mouseJustClicked = false;
     }
 
     /**
-     * Reset all input state
-     *
-     * Useful when switching scenes or pausing
+     * Reset all input state.
      */
     public void reset() {
         pressedKeys.clear();
         justPressedKeys.clear();
-        System.out.println("[InputManager] Input state reset");
+        mouseX = 0;
+        mouseY = 0;
+        mouseClicked = false;
+        mouseJustClicked = false;
+        mouseButton = 0;
+    }
+
+    // ========== DEBUG METHODS ==========
+
+    /**
+     * Get all currently pressed keys.
+     *
+     * @return Set of pressed key names
+     */
+    public Set<String> getPressedKeys() {
+        return new HashSet<>(pressedKeys);
     }
 
     /**
-     * Get debug information about current input state
+     * Get current mouse state as string.
+     *
+     * @return Mouse state description
      */
-    public String getDebugInfo() {
-        return String.format(
-                "Pressed: %d keys, Just Pressed: %d keys",
-                pressedKeys.size(),
-                justPressedKeys.size()
-        );
+    public String getMouseStateString() {
+        return String.format("Mouse[x=%d, y=%d, clicked=%b, button=%d]",
+                mouseX, mouseY, mouseClicked, mouseButton);
     }
 }
