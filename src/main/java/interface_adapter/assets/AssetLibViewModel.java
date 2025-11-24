@@ -12,7 +12,6 @@ import java.beans.PropertyChangeSupport;
  */
 public class AssetLibViewModel {
     public static final String ASSET_ADDED = "assetAdded";
-
     private final AssetLib assetLib;
     private final PropertyChangeSupport support;
 
@@ -31,9 +30,7 @@ public class AssetLibViewModel {
     }
 
     /**
-     * Notifies listeners that an asset was added externally (e.g., by a use case).
-     * Use this when the asset was added directly to the entity AssetLib
-     * and you need to notify views about the change.
+     * Notifies listeners that an asset was added externally
      * @param asset the asset that was added
      */
     public void notifyAssetAdded(Asset asset) {

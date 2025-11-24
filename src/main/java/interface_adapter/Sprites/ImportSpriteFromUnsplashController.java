@@ -1,7 +1,7 @@
 package interface_adapter.Sprites;
 
-import use_case.Sprites.SpriteInputBoundary;
-import use_case.Sprites.ImportSpriteFromUnsplashRequest;
+import use_case.Sprites.Import.SpriteInputBoundary;
+import use_case.Sprites.Import.ImportSpriteFromUnsplashRequest;
 
 /**
  * Controller for importing sprites from Unsplash.
