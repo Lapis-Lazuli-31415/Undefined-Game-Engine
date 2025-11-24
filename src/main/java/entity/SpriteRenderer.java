@@ -1,6 +1,5 @@
 package entity;
 
-import java.awt.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class SpriteRenderer extends Property {
@@ -50,4 +49,11 @@ public class SpriteRenderer extends Property {
         return visible;
     }
 
+    public int getWidth() {
+        return this.sprite.getWidth();
+    }
+
+    public int getHeight() {
+        return this.sprite.getHeight();
+    }
 }

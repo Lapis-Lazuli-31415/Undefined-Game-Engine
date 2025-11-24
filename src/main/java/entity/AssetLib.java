@@ -42,4 +42,8 @@ public class AssetLib {
     public boolean contains(UUID id) {
         return assets.containsKey(id);
     }
+
+    public void remove(UUID id) {
+        assets.remove(id);
+    }
 }

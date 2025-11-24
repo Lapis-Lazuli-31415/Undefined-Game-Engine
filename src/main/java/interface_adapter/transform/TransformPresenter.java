@@ -24,6 +24,6 @@ public class TransformPresenter implements UpdateTransformOutputBoundary {
         state.setRotation(transform.getRotation());
 
         // Notify observers once after updating the entire state
-        viewModel.notifyListeners();
+        viewModel.firePropertyChange();
     }
 }
