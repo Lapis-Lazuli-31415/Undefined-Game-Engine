@@ -1,4 +1,4 @@
-package use_case.Sprites;
+package use_case.Sprites.Import;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,4 +42,9 @@ public interface SpriteUserDataAccessInterface {
      * @return the path to the uploads directory
      */
     Path getUploadsDirectory();
+
+    /**
+     * deletes the specified sprite file from the uploads directory.
+     * @param spriteFile
+     */
 }

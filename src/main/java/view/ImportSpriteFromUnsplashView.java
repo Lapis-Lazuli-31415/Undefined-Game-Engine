@@ -14,24 +14,21 @@ import java.beans.PropertyChangeListener;
  */
 public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChangeListener {
 
-    private final String viewName = "importSpriteFromUnsplash";
-    private final ImportSpriteFromUnsplashViewModel viewModel;
     private final ImportSpriteFromUnsplashController controller;
 
     // UI Components
     private final JTextField searchQueryField;
-    private final JTextField imageIdField;      // TODO: probably delete this feature
+    private final JTextField imageIdField;
     private final JTextField fileNameField;
     private final JButton searchButton;
-    private final JButton importByIdButton;     // TODO: probably delete this feature
+    private final JButton importByIdButton;
     private final JLabel statusLabel;
     private final JProgressBar progressBar;
 
     public ImportSpriteFromUnsplashView(ImportSpriteFromUnsplashViewModel viewModel,
                                          ImportSpriteFromUnsplashController controller) {
-        this.viewModel = viewModel;
         this.controller = controller;
-        this.viewModel.addPropertyChangeListener(this);
+        viewModel.addPropertyChangeListener(this);
 
         // panel setup
         setLayout(new BorderLayout(10, 10));
@@ -67,7 +64,7 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         importByIdButton = new JButton("Import by ID");
         imageIdPanel.add(importByIdButton);
 
-        // file renname section
+        // file rename section
         JPanel fileNamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         fileNamePanel.add(new JLabel("File Name (optional):"));
         fileNameField = new JTextField(20);
@@ -116,20 +113,12 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         String searchQuery = searchQueryField.getText().trim();
         String fileName = fileNameField.getText().trim();
 
-        if (searchQuery.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Please enter a search query",
-                    "Invalid Input",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
         // loading state
         setLoading(true);
         statusLabel.setText("Searching for images...");
 
         // execute the use case in a background thread to keep UI responsive
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 controller.execute(searchQuery, fileName.isEmpty() ? null : fileName);
@@ -143,20 +132,12 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         String imageId = imageIdField.getText().trim();
         String fileName = fileNameField.getText().trim();
 
-        if (imageId.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Please enter an image ID",
-                    "Invalid Input",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
         // loading state
         setLoading(true);
         statusLabel.setText("Importing image...");
 
         // execute the use case in a background thread to keep UI responsive
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 controller.executeWithImageId(imageId, fileName.isEmpty() ? null : fileName);
@@ -212,8 +193,8 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
         }
     }
 
-    public String getViewName() {
-        return viewName;
+    public String getViewName() {       // TODO: remove i think
+        return "importSpriteFromUnsplash";
     }
 }
 
