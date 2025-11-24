@@ -1,5 +1,6 @@
 package use_case.Sprites.Import;
 
+import entity.Asset;
 import entity.AssetLib;
 import entity.Image;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class ImportSpriteInteractor implements SpriteInputBoundary {
 
@@ -80,8 +82,32 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
     }
 
     @Override
-    public void execute(DeleteSpriteRequest request) {
-        // TODO: implement
+    public void executeDelete(DeleteSpriteRequest request) throws IOException {
+        if (!dataAccess.existsByName(request.spriteFile.getName())) {
+            outputBoundary.prepareFailView("Sprite does not exist.");
+            return;
+        }
+        // delete from data storage
+        dataAccess.deleteSprite(request.spriteFile);
+
+        // delete from asset lib
+        assetLib.remove(getFileId(request.spriteFile.getName()));
+
+        // prepare success response
+        DeleteSpriteResponse response = new DeleteSpriteResponse();
+        response.success = true;
+        response.message = "Sprite deleted successfully: " + request.spriteFile.getName();
+
+        outputBoundary.prepareDeleteSuccessView(response);
+    }
+
+    private UUID getFileId(String fileName) {
+        for (Asset asset : assetLib.getAll()) {
+            if (asset.getName().equals(fileName)) {
+                return asset.getId();
+            }
+        }
+        return null;
     }
 
     private String getFileExtension(String fileName) {

@@ -98,7 +98,7 @@ public class ImportSpriteFromUnsplashInteractor implements SpriteInputBoundary {
     }
 
     @Override
-    public void execute(DeleteSpriteRequest request) {
+    public void executeDelete(DeleteSpriteRequest request) {
         // TODO: implement
     }
 

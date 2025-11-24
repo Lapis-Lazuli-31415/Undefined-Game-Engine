@@ -42,4 +42,10 @@ public interface SpriteUserDataAccessInterface {
      * @return the path to the uploads directory
      */
     Path getUploadsDirectory();
+
+    /**
+     * deletes the specified sprite file from the uploads directory.
+     * @param spriteFile
+     */
+    void deleteSprite(File spriteFile) throws IOException;
 }

@@ -87,5 +87,11 @@ public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInt
     public Path getUploadsDirectory() {
         return uploadsDirectory;
     }
+
+    @Override
+    public void deleteSprite(File spriteFile) throws IOException {
+        Path targetPath = uploadsDirectory.resolve(spriteFile.getName());
+        Files.deleteIfExists(targetPath);
+    }
 }
 

@@ -7,5 +7,4 @@ package use_case.Sprites.Import;
 public class DeleteSpriteResponse {
     public boolean success;
     public String message;
-    public String deletedSpriteFile;
 }

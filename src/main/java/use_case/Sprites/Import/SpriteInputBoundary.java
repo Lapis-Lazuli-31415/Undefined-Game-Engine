@@ -1,5 +1,7 @@
 package use_case.Sprites.Import;
 
+import java.io.IOException;
+
 /**
  * Input Boundary for actions related to importing and managing sprites.
  */
@@ -16,5 +18,5 @@ public interface SpriteInputBoundary {
      * Executes the sprite deletion use case
      * @param DeleteSpriteRequest request containing the sprite file to be deleted
      */
-    void execute(DeleteSpriteRequest request);
+    void executeDelete(DeleteSpriteRequest request) throws IOException;
 }
