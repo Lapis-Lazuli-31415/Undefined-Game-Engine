@@ -6,7 +6,7 @@ import entity.scripting.expression.BooleanExpression;
 
 public class BooleanVariable extends Variable<Boolean> implements BooleanExpression {
     public final static String VARIABLE_TYPE = "Boolean";
-    private final static Class<Boolean> VALUE_TYPE = Boolean.class;
+    public final static Class<Boolean> VALUE_TYPE = Boolean.class;
 
     public BooleanVariable(String name, boolean isGlobal) {
         super(name, isGlobal);

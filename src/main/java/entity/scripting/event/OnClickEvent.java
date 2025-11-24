@@ -1,7 +1,7 @@
 package entity.scripting.event;
 
 public class OnClickEvent extends Event{
-    private static String EVENT_TYPE = "On Click";
+    private static final String EVENT_TYPE = "On Click";
 
     public OnClickEvent() {
         super("On Click");

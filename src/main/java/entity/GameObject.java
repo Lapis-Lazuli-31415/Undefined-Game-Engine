@@ -1,5 +1,6 @@
 package entity;
 
+import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class GameObject {
     private ArrayList<Property> properties;
     private Environment environments;
     private Transform transform;
+    private TriggerManager triggerManager;
 
     public GameObject(String id,
                       String name,
@@ -79,6 +81,14 @@ public class GameObject {
 
     public void setTransform(Transform transform) {
         this.transform = transform;
+    }
+
+    public TriggerManager getTriggerManager() {
+        return triggerManager;
+    }
+
+    public void setTriggerManager(TriggerManager triggerManager) {
+        this.triggerManager = triggerManager;
     }
 
     // --- Property helpers ---

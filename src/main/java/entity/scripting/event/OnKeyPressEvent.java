@@ -1,7 +1,7 @@
 package entity.scripting.event;
 
 public class OnKeyPressEvent extends Event{
-    private static String EVENT_TYPE = "On Key Press";
+    private static final String EVENT_TYPE = "On Key Press";
     private String key;
 
     public OnKeyPressEvent(String key) {
