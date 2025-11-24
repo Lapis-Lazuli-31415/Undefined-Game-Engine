@@ -1,7 +1,8 @@
-package use_case.Sprites;
+package use_case.Sprites.Import;
 
 import entity.AssetLib;
 import entity.Image;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class ImportSpriteInteractor implements SpriteInputBoundary {
 
-    private static final long MAX_FILE_SIZE = 250L * 1024 * 1024; // 250 MB in bytes
+    private static final long MAX_FILE_SIZE = 250L * 1024 * 1024; // 250 MB
     private static final List<String> VALID_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg");
 
     private final SpriteUserDataAccessInterface dataAccess;
@@ -76,6 +77,11 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
         } catch (IOException e) {
             outputBoundary.prepareFailView("Failed to import sprite: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void execute(DeleteSpriteRequest request) {
+        // TODO: implement
     }
 
     private String getFileExtension(String fileName) {

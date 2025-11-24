@@ -1,4 +1,4 @@
-package use_case.Sprites;
+package use_case.Sprites.Import;
 
 import java.io.File;
 import java.io.IOException;

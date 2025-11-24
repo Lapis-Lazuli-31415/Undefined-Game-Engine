@@ -1,4 +1,4 @@
-package use_case.Sprites;
+package use_case.Sprites.Import;
 
 import entity.AssetLib;
 import entity.Image;
@@ -95,6 +95,11 @@ public class ImportSpriteFromUnsplashInteractor implements SpriteInputBoundary {
         } catch (IOException e) {
             outputBoundary.prepareFailView("Failed to import sprite from Unsplash: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void execute(DeleteSpriteRequest request) {
+        // TODO: implement
     }
 
     /**

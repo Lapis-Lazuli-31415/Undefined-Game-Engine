@@ -8,6 +8,7 @@ import entity.Transform;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
+import use_case.Sprites.Import.ImportSpriteInteractor;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -60,8 +61,8 @@ public class HomeView extends javax.swing.JFrame {
                 new interface_adapter.Sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
 
             // create interactor
-            use_case.Sprites.ImportSpriteInteractor interactor =
-                new use_case.Sprites.ImportSpriteInteractor(
+            ImportSpriteInteractor interactor =
+                new ImportSpriteInteractor(
                     spriteDAO,
                     presenter,
                     assetLibViewModel.getAssetLib()

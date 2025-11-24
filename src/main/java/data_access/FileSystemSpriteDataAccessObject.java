@@ -1,6 +1,6 @@
 package data_access;
 
-import use_case.Sprites.SpriteUserDataAccessInterface;
+import use_case.Sprites.Import.SpriteUserDataAccessInterface;
 
 import java.io.File;
 import java.io.IOException;

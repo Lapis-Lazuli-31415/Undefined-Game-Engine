@@ -1,7 +1,7 @@
 package interface_adapter.Sprites;
 
-import use_case.Sprites.ImportSpriteRequest;
-import use_case.Sprites.SpriteInputBoundary;
+import use_case.Sprites.Import.ImportSpriteRequest;
+import use_case.Sprites.Import.SpriteInputBoundary;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package use_case.Sprites;
+package use_case.Sprites.Import;
 
 /**
  * Input Boundary for actions related to importing and managing sprites.
@@ -11,4 +11,10 @@ public interface SpriteInputBoundary {
      * @param ImportSpriteRequest request containing the sprite file to be imported
      */
     void execute(ImportSpriteRequest request);
+
+    /**
+     * Executes the sprite deletion use case
+     * @param DeleteSpriteRequest request containing the sprite file to be deleted
+     */
+    void execute(DeleteSpriteRequest request);
 }

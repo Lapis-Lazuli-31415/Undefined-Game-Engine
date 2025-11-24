@@ -1,7 +1,8 @@
 package interface_adapter.Sprites;
 
-import use_case.Sprites.ImportSpriteResponse;
-import use_case.Sprites.SpriteOutputBoundary;
+import use_case.Sprites.Import.DeleteSpriteResponse;
+import use_case.Sprites.Import.ImportSpriteResponse;
+import use_case.Sprites.Import.SpriteOutputBoundary;
 
 /**
  * The Presenter for import sprite from Unsplash.
@@ -54,6 +55,17 @@ public class ImportSpriteFromUnsplashPresenter implements SpriteOutputBoundary {
         // Update the view model
         viewModel.setState(state);
         viewModel.firePropertyChanged();
+    }
+
+    @Override
+    public void prepareDeleteFailView(String errorMessage) {
+        // TODO: implement
+    }
+
+    @Override
+    public void prepareDeleteSuccessView(DeleteSpriteResponse response) {
+        // TODO: implement
+
     }
 }
 
