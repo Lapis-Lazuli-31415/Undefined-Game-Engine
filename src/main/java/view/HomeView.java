@@ -1,13 +1,29 @@
 package view;
-
+import entity.Property;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.*;
 
 import entity.GameObject;
+import entity.Scene;
 import entity.Transform;
+import entity.scripting.environment.Environment;
+import interface_adapter.preview.PreviewController;
+import interface_adapter.preview.PreviewState;
+import interface_adapter.preview.PreviewViewModel;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
+// ===== ADDED BY CHENG: Imports for preview functionality =====
+import entity.Scene;
+import entity.scripting.environment.Environment;
+import interface_adapter.preview.PreviewController;
+import interface_adapter.preview.PreviewViewModel;
+import interface_adapter.preview.PreviewState;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+// ===== END ADDED BY CHENG =====
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -32,9 +48,15 @@ public class HomeView extends javax.swing.JFrame {
     private GameObject demoObject;
     private TransformViewModel transformViewModel;
     private TransformController transformController;
+    // ===== ADDED BY CHENG: Preview system fields =====
+    private PreviewController previewController;
+    private PreviewViewModel previewViewModel;
+    private PreviewWindow currentPreview;  // Track current preview window
+// ===== END ADDED BY CHENG =====
 
     public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
+        initializePreviewSystem();  // ===== ADDED BY CHENG =====
     }
 
     public HomeView(interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
@@ -233,6 +255,9 @@ public class HomeView extends javax.swing.JFrame {
         stopButton.setFocusPainted(false);
         stopButton.setOpaque(true);
         stopButton.setBorderPainted(false);
+
+        playButton.addActionListener(e -> onPlayClicked());
+        stopButton.addActionListener(e -> onStopClicked());
 
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
@@ -455,6 +480,224 @@ public class HomeView extends javax.swing.JFrame {
     public interface_adapter.assets.AssetLibViewModel getAssetLibViewModel() {
         return assetLibViewModel;
     }
+    // ========== PREVIEW SYSTEM METHODS - ADDED BY CHENG ==========
+
+    /**
+     * Initialize the preview system
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * Sets up Clean Architecture components:
+     * - ViewModel (observable state)
+     * - Presenter (formats Use Case output)
+     * - Interactor (business logic)
+     * - Controller (receives View input)
+     */
+    private void initializePreviewSystem() {
+        // Create Use Case components
+        use_case.validate_scene.ValidateSceneInteractor validator =
+                new use_case.validate_scene.ValidateSceneInteractor();
+
+        // Create Interface Adapter components
+        previewViewModel = new PreviewViewModel();
+        interface_adapter.preview.PreviewPresenter presenter =
+                new interface_adapter.preview.PreviewPresenter(previewViewModel);
+
+        // Create Use Case Interactor
+        use_case.preview.PreviewInteractor interactor =
+                new use_case.preview.PreviewInteractor(validator, presenter);
+
+        // Create Controller
+        previewController = new PreviewController(interactor);
+
+        // Register this view as observer of ViewModel
+        previewViewModel.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if ("state".equals(evt.getPropertyName())) {
+                    handlePreviewStateChange((PreviewState) evt.getNewValue());
+                }
+            }
+        });
+
+        currentPreview = null;
+    }
+
+    /**
+     * Handle Play button click
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * Following Clean Architecture:
+     * 1. Get current scene (UI responsibility)
+     * 2. Delegate to Controller (Interface Adapter)
+     * 3. Controller → Interactor → Presenter → ViewModel
+     * 4. View observes ViewModel and updates UI
+     */
+    private void onPlayClicked() {
+        try {
+            // 1. Get current scene (UI responsibility)
+            Scene scene = getCurrentScene();
+
+            if (scene == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No scene is currently open.\nPlease open or create a scene first.",
+                        "Cannot Start Preview",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            // 2. Delegate to Controller (Clean Architecture flow starts here)
+            previewController.execute(scene);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to start preview: " + ex.getMessage(),
+                    "Preview Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    /**
+     * Handle Stop button click
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * Stops the game loop and closes the preview window
+     */
+    private void onStopClicked() {
+        if (currentPreview != null) {
+            // Stop the preview
+            currentPreview.close();
+            currentPreview = null;
+
+            System.out.println("⏹ Preview stopped");
+        } else {
+            System.out.println("No preview is running");
+        }
+    }
+
+    /**
+     * Handle preview state changes from ViewModel
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * This method is called when ViewModel updates (Observer pattern)
+     * Updates UI based on the new state
+     */
+    private void handlePreviewStateChange(PreviewState state) {
+        // Handle error
+        if (state.getError() != null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    state.getError(),
+                    "Cannot Start Preview",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // Handle warning
+        if (state.getWarning() != null) {
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    state.getWarning() + "\n\nContinue anyway?",
+                    "Preview Warning",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (choice != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        // Open preview if ready
+        if (state.isReadyToPreview() && state.getScene() != null) {
+            Environment globalEnv = createGlobalEnvironment();
+            currentPreview = new PreviewWindow(state.getScene(), globalEnv);
+            currentPreview.display();
+            System.out.println("✅ Preview started");
+        }
+    }
+
+    /**
+     * Get current scene from scene manager
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * TODO: Replace with actual SceneManager implementation when available
+     * Currently returns a test scene for development
+     */
+    private Scene getCurrentScene() {
+        // TODO: Replace with actual implementation
+        // Example: return sceneManager.getCurrentScene();
+
+        // For testing: create a test scene using Lynn's demoObject
+        return createTestScene();
+    }
+
+    /**
+     * Create global environment for triggers
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * The global environment stores variables that are shared across
+     * all GameObjects (e.g., game score, level, player health)
+     */
+    private Environment createGlobalEnvironment() {
+        Environment env = new Environment();
+
+        // Add initial global variables here if needed
+        // Example:
+        // try {
+        //     env.set("game", "score", Integer.class, 0);
+        //     env.set("game", "level", Integer.class, 1);
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+
+        return env;
+    }
+
+    /**
+     * Create test scene (temporary implementation)
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     *
+     * TODO: Remove this when getCurrentScene() is properly implemented
+     */
+    private Scene createTestScene() {
+        java.util.ArrayList<GameObject> objects = new java.util.ArrayList<>();
+
+        java.util.Vector<Double> position = new java.util.Vector<>();
+        position.add(400.0);  // x
+        position.add(300.0);  // y
+
+        java.util.Vector<Double> scale = new java.util.Vector<>();
+        scale.add(1.0);
+        scale.add(1.0);
+
+        Transform transform = new Transform(position, 0f, scale);
+
+        java.util.ArrayList<entity.Property> properties = new java.util.ArrayList<>();
+        GameObject testObject = new GameObject(
+                "test-1",
+                "TestObject",
+                true,
+                properties,
+                null
+        );
+        testObject.setTransform(transform);
+
+        objects.add(testObject);
+
+        return new Scene(
+                "demo-scene",
+                "Demo Scene",
+                objects,
+                null
+        );
+    }
+    // ========== END PREVIEW SYSTEM METHODS - ADDED BY CHENG ==========
 
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
