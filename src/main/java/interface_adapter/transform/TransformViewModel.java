@@ -9,7 +9,7 @@ import interface_adapter.ViewModel;
 public class TransformViewModel extends ViewModel<TransformState> {
 
     public TransformViewModel() {
-        super("use_case/transform");
+        super("Transform");
         this.state = new TransformState();
     }
 }

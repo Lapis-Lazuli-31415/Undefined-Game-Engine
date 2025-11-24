@@ -1,7 +1,5 @@
 package entity;
 
-import java.awt.*;
-
 public class SpriteRenderer extends Property {
 
     private Image sprite;
@@ -34,4 +32,11 @@ public class SpriteRenderer extends Property {
         this.visible = visiblity;
     }
 
+    public int getWidth() {
+        return this.sprite.getWidth();
+    }
+
+    public int getHeight() {
+        return this.sprite.getHeight();
+    }
 }
