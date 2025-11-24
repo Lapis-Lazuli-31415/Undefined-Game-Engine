@@ -668,6 +668,7 @@ public class HomeView extends javax.swing.JFrame {
     private Scene createTestScene() {
         java.util.ArrayList<GameObject> objects = new java.util.ArrayList<>();
 
+        // 1. Create Transform - position in center
         java.util.Vector<Double> position = new java.util.Vector<>();
         position.add(400.0);  // x
         position.add(300.0);  // y
@@ -678,6 +679,7 @@ public class HomeView extends javax.swing.JFrame {
 
         Transform transform = new Transform(position, 0f, scale);
 
+        // 2. Create GameObject
         java.util.ArrayList<entity.Property> properties = new java.util.ArrayList<>();
         GameObject testObject = new GameObject(
                 "test-1",
@@ -687,6 +689,12 @@ public class HomeView extends javax.swing.JFrame {
                 null
         );
         testObject.setTransform(transform);
+
+        // 3. Add OnClickEvent trigger so button mode will create a button
+        entity.scripting.event.OnClickEvent clickEvent = new entity.scripting.event.OnClickEvent();
+        entity.scripting.Trigger clickTrigger = new entity.scripting.Trigger(clickEvent);
+        clickTrigger.addAction(new entity.scripting.action.PrintAction("Object clicked!"));
+        testObject.getTriggerManager().getAllTriggers().add(clickTrigger);
 
         objects.add(testObject);
 

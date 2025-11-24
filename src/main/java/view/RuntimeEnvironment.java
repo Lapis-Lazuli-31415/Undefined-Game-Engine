@@ -163,6 +163,7 @@ public class RuntimeEnvironment {
      */
     private void initializeListeners() {
         System.out.println("Initializing event listeners...");
+        System.out.println("Mode: " + (canvas.isUsingButtonMode() ? "Button" : "Collision"));
 
         int keyListenerCount = 0;
         int clickListenerCount = 0;
@@ -177,20 +178,30 @@ public class RuntimeEnvironment {
                 Event event = trigger.getEvent();
                 EventListener listener = null;
 
-                // Use Factory to create appropriate listener
                 if (event instanceof OnKeyPressEvent) {
                     OnKeyPressEvent keyEvent = (OnKeyPressEvent) event;
                     listener = listenerFactory.createKeyPressListener(keyEvent);
                     keyListenerCount++;
-                    System.out.println("  ✓ Created KeyPressListener for key: " + keyEvent.getKey());
+                    System.out.println("  + Created KeyPressListener for key: " + keyEvent.getKey());
 
                 } else if (event instanceof OnClickEvent) {
-                    listener = listenerFactory.createCollisionClickListener(obj);
-                    clickListenerCount++;
-                    System.out.println("  ✓ Created ClickListener (collision mode) for: " + obj.getName());
+                    if (canvas.isUsingButtonMode()) {
+                        // Button mode - get listener from canvas
+                        listener = canvas.getClickListener(obj);
+                        if (listener != null) {
+                            clickListenerCount++;
+                            System.out.println("  + Retrieved ClickListener (button mode) for: " + obj.getName());
+                        } else {
+                            System.err.println("  - Failed to get ClickListener for: " + obj.getName());
+                        }
+                    } else {
+                        // Collision mode - create new listener
+                        listener = listenerFactory.createCollisionClickListener(obj);
+                        clickListenerCount++;
+                        System.out.println("  + Created ClickListener (collision mode) for: " + obj.getName());
+                    }
                 }
 
-                // Store listener
                 if (listener != null) {
                     listeners.put(trigger, listener);
                 }

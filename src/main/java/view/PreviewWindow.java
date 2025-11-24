@@ -38,7 +38,7 @@ public class PreviewWindow {
 
     private JLabel statusLabel;
     private JLabel sceneInfoLabel;
-
+    private JPanel objectButtonsPanel;  // Panel for object buttons in button mode
     /**
      * Create a PreviewWindow.
      *
@@ -121,9 +121,13 @@ public class PreviewWindow {
      */
     private JPanel createStatusPanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        panel.setLayout(new BorderLayout());
         panel.setBackground(new Color(60, 60, 60));
-        panel.setPreferredSize(new Dimension(900, 40));
+        panel.setPreferredSize(new Dimension(900, 70));
+
+        // Top row: status and mode toggle
+        JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topRow.setBackground(new Color(60, 60, 60));
 
         statusLabel = new JLabel("Running...");
         statusLabel.setForeground(Color.GREEN);
@@ -133,12 +137,99 @@ public class PreviewWindow {
         instructionLabel.setForeground(Color.LIGHT_GRAY);
         instructionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
 
-        panel.add(statusLabel);
-        panel.add(instructionLabel);
+        JButton toggleModeButton = new JButton("Mode: Collision");
+        toggleModeButton.addActionListener(e -> {
+            boolean newMode = !canvas.isUsingButtonMode();
+
+            if (runtime != null && runtime.isRunning()) {
+                runtime.stop();
+            }
+
+            canvas.setUseButtonMode(newMode);
+            canvas.setGameObjects(scene.getGameObjects());
+
+            // Update object buttons panel
+            updateObjectButtonsPanel();
+
+            runtime.start();
+
+            if (newMode) {
+                toggleModeButton.setText("Mode: Button");
+            } else {
+                toggleModeButton.setText("Mode: Collision");
+            }
+
+            System.out.println("Switched to: " + (newMode ? "Button Mode" : "Collision Mode"));
+        });
+
+        topRow.add(statusLabel);
+        topRow.add(instructionLabel);
+        topRow.add(toggleModeButton);
+
+        // Bottom row: object buttons (for button mode)
+        objectButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        objectButtonsPanel.setBackground(new Color(50, 50, 50));
+
+        panel.add(topRow, BorderLayout.NORTH);
+        panel.add(objectButtonsPanel, BorderLayout.CENTER);
 
         return panel;
     }
+    /**
+     * Update the object buttons panel based on current mode.
+     * Shows clickable object buttons only in Button Mode.
+     */
+    private void updateObjectButtonsPanel() {
+        objectButtonsPanel.removeAll();
 
+        if (canvas.isUsingButtonMode()) {
+            // Add a button for each object with OnClickEvent
+            for (GameObject obj : scene.getGameObjects()) {
+                if (!obj.isActive()) continue;
+
+                if (hasOnClickEvent(obj)) {
+                    JButton objButton = new JButton(obj.getName());
+                    objButton.addActionListener(e -> {
+                        // Get the click listener and trigger it
+                        entity.Eventlistener.ClickListener listener = canvas.getClickListener(obj);
+                        if (listener != null) {
+                            listener.notifyClicked();
+                            System.out.println("Button clicked: " + obj.getName());
+                        }
+                    });
+                    objectButtonsPanel.add(objButton);
+                }
+            }
+
+            if (objectButtonsPanel.getComponentCount() == 0) {
+                JLabel noObjectsLabel = new JLabel("No clickable objects");
+                noObjectsLabel.setForeground(Color.GRAY);
+                objectButtonsPanel.add(noObjectsLabel);
+            }
+        } else {
+            JLabel collisionLabel = new JLabel("Click objects in the scene above");
+            collisionLabel.setForeground(Color.GRAY);
+            objectButtonsPanel.add(collisionLabel);
+        }
+
+        objectButtonsPanel.revalidate();
+        objectButtonsPanel.repaint();
+    }
+
+    /**
+     * Check if GameObject has OnClickEvent trigger.
+     */
+    private boolean hasOnClickEvent(GameObject obj) {
+        entity.scripting.TriggerManager tm = obj.getTriggerManager();
+        if (tm == null) return false;
+
+        for (entity.scripting.Trigger trigger : tm.getAllTriggers()) {
+            if (trigger.getEvent() instanceof entity.scripting.event.OnClickEvent) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Update scene info display.
      */
@@ -192,7 +283,8 @@ public class PreviewWindow {
         } else {
             System.out.println("No background music");
         }
-
+        // Update object buttons panel
+        updateObjectButtonsPanel();
         System.out.println("=== Scene Loaded ===\n");
     }
 

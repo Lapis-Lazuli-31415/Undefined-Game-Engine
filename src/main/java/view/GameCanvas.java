@@ -81,11 +81,40 @@ public class GameCanvas extends JPanel {
     public void setGameObjects(ArrayList<GameObject> gameObjects) {
         this.gameObjects = gameObjects;
 
+        // Don't create UI buttons here anymore - they will be in the status panel
+        // Clear any existing buttons
+        for (JButton btn : uiButtons.values()) {
+            remove(btn);
+        }
+        uiButtons.clear();
+        clickListeners.clear();
+
+        // But still create click listeners for button mode
         if (useButtonMode) {
-            updateUIButtons();  // Button mode: create buttons
+            for (GameObject obj : gameObjects) {
+                if (!obj.isActive()) continue;
+                if (hasOnClickEvent(obj)) {
+                    createClickListener(obj);
+                }
+            }
         }
 
         repaint();
+    }
+
+    /**
+     * Create ClickListener for a GameObject (without creating UI button).
+     */
+    private void createClickListener(GameObject obj) {
+        String label = obj.getName();
+
+        ClickListener clickListener;
+        if (listenerFactory != null) {
+            clickListener = (ClickListener) listenerFactory.createButtonClickListener(label);
+        } else {
+            clickListener = new ClickListener(label);
+        }
+        clickListeners.put(obj, clickListener);
     }
 
     /**
@@ -420,5 +449,13 @@ public class GameCanvas extends JPanel {
         uiButtons.clear();
         clickListeners.clear();
         gameObjects.clear();
+    }
+    /**
+     * Check if using button mode.
+     *
+     * @return true if button mode, false if sprite/collision mode
+     */
+    public boolean isUsingButtonMode() {
+        return useButtonMode;
     }
 }
