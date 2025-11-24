@@ -13,10 +13,4 @@ public interface SpriteInputBoundary {
      * @param ImportSpriteRequest request containing the sprite file to be imported
      */
     void execute(ImportSpriteRequest request);
-
-    /**
-     * Executes the sprite deletion use case
-     * @param DeleteSpriteRequest request containing the sprite file to be deleted
-     */
-    void executeDelete(DeleteSpriteRequest request) throws IOException;
 }

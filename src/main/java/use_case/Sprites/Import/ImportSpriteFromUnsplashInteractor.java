@@ -97,11 +97,6 @@ public class ImportSpriteFromUnsplashInteractor implements SpriteInputBoundary {
         }
     }
 
-    @Override
-    public void executeDelete(DeleteSpriteRequest request) {
-        // TODO: implement
-    }
-
     /**
      * Determines the file name for the downloaded image.
      */

@@ -1,7 +1,6 @@
 package interface_adapter.Sprites;
 
 import interface_adapter.assets.AssetLibViewModel;
-import use_case.Sprites.Import.DeleteSpriteResponse;
 import use_case.Sprites.Import.ImportSpriteResponse;
 import use_case.Sprites.Import.SpriteOutputBoundary;
 
@@ -47,23 +46,5 @@ public class ImportSpritePresenter implements SpriteOutputBoundary {
         // Update the view model
         viewModel.setState(state);
         viewModel.firePropertyChanged();
-    }
-
-    @Override
-    public void prepareDeleteFailView(String errorMessage) {
-        ImportSpriteState state = viewModel.getState();
-        state.setSuccess(false);
-        state.setMessage(errorMessage);
-        viewModel.firePropertyChanged();
-    }
-
-    @Override
-    public void prepareDeleteSuccessView(DeleteSpriteResponse response) {
-        ImportSpriteState state = viewModel.getState();
-        state.setSuccess(true);
-        state.setMessage(response.message);
-        viewModel.firePropertyChanged();
-
-        assetLibViewModel.notifyAssetRemoved(response.deletedSprite);
     }
 }

@@ -16,16 +16,4 @@ public interface SpriteOutputBoundary {
      * @param errorMessage the error message to display
      */
     void prepareFailView(String errorMessage);
-
-    /**
-     * Prepares the failure view for the sprite deletion use case
-     * @param errorMessage the error message to display
-     */
-    void prepareDeleteFailView(String errorMessage);
-
-    /**
-     * Prepares the success view for the sprite deletion use case
-     * @param response the response model containing the result of the deletion operation
-     */
-    void prepareDeleteSuccessView(DeleteSpriteResponse response);
 }

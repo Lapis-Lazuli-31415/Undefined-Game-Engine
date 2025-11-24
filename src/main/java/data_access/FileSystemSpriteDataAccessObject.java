@@ -88,19 +88,6 @@ public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInt
         return uploadsDirectory;
     }
 
-    @Override
-    public void deleteSprite(File spriteFile) throws IOException {
-        Path targetPath = uploadsDirectory.resolve(spriteFile.getName());
-        Files.deleteIfExists(targetPath);
-    }
-
-    /**
-     * Gets all existing image files from the uploads directory.
-     * Supports .png, .jpg, and .jpeg extensions.
-     *
-     * @return a list of File objects representing all images in the uploads directory
-     * @throws IOException if an error occurs while reading the directory
-     */
     public java.util.List<File> getAllExistingImages() throws IOException {
         java.util.List<File> imageFiles = new java.util.ArrayList<>();
 

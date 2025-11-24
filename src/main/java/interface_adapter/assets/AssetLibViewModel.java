@@ -12,8 +12,6 @@ import java.beans.PropertyChangeSupport;
  */
 public class AssetLibViewModel {
     public static final String ASSET_ADDED = "assetAdded";
-    public static final String ASSET_REMOVED = "assetRemoved";
-
     private final AssetLib assetLib;
     private final PropertyChangeSupport support;
 
@@ -38,12 +36,6 @@ public class AssetLibViewModel {
     public void notifyAssetAdded(Asset asset) {
         support.firePropertyChange(ASSET_ADDED, null, asset);
     }
-
-    /**
-     * Notifies listeners that an asset was removed externally
-     * @param asset the asset that was removed
-     */
-    public void notifyAssetRemoved(Asset asset) { support.firePropertyChange(ASSET_REMOVED, null, asset); }
 
     /**
      * Gets the underlying AssetLib entity.

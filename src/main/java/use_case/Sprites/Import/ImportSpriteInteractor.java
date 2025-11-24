@@ -81,35 +81,6 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
         }
     }
 
-    @Override
-    public void executeDelete(DeleteSpriteRequest request) throws IOException {
-        if (!dataAccess.existsByName(request.spriteFile.getName())) {
-            outputBoundary.prepareFailView("Sprite does not exist.");
-            return;
-        }
-        // delete from data storage
-        dataAccess.deleteSprite(request.spriteFile);
-
-        // delete from asset lib
-        assetLib.remove(getFileId(request.spriteFile.getName()));
-
-        // prepare success response
-        DeleteSpriteResponse response = new DeleteSpriteResponse();
-        response.success = true;
-        response.message = "Sprite deleted successfully: " + request.spriteFile.getName();
-
-        outputBoundary.prepareDeleteSuccessView(response);
-    }
-
-    private UUID getFileId(String fileName) {
-        for (Asset asset : assetLib.getAll()) {
-            if (asset.getName().equals(fileName)) {
-                return asset.getId();
-            }
-        }
-        return null;
-    }
-
     private String getFileExtension(String fileName) {
         int lastDotIndex = fileName.lastIndexOf('.');
         if (lastDotIndex == -1) {

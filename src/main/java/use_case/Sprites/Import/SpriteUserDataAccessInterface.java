@@ -47,5 +47,4 @@ public interface SpriteUserDataAccessInterface {
      * deletes the specified sprite file from the uploads directory.
      * @param spriteFile
      */
-    void deleteSprite(File spriteFile) throws IOException;
 }
