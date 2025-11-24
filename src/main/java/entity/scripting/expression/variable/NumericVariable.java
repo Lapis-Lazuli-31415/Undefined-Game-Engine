@@ -5,8 +5,8 @@ import entity.scripting.error.EnvironmentException;
 import entity.scripting.expression.NumericExpression;
 
 public class NumericVariable extends NumericExpression implements Variable<Double> {
-    private String name;
-    private boolean isGlobal;
+    private final String name;
+    private final boolean isGlobal;
     private final static String VARIABLE_TYPE = "Numeric";
     private final static Class<Double> VALUE_TYPE = Double.class;
 
@@ -38,9 +38,9 @@ public class NumericVariable extends NumericExpression implements Variable<Doubl
     @Override
     public Double evaluate(Environment globalEnvironment, Environment localEnvironment) throws EnvironmentException {
         if (isGlobal){
-            return globalEnvironment.get(VARIABLE_TYPE, name, VALUE_TYPE);
+            return globalEnvironment.get(this);
         } else {
-            return localEnvironment.get(VARIABLE_TYPE, name, VALUE_TYPE);
+            return localEnvironment.get(this);
         }
     }
 }

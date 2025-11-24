@@ -1,20 +1,29 @@
 package entity.scripting.environment;
 
 import entity.scripting.error.EnvironmentException;
+import entity.scripting.expression.variable.Variable;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 
 public class Environment {
     private final Map<String, VariableMap<?>> variables;
 
     public Environment(){
-        variables = new HashMap<>();
+        variables = new TreeMap<>();
     }
 
-    <T> void set(String variableType, String name, Class<T> valueType, T value) throws EnvironmentException {
+    protected <T> void set(Variable<T> variable, T value) throws EnvironmentException {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+        Class<T> valueType = variable.getValueType();
+
         if (!valueType.isInstance(value)){
-            throw new EnvironmentException("Value " + value + " is not a type of " + valueType.getSimpleName());
+            throw new EnvironmentException(
+                    "Invalid value for variable " + name + ": expected type "
+                            + valueType.getSimpleName() + " but received "
+                            + value.getClass().getSimpleName()
+            );
         }
 
         if (!variables.containsKey(variableType)){
@@ -27,21 +36,59 @@ public class Environment {
         variableMap.set(name, value);
     }
 
-    public <T> T get(String variableType, String name, Class<T> valueType) throws EnvironmentException {
-        if (!variables.containsKey(variableType)){
-            throw new EnvironmentException("Environment does not contain type: " + variableType);
-        }
+    public <T> T get(Variable<T> variable) throws EnvironmentException {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+        Class<T> valueType = variable.getValueType();
 
+        if (!variables.containsKey(variableType)){
+            throw new EnvironmentException("Unknown/Empty variable category: " + variableType);
+        }
 
         VariableMap<?> variableMap = variables.get(variableType);
 
-        if (!valueType.isInstance(variableMap.get(name))){
+        if (!variableMap.contains(name)){
+            throw new EnvironmentException("Variable " + name + " not found in category " + variableType);
+        }
+
+        Object rawValue = variableMap.get(name);
+
+        if (!valueType.isInstance(rawValue)){
             throw new EnvironmentException(
-                    "Variable " + name + " does not refer to a type of " + valueType.getSimpleName());
+                    "Type mismatch for variable " + name + ": expected "
+                            + valueType.getSimpleName() + " but found "
+                            + rawValue.getClass().getSimpleName()
+            );
         }
 
         @SuppressWarnings("unchecked")
-        T value = (T) variableMap.get(name);
+        T value = (T) rawValue;
         return value;
+    }
+
+    public <T> void delete(Variable<T> variable) throws EnvironmentException {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+
+        if (!variables.containsKey(variableType)){
+            throw new EnvironmentException("Unknown/Empty variable category: " + variableType);
+        }
+
+        VariableMap<?> variableMap = variables.get(variableType);
+
+        variableMap.delete(name);
+    }
+
+    public <T> boolean contains(Variable<T> variable) {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+
+        if (!variables.containsKey(variableType)){
+            return false;
+        }
+
+        VariableMap<?> variableMap = variables.get(variableType);
+
+        return variableMap.contains(name);
     }
 }
