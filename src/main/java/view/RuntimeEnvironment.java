@@ -58,18 +58,41 @@ public class RuntimeEnvironment {
      * @param globalEnvironment The global environment for triggers
      * @param listenerFactory Factory for creating event listeners
      */
+//    public RuntimeEnvironment(Scene scene, GameCanvas canvas,
+//                              Environment globalEnvironment,
+//                              EventListenerFactory listenerFactory) {
+//        this.scene = scene;
+//        this.canvas = canvas;
+//        this.globalEnvironment = globalEnvironment;
+//        this.inputManager = listenerFactory != null
+//                ? new InputManager()
+//                : new InputManager(); // Create InputManager here
+//        this.listenerFactory = listenerFactory != null
+//                ? listenerFactory
+//                : new EventListenerFactory(this.inputManager); // Create factory if not provided
+//        this.listeners = new HashMap<>();
+//        this.running = false;
+//
+//        // Pass global environment to canvas
+//        canvas.setGlobalEnvironment(globalEnvironment);
+//
+//        System.out.println("RuntimeEnvironment created");
+//    }
     public RuntimeEnvironment(Scene scene, GameCanvas canvas,
                               Environment globalEnvironment,
                               EventListenerFactory listenerFactory) {
         this.scene = scene;
         this.canvas = canvas;
         this.globalEnvironment = globalEnvironment;
-        this.inputManager = listenerFactory != null
-                ? new InputManager()
-                : new InputManager(); // Create InputManager here
-        this.listenerFactory = listenerFactory != null
-                ? listenerFactory
-                : new EventListenerFactory(this.inputManager); // Create factory if not provided
+
+        if (listenerFactory != null) {
+            this.listenerFactory = listenerFactory;
+            this.inputManager = listenerFactory.getInputManager();
+        } else {
+            this.inputManager = new InputManager();
+            this.listenerFactory = new EventListenerFactory(this.inputManager);
+        }
+
         this.listeners = new HashMap<>();
         this.running = false;
 
@@ -110,8 +133,10 @@ public class RuntimeEnvironment {
         // 1. Initialize listeners using Factory
         initializeListeners();
 
-        // 2. Attach InputManager to canvas
+// 2. Attach InputManager to canvas (keyboard + mouse)
         canvas.addKeyListener(inputManager);
+        canvas.addMouseListener(inputManager.getMouseListener());
+        canvas.addMouseMotionListener(inputManager.getMouseListener());
         canvas.setFocusable(true);
         canvas.requestFocus();
 
@@ -160,15 +185,9 @@ public class RuntimeEnvironment {
                     System.out.println("  ✓ Created KeyPressListener for key: " + keyEvent.getKey());
 
                 } else if (event instanceof OnClickEvent) {
-                    // For click events, get listener from canvas
-                    // (Canvas manages the UI buttons and their click listeners)
-                    listener = canvas.getClickListener(obj);
-                    if (listener != null) {
-                        clickListenerCount++;
-                        System.out.println("  ✓ Retrieved ClickListener for: " + obj.getName());
-                    } else {
-                        System.err.println("  ✗ Failed to get ClickListener for: " + obj.getName());
-                    }
+                    listener = listenerFactory.createCollisionClickListener(obj);
+                    clickListenerCount++;
+                    System.out.println("  ✓ Created ClickListener (collision mode) for: " + obj.getName());
                 }
 
                 // Store listener
@@ -306,8 +325,10 @@ public class RuntimeEnvironment {
             gameLoopTimer.stop();
         }
 
-        // Remove input manager from canvas
+        // Remove input manager from canvas (keyboard + mouse)
         canvas.removeKeyListener(inputManager);
+        canvas.removeMouseListener(inputManager.getMouseListener());
+        canvas.removeMouseMotionListener(inputManager.getMouseListener());
 
         // Reset input state
         inputManager.reset();

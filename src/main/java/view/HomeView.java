@@ -1,5 +1,5 @@
 package view;
-
+import entity.Property;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -255,6 +255,9 @@ public class HomeView extends javax.swing.JFrame {
         stopButton.setFocusPainted(false);
         stopButton.setOpaque(true);
         stopButton.setBorderPainted(false);
+
+        playButton.addActionListener(e -> onPlayClicked());
+        stopButton.addActionListener(e -> onStopClicked());
 
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
@@ -665,18 +668,35 @@ public class HomeView extends javax.swing.JFrame {
     private Scene createTestScene() {
         java.util.ArrayList<GameObject> objects = new java.util.ArrayList<>();
 
-        if (demoObject != null) {
-            objects.add(demoObject);
-        }
+        java.util.Vector<Double> position = new java.util.Vector<>();
+        position.add(400.0);  // x
+        position.add(300.0);  // y
+
+        java.util.Vector<Double> scale = new java.util.Vector<>();
+        scale.add(1.0);
+        scale.add(1.0);
+
+        Transform transform = new Transform(position, 0f, scale);
+
+        java.util.ArrayList<entity.Property> properties = new java.util.ArrayList<>();
+        GameObject testObject = new GameObject(
+                "test-1",
+                "TestObject",
+                true,
+                properties,
+                null
+        );
+        testObject.setTransform(transform);
+
+        objects.add(testObject);
 
         return new Scene(
-                "demo-scene",      // Scene ID
-                "Demo Scene",      // Scene name
-                objects,           // GameObjects list
-                null               // Background music (null will trigger warning)
+                "demo-scene",
+                "Demo Scene",
+                objects,
+                null
         );
     }
-
     // ========== END PREVIEW SYSTEM METHODS - ADDED BY CHENG ==========
 
     public static void main(String[] args) {

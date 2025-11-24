@@ -125,7 +125,7 @@ public class PreviewWindow {
         panel.setBackground(new Color(60, 60, 60));
         panel.setPreferredSize(new Dimension(900, 40));
 
-        statusLabel = new JLabel("▶ Running...");
+        statusLabel = new JLabel("Running...");
         statusLabel.setForeground(Color.GREEN);
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
@@ -149,7 +149,7 @@ public class PreviewWindow {
         int triggerCount = countTotalTriggers();
 
         String info = String.format(
-                "📋 Scene: %s | 🎮 Objects: %d (%d active) | ⚡ Triggers: %d",
+                "Scene: %s | Objects: %d (%d active) | Triggers: %d",
                 scene.getName(), objectCount, activeCount, triggerCount
         );
 

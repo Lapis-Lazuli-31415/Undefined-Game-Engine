@@ -24,4 +24,8 @@ public class Image extends Asset {
     protected int getHeight() {
         return height;
     }
+
+    public BufferedImage getBufferedImage() {
+        return image;
+    }
 }
