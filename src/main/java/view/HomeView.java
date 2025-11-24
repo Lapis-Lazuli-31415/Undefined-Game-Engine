@@ -96,6 +96,7 @@ public class HomeView extends javax.swing.JFrame {
         audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
         audioContent.setBackground(new Color(70, 70, 70));
 
+
         JScrollPane audioScroll = new JScrollPane(audioContent);
         audioScroll.setPreferredSize(new Dimension(180, 140));
 
@@ -146,8 +147,7 @@ public class HomeView extends javax.swing.JFrame {
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
 
-        tabBar.add(tabLabel, BorderLayout.WEST);
-        tabBar.add(addTabButton, BorderLayout.CENTER);
+
         tabBar.add(rightTabControls, BorderLayout.EAST);
 
         // Center content
@@ -165,6 +165,8 @@ public class HomeView extends javax.swing.JFrame {
 
         openFolderPanel.add(Box.createVerticalGlue());
         openFolderPanel.add(folderIcon);
+
+        
         openFolderPanel.add(Box.createVerticalStrut(20));
         openFolderPanel.add(openFolderLabel);
         openFolderPanel.add(Box.createVerticalGlue());
