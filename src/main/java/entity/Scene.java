@@ -8,17 +8,15 @@ public class Scene {
     private final UUID id;
     private final String name;
     private ArrayList<GameObject> gameObjects;
-    private Music backgroundMusic;
 
-    public Scene(UUID id, String name, ArrayList<GameObject> gameObjects, Music backgroundMusic) {
+    public Scene(UUID id, String name, ArrayList<GameObject> gameObjects) {
         this.id = id;
         this.name = name;
         this.gameObjects = gameObjects;
-        this.backgroundMusic = backgroundMusic;
     }
 
     public static Scene create(String name) {
-        return new Scene(UUID.randomUUID(), name, new ArrayList<>(), new Music());
+        return new Scene(UUID.randomUUID(), name, new ArrayList<>());
     }
 
     public UUID getId() {
