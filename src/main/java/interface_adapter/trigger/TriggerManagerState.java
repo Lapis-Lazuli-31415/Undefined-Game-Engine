@@ -58,6 +58,30 @@ public class TriggerManagerState {
         return triggers.get(index).getConditions();
     }
 
+    public void addTriggerCondition(int index, String condition){
+        triggers.get(index).addCondition(condition);
+    }
+
+    public String getTriggerCondition(int triggerIndex, int conditionIndex){
+        return triggers.get(triggerIndex).getCondition(conditionIndex);
+    }
+
+    public void deleteTriggerCondition(int triggerIndex, int conditionIndex){
+        triggers.get(triggerIndex).deleteCondition(conditionIndex);
+    }
+
+    public void addTriggerAction(int index, String action){
+        triggers.get(index).addAction(action);
+    }
+
+    public String getTriggerAction(int triggerIndex, int actionIndex){
+        return triggers.get(triggerIndex).getAction(actionIndex);
+    }
+
+    public void deleteTriggerAction(int triggerIndex, int actionIndex){
+        triggers.get(triggerIndex).deleteAction(actionIndex);
+    }
+
     public List<String> getTriggerActions(int index){
         return triggers.get(index).getActions();
     }
@@ -116,12 +140,36 @@ public class TriggerManagerState {
             this.conditions = conditions;
         }
 
+        public void addCondition(String condition) {
+            conditions.add(condition);
+        }
+
+        public String getCondition(int index) {
+            return conditions.get(index);
+        }
+
+        public void deleteCondition(int index) {
+            conditions.remove(index);
+        }
+
         public List<String> getActions() {
             return actions;
         }
 
         public void setActions(List<String> actions) {
             this.actions = actions;
+        }
+
+        public void addAction(String action) {
+            actions.add(action);
+        }
+
+        public String getAction(int index) {
+            return actions.get(index);
+        }
+
+        public void deleteAction(int index) {
+            actions.remove(index);
         }
     }
 }
