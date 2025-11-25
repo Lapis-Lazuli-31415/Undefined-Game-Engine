@@ -2,6 +2,7 @@ package interface_adapter.trigger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TriggerManagerState {
     private final List<TriggerState> triggers;
@@ -10,8 +11,9 @@ public class TriggerManagerState {
         triggers = new ArrayList<>();
     }
 
-    public void addTrigger(String event, List<String> conditions, List<String> actions) {
-        TriggerState triggerState = new TriggerState(event, conditions, actions);
+    public void addTrigger(String event, Map<String, String> eventParameters,
+                           List<String> conditions, List<String> actions) {
+        TriggerState triggerState = new TriggerState(event, eventParameters, conditions, actions);
         triggers.add(triggerState);
     }
 
@@ -21,6 +23,30 @@ public class TriggerManagerState {
 
     public String getTriggerEvent(int index){
         return triggers.get(index).getEvent();
+    }
+
+    public void setTriggerEvent(int index, String event){
+        triggers.get(index).setEvent(event);
+    }
+
+    public Map<String, String> getTriggerEventParameters(int index){
+        return triggers.get(index).getEventParameters();
+    }
+
+    public void setTriggerEventParameters(int index, Map<String, String> eventParameters){
+        triggers.get(index).setEventParameters(eventParameters);
+    }
+
+    public void addTriggerEventParameters(int index, String key, String value){
+        triggers.get(index).addEventParameter(key, value);
+    }
+
+    public void deleteTriggerEventParameters(int index, String key){
+        triggers.get(index).deleteEventParameter(key);
+    }
+
+    public void clearTriggerEventParameters(int index){
+        triggers.get(index).clearEventParameters();
     }
 
     public List<String> getTriggerConditions(int index){
@@ -33,11 +59,16 @@ public class TriggerManagerState {
 
     private static class TriggerState {
         private String event;
+        private Map<String, String> eventParameters;
         private List<String> conditions;
         private List<String> actions;
 
-        public TriggerState(String event, List<String> conditions, List<String> action) {
+        public TriggerState(String event, Map<String, String> eventParameters,
+                            List<String> conditions, List<String> action) {
             this.event = event;
+            this.eventParameters = eventParameters;
+            this.conditions = conditions;
+            this.actions = action;
         }
 
         public String getEvent() {
@@ -46,6 +77,26 @@ public class TriggerManagerState {
 
         public void setEvent(String event) {
             this.event = event;
+        }
+
+        public Map<String, String> getEventParameters() {
+            return eventParameters;
+        }
+
+        public void setEventParameters(Map<String, String> eventParameters) {
+            this.eventParameters = eventParameters;
+        }
+
+        public void addEventParameter(String key, String value) {
+            eventParameters.put(key, value);
+        }
+
+        public void deleteEventParameter(String key) {
+            eventParameters.remove(key);
+        }
+
+        public void clearEventParameters() {
+            eventParameters.clear();
         }
 
         public List<String> getConditions() {

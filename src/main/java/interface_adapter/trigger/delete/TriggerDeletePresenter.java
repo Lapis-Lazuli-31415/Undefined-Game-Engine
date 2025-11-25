@@ -13,7 +13,7 @@ public class TriggerDeletePresenter implements TriggerDeleteOutputBoundary {
     }
 
     @Override
-    public void prepareView(TriggerDeleteOutputData outputData) {
+    public void prepareSuccessView(TriggerDeleteOutputData outputData) {
         TriggerManagerState state = triggerManagerViewModel.getState();
 
         state.deleteTrigger(outputData.getIndex());

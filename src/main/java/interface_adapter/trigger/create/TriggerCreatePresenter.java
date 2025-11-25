@@ -12,10 +12,11 @@ public class TriggerCreatePresenter implements TriggerCreateOutputBoundary {
         this.triggerManagerViewModel = triggerManagerViewModel;
     }
 
-    public void prepareView(TriggerCreateOutputData outputData) {
+    public void prepareSuccessView(TriggerCreateOutputData outputData) {
         TriggerManagerState state = triggerManagerViewModel.getState();
 
-        state.addTrigger(outputData.getEvent(), outputData.getConditions(), outputData.getActions());
+        state.addTrigger(outputData.getEvent(), outputData.getEventParameters(),
+                outputData.getConditions(), outputData.getActions());
 
         triggerManagerViewModel.firePropertyChange();
     }

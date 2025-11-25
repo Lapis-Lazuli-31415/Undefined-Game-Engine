@@ -1,23 +1,22 @@
 package entity.scripting.event;
 
-public class OnKeyPressEvent extends Event{
-    private static final String EVENT_TYPE = "On Key Press";
-    private String key;
+import java.util.List;
 
-    public OnKeyPressEvent(String key) {
-        super("On Key Press");
-        this.key = key;
+public class OnKeyPressEvent extends Event{
+    public static final String EVENT_TYPE = "On Key Press";
+
+    public OnKeyPressEvent() {
+        super(EVENT_TYPE);
     }
 
     public static String getEventType() {
         return EVENT_TYPE;
     }
 
-    public String getKey() {
-        return key;
-    }
+    @Override
+    public boolean isRequiredParameter(String key){
+        final List<String> REQUIRED_PARAMS = List.of("key");
 
-    public void setKey(String key) {
-        this.key = key;
+        return REQUIRED_PARAMS.contains(key);
     }
 }

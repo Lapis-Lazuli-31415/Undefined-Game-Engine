@@ -25,6 +25,10 @@ public class Trigger {
         return event;
     }
 
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
     public List<Condition> getConditions() {
         return conditions;
     }

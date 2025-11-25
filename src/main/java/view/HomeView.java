@@ -29,9 +29,14 @@ public class HomeView extends javax.swing.JFrame {
 
     // Demo wiring
     private ScenePanel scenePanel;
-    private GameObject demoObject;
+    private static GameObject DEMO_OBJECT;
     private TransformViewModel transformViewModel;
     private TransformController transformController;
+
+    // TODO: Delete this after gameObject selection is implemented
+    public static GameObject getDemoGameObject() {
+        return DEMO_OBJECT;
+    }
 
     public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
@@ -278,20 +283,20 @@ public class HomeView extends javax.swing.JFrame {
 
         Transform transform = new Transform(pos, 0f, scale);
 
-        demoObject = new GameObject(
+        DEMO_OBJECT = new GameObject(
                 "demo-1",
                 "Demo Sprite",
                 true,
                 new java.util.ArrayList<>(),
                 null
         );
-        demoObject.setTransform(transform);
+        DEMO_OBJECT.setTransform(transform);
 
         // Create view model
         transformViewModel = new TransformViewModel();
 
         // Use app-layer factory to wire up use case
-        transformController = TransformUseCaseFactory.create(demoObject, transformViewModel);
+        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
         // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);
