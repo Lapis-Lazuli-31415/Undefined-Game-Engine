@@ -1,11 +1,12 @@
 package entity.scripting.event;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class DefaultEventFactory implements EventFactory{
-    private final Map<String, Supplier<Event>> registry = new HashMap<>();
+    private final Map<String, Supplier<Event>> registry = new LinkedHashMap<>();
 
     public DefaultEventFactory() {
         registry.put(EmptyEvent.EVENT_TYPE, EmptyEvent::new);
@@ -23,7 +24,7 @@ public class DefaultEventFactory implements EventFactory{
     }
 
     @Override
-    public String[] getRegisteredEvents() {
-        return registry.keySet().toArray(new String[0]);
+    public List<String> getRegisteredEvents() {
+        return List.copyOf(registry.keySet());
     }
 }

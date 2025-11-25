@@ -1,7 +1,10 @@
 package entity.scripting.event;
 
+import java.util.List;
+
 public class OnClickEvent extends Event{
     public static final String EVENT_TYPE = "On Click";
+    public static final List<String> REQUIRED_PARAMETERS = List.of();
 
     public OnClickEvent() {
         super(EVENT_TYPE);
@@ -14,5 +17,10 @@ public class OnClickEvent extends Event{
     @Override
     public boolean isRequiredParameter(String key){
         return false;
+    }
+
+    @Override
+    public List<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 }

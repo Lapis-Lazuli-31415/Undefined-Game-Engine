@@ -26,7 +26,7 @@ public class EventChangeInteractor implements EventChangeInputBoundary {
         Event event = eventFactory.create(inputData.getEvent());
         trigger.setEvent(event);
 
-        EventChangeOutputData outputData = new EventChangeOutputData(index, event.getEventLabel());
+        EventChangeOutputData outputData = new EventChangeOutputData(index, inputData.getEvent());
         eventChangePresenter.prepareSuccessView(outputData);
     }
 }

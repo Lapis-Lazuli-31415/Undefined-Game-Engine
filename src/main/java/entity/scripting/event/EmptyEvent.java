@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class EmptyEvent extends Event{
     public static final String EVENT_TYPE = "Empty";
+    public static final List<String> REQUIRED_PARAMETERS = List.of();
 
     public EmptyEvent() {
         super(EVENT_TYPE);
@@ -18,5 +19,10 @@ public class EmptyEvent extends Event{
     @Override
     public boolean isRequiredParameter(String key) {
         return false;
+    }
+
+    @Override
+    public List<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 }

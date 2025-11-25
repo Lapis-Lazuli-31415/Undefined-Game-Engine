@@ -8,7 +8,7 @@ import view.HomeView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TriggerCreateInteractor implements TriggerCreateInputBoundary{
+public class TriggerCreateInteractor implements ConditionCreateInputBoundary {
     private final TriggerCreateOutputBoundary triggerCreatePresenter;
 
     public TriggerCreateInteractor(TriggerCreateOutputBoundary triggerCreatePresenter){
@@ -23,7 +23,7 @@ public class TriggerCreateInteractor implements TriggerCreateInputBoundary{
         Trigger trigger = new Trigger(new EmptyEvent(), true);
         gameObject.getTriggerManager().addTrigger(trigger);
 
-        TriggerCreateOutputData outputData = new TriggerCreateOutputData(EmptyEvent.getEventType(),
+        TriggerCreateOutputData outputData = new TriggerCreateOutputData(EmptyEvent.EVENT_TYPE,
                 new HashMap<>(), new ArrayList<>(), new ArrayList<>());
         triggerCreatePresenter.prepareSuccessView(outputData);
 

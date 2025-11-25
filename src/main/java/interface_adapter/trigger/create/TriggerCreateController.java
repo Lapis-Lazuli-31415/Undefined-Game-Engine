@@ -1,11 +1,11 @@
 package interface_adapter.trigger.create;
 
-import use_case.trigger.create.TriggerCreateInputBoundary;
+import use_case.trigger.create.ConditionCreateInputBoundary;
 
 public class TriggerCreateController {
-    private final TriggerCreateInputBoundary triggerCreateInteractor;
+    private final ConditionCreateInputBoundary triggerCreateInteractor;
 
-    public TriggerCreateController(TriggerCreateInputBoundary triggerCreateInteractor) {
+    public TriggerCreateController(ConditionCreateInputBoundary triggerCreateInteractor) {
         this.triggerCreateInteractor = triggerCreateInteractor;
     }
 

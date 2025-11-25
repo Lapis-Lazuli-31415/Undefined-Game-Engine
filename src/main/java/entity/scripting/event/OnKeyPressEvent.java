@@ -1,9 +1,11 @@
 package entity.scripting.event;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class OnKeyPressEvent extends Event{
     public static final String EVENT_TYPE = "On Key Press";
+    public static final List<String> REQUIRED_PARAMETERS = List.of("key");
 
     public OnKeyPressEvent() {
         super(EVENT_TYPE);
@@ -15,8 +17,11 @@ public class OnKeyPressEvent extends Event{
 
     @Override
     public boolean isRequiredParameter(String key){
-        final List<String> REQUIRED_PARAMS = List.of("key");
+        return REQUIRED_PARAMETERS.contains(key);
+    }
 
-        return REQUIRED_PARAMS.contains(key);
+    @Override
+    public List<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 }

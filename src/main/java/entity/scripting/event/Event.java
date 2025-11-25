@@ -1,6 +1,7 @@
 package entity.scripting.event;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,6 +33,8 @@ public abstract class Event {
     }
 
     public abstract boolean isRequiredParameter(String key);
+
+    public abstract List<String> getRequiredParameters();
 
     public String getEventLabel(){
         return eventLabel;
