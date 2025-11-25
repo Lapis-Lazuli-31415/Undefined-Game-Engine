@@ -7,7 +7,21 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ImportSpriteFromUnsplashInteractor {
 
     @Test
-    void testImportSpriteFromUnsplash() {
-        assert(true);
+    void successTest() {
     }
+
+    @Test
+    void noImagesFoundTest() {
+    }
+
+    @Test
+    void invalidImageIdTest() {
+
+    }
+
+    @Test
+    void duplicateNameTest() {
+
+    }
+
 }
