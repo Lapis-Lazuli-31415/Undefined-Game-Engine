@@ -9,9 +9,11 @@ import view.HomeView;
 public class ConditionChangeInteractor implements ConditionChangeInputBoundary {
 
     private final ConditionChangeOutputBoundary conditionChangePresenter;
+    private final ConditionFactory conditionFactory;
 
-    public ConditionChangeInteractor(ConditionChangeOutputBoundary presenter) {
+    public ConditionChangeInteractor(ConditionChangeOutputBoundary presenter, ConditionFactory presenterFactory) {
         this.conditionChangePresenter = presenter;
+        this.conditionFactory = presenterFactory;
     }
 
     @Override
@@ -22,7 +24,6 @@ public class ConditionChangeInteractor implements ConditionChangeInputBoundary {
         int triggerIndex = inputData.getTriggerIndex();
         int conditionIndex = inputData.getConditionIndex();
 
-        ConditionFactory conditionFactory = new DefaultConditionFactory();
         Condition condition = conditionFactory.create(inputData.getCondition());
 
         gameObject.getTriggerManager().getTrigger(triggerIndex).setCondition(conditionIndex, condition);

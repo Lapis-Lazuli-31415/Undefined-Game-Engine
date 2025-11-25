@@ -1,5 +1,7 @@
 package use_case.trigger.create;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +17,13 @@ public class TriggerCreateOutputData {
         this.eventParameters = eventParameters;
         this.conditions = conditions;
         this.actions = actions;
+    }
+
+    public TriggerCreateOutputData(String event){
+        this.event = event;
+        this.eventParameters = new HashMap<>();
+        this.conditions = new ArrayList<>();
+        this.actions = new ArrayList<>();
     }
 
     public String getEvent() {

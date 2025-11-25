@@ -10,9 +10,11 @@ import view.HomeView;
 
 public class EventChangeInteractor implements EventChangeInputBoundary {
     private final EventChangeOutputBoundary eventChangePresenter;
+    private final EventFactory eventFactory;
 
-    public EventChangeInteractor(EventChangeOutputBoundary eventChangePresenter){
+    public EventChangeInteractor(EventChangeOutputBoundary eventChangePresenter, EventFactory eventFactory) {
         this.eventChangePresenter = eventChangePresenter;
+        this.eventFactory = eventFactory;
     }
 
     @Override
@@ -22,7 +24,7 @@ public class EventChangeInteractor implements EventChangeInputBoundary {
 
         int index = inputData.getIndex();
         Trigger trigger = gameObject.getTriggerManager().getTrigger(index);
-        EventFactory eventFactory = new DefaultEventFactory();
+
         Event event = eventFactory.create(inputData.getEvent());
         trigger.setEvent(event);
 
