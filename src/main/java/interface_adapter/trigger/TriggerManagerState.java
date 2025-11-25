@@ -3,6 +3,7 @@ package interface_adapter.trigger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class TriggerManagerState {
     private final List<TriggerState> triggers;
@@ -37,12 +38,16 @@ public class TriggerManagerState {
         triggers.get(index).setEventParameters(eventParameters);
     }
 
-    public void addTriggerEventParameters(int index, String key, String value){
+    public void addTriggerEventParameter(int index, String key, String value){
         triggers.get(index).addEventParameter(key, value);
     }
 
-    public void deleteTriggerEventParameters(int index, String key){
+    public void deleteTriggerEventParameter(int index, String key){
         triggers.get(index).deleteEventParameter(key);
+    }
+
+    public String getTriggerEventParameter(int index, String key){
+        return Objects.requireNonNullElse(triggers.get(index).getEventParameters().get(key), "");
     }
 
     public void clearTriggerEventParameters(int index){
@@ -93,6 +98,10 @@ public class TriggerManagerState {
 
         public void deleteEventParameter(String key) {
             eventParameters.remove(key);
+        }
+
+        public String getEventParameter(String key) {
+            return eventParameters.get(key);
         }
 
         public void clearEventParameters() {

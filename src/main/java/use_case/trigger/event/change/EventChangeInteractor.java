@@ -1,16 +1,12 @@
 package use_case.trigger.event.change;
 
 import entity.GameObject;
-import entity.Property;
 import entity.scripting.Trigger;
-import entity.scripting.environment.Environment;
 import entity.scripting.event.DefaultEventFactory;
 import entity.scripting.event.Event;
 import entity.scripting.event.EventFactory;
-import use_case.trigger.delete.TriggerDeleteOutputData;
 import view.HomeView;
 
-import java.util.ArrayList;
 
 public class EventChangeInteractor implements EventChangeInputBoundary {
     private final EventChangeOutputBoundary eventChangePresenter;
