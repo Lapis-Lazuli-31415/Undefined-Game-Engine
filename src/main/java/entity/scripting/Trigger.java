@@ -41,8 +41,16 @@ public class Trigger {
         conditions.add(condition);
     }
 
+    public void setCondition(int index, Condition condition) {
+        conditions.set(index, condition);
+    }
+
     public void addAction(Action action) {
         actions.add(action);
+    }
+
+    public void setAction(int index, Action action) {
+        actions.set(index, action);
     }
 
     public void deleteCondition(Condition condition) {

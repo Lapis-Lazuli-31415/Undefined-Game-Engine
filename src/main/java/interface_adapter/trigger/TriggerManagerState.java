@@ -62,6 +62,10 @@ public class TriggerManagerState {
         triggers.get(index).addCondition(condition);
     }
 
+    public void setTriggerCondition(int triggerIndex, int conditionIndex, String condition){
+        triggers.get(triggerIndex).setCondition(conditionIndex, condition);
+    }
+
     public String getTriggerCondition(int triggerIndex, int conditionIndex){
         return triggers.get(triggerIndex).getCondition(conditionIndex);
     }
@@ -72,6 +76,10 @@ public class TriggerManagerState {
 
     public void addTriggerAction(int index, String action){
         triggers.get(index).addAction(action);
+    }
+
+    public void setTriggerAction(int triggerIndex, int actionIndex, String action){
+        triggers.get(triggerIndex).setAction(actionIndex, action);
     }
 
     public String getTriggerAction(int triggerIndex, int actionIndex){
@@ -144,6 +152,10 @@ public class TriggerManagerState {
             conditions.add(condition);
         }
 
+        public void setCondition(int index, String condition) {
+            conditions.set(index, condition);
+        }
+
         public String getCondition(int index) {
             return conditions.get(index);
         }
@@ -162,6 +174,10 @@ public class TriggerManagerState {
 
         public void addAction(String action) {
             actions.add(action);
+        }
+
+        public void setAction(int index, String action) {
+            actions.set(index, action);
         }
 
         public String getAction(int index) {
