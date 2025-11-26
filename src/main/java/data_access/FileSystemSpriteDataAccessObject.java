@@ -1,6 +1,6 @@
 package data_access;
 
-import use_case.Sprites.SpriteUserDataAccessInterface;
+import use_case.Sprites.Import.SpriteUserDataAccessInterface;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,6 +86,27 @@ public class FileSystemSpriteDataAccessObject implements SpriteUserDataAccessInt
 
     public Path getUploadsDirectory() {
         return uploadsDirectory;
+    }
+
+    public java.util.List<File> getAllExistingImages() throws IOException {
+        java.util.List<File> imageFiles = new java.util.ArrayList<>();
+
+        if (!Files.exists(uploadsDirectory)) {
+            return imageFiles; // Return empty list if directory doesn't exist
+        }
+
+        try (java.util.stream.Stream<Path> paths = Files.list(uploadsDirectory)) {
+            paths.filter(Files::isRegularFile)
+                    .filter(path -> {
+                        String fileName = path.getFileName().toString().toLowerCase();
+                        return fileName.endsWith(".png") ||
+                                fileName.endsWith(".jpg") ||
+                                fileName.endsWith(".jpeg");
+                    })
+                    .forEach(path -> imageFiles.add(path.toFile()));
+        }
+
+        return imageFiles;
     }
 }
 

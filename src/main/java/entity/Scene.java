@@ -19,24 +19,13 @@ public class Scene {
     public String getId() {
         return id;
     }
-    // Add these methods to Scene.java
 
-    /**
-     * Get all GameObjects in the scene
-     *
-     * @return List of GameObjects
-     */
-    public ArrayList<GameObject> getGameObjects() {
-        return new ArrayList<>(gameObjects);
-    }
-
-    /**
-     * Get scene name
-     *
-     * @return Scene name
-     */
     public String getName() {
         return name;
+    }
+
+    public ArrayList<GameObject> getGameObjects() {
+        return gameObjects;
     }
 
     /**
@@ -62,4 +51,5 @@ public class Scene {
     public Music getBackgroundMusic() { return backgroundMusic;
 
     }
+}
 }

@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Image extends Asset {
     private final int width;
@@ -15,6 +16,12 @@ public class Image extends Asset {
         this.image = ImageIO.read(imagePath.toFile());
         this.width = image != null ? image.getWidth() : 0;
         this.height = image != null ? image.getHeight() : 0;
+    }
+  
+ 
+    @ JsonIgnore // #TODO: IGNORE FOR NOW!! wait till misa does image
+    public BufferedImage getBufferedImage() {
+        return bimg;
     }
 
     protected int getWidth() {

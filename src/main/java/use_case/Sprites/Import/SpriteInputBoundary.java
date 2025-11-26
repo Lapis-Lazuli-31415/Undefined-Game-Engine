@@ -1,4 +1,6 @@
-package use_case.Sprites;
+package use_case.Sprites.Import;
+
+import java.io.IOException;
 
 /**
  * Input Boundary for actions related to importing and managing sprites.
