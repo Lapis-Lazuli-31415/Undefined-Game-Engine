@@ -1,19 +1,17 @@
 package use_case.Sprites.Import;
 
-import entity.Asset;
-import entity.AssetLib;
-import entity.Image;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+
+import entity.AssetLib;
+import entity.Image;
 
 public class ImportSpriteInteractor implements SpriteInputBoundary {
 
-    private static final long MAX_FILE_SIZE = 250L * 1024 * 1024; // 250 MB
+    private static final long MAX_FILE_SIZE = 250L * 1024 * 1024;
     private static final List<String> VALID_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg");
 
     private final SpriteUserDataAccessInterface dataAccess;
@@ -30,7 +28,7 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
 
     @Override
     public void execute(ImportSpriteRequest request) {
-        File spriteFile = request.spriteFile;
+        final File spriteFile = request.spriteFile;
 
         // 1. validate the existence of the selected file
         if (spriteFile == null || !spriteFile.exists()) {
@@ -39,8 +37,8 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
         }
 
         // 2. validate file type using extension
-        String fileName = spriteFile.getName();
-        String extension = getFileExtension(fileName);
+        final String fileName = spriteFile.getName();
+        final String extension = getFileExtension(fileName);
         if (!isValidExtension(extension)) {
             outputBoundary.prepareFailView("Invalid file extension. Supported formats are: " + VALID_EXTENSIONS);
             return;
@@ -60,29 +58,30 @@ public class ImportSpriteInteractor implements SpriteInputBoundary {
 
         try {
             // 5. save to uploads directory
-            Path savedPath = dataAccess.saveSprite(spriteFile, fileName);
+            final Path savedPath = dataAccess.saveSprite(spriteFile, fileName);
 
             // 6. create new Image entity
-            Image importedImage = new Image(savedPath);
+            final Image importedImage = new Image(savedPath);
 
             // 7. add sprite to asset library
             assetLib.add(importedImage);
 
             // 8. prepare and return success response
-            ImportSpriteResponse response = new ImportSpriteResponse();
+            final ImportSpriteResponse response = new ImportSpriteResponse();
             response.success = true;
             response.message = "Sprite imported successfully: " + fileName;
             response.importedSprite = importedImage;
 
             outputBoundary.prepareSuccessView(response);
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             outputBoundary.prepareFailView("Failed to import sprite: " + e.getMessage());
         }
     }
 
     private String getFileExtension(String fileName) {
-        int lastDotIndex = fileName.lastIndexOf('.');
+        final int lastDotIndex = fileName.lastIndexOf('.');
         if (lastDotIndex == -1) {
             return "";
         }
