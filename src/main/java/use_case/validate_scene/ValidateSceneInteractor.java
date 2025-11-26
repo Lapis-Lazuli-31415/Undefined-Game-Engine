@@ -37,12 +37,12 @@ public class ValidateSceneInteractor implements ValidateSceneInputBoundary {
             return ValidationResult.error("GameObjects needed");
         }
 
-        // Rule 4: Check Background Music (optional - warning only)
-        if (scene.getBackgroundMusic() == null) {
-            return ValidationResult.warning(
-                    "No background music found. Continue without music?"
-            );
-        }
+//        // Rule 4: Check Background Music (optional - warning only)
+//        if (scene.getBackgroundMusic() == null) {
+//            return ValidationResult.warning(
+//                    "No background music found. Continue without music?"
+//            );
+//        }
 
         // All checks passed
         return ValidationResult.valid();
