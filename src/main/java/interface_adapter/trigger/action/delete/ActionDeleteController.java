@@ -12,7 +12,7 @@ public class ActionDeleteController {
     }
 
     public void execute(int triggerIndex, int actionIndex) {
-        ActionDeleteInputData input = new ActionDeleteInputData(triggerIndex, actionIndex);
-        actionDeleteInteractor.execute(input);
+        ActionDeleteInputData inputData = new ActionDeleteInputData(triggerIndex, actionIndex);
+        actionDeleteInteractor.execute(inputData);
     }
 }
