@@ -30,7 +30,7 @@ public class VariableController {
                 type
         );
 
-        updateInteractor.execute(input);   // or whatever your method name is
+        updateInteractor.execute(input);
     }
 
     public void deleteVariable(String name,
