@@ -8,8 +8,6 @@ import entity.scripting.Trigger;
 import entity.scripting.TriggerManager;
 import entity.scripting.event.OnClickEvent;
 import entity.Eventlistener.ClickListener;
-import entity.scripting.condition.Condition;
-import entity.scripting.action.Action;
 import entity.scripting.environment.Environment;
 import interface_adapter.preview.EventListenerFactory;
 
@@ -173,8 +171,7 @@ public class GameCanvas extends JPanel {
         // Add click action
         button.addActionListener(e -> {
             clickListener.notifyClicked();
-            executeOnClickTriggers(obj);
-            System.out.println("🖱️ Button clicked: [" + label + "]");
+            System.out.println("Button clicked: [" + label + "]");
         });
 
         uiButtons.put(obj, button);
@@ -199,51 +196,6 @@ public class GameCanvas extends JPanel {
         return false;
     }
 
-    /**
-     * Execute all OnClick triggers for a GameObject.
-     *
-     * @param obj The game object
-     */
-    private void executeOnClickTriggers(GameObject obj) {
-        TriggerManager tm = obj.getTriggerManager();
-        if (tm == null) return;
-
-        for (Trigger trigger : tm.getAllTriggers()) {
-            if (trigger.getEvent() instanceof OnClickEvent) {
-                executeTrigger(trigger, obj);
-            }
-        }
-    }
-
-    /**
-     * Execute a single trigger.
-     *
-     * @param trigger The trigger to execute
-     * @param obj The game object
-     */
-    private void executeTrigger(Trigger trigger, GameObject obj) {
-        try {
-            Environment localEnv = obj.getEnvironment();
-
-            // Check conditions
-            boolean allConditionsMet = true;
-            for (Condition condition : trigger.getConditions()) {
-                if (!condition.evaluate(globalEnvironment, localEnv)) {
-                    allConditionsMet = false;
-                    break;
-                }
-            }
-
-            // Execute actions
-            if (allConditionsMet) {
-                for (Action action : trigger.getActions()) {
-                    action.execute(globalEnvironment, localEnv);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error executing trigger: " + e.getMessage());
-        }
-    }
 
     /**
      * Get click listener for a GameObject (BUTTON MODE).
