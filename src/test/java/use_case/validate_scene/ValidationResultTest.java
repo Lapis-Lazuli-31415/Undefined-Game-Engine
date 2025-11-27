@@ -1,56 +1,79 @@
 package use_case.validate_scene;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for ValidationResult
+ * Tests for ValidationResult.
  *
  * @author Wanru Cheng
  */
 class ValidationResultTest {
 
     @Test
-    void testValidResult() {
+    void valid_createsValidResult() {
+        // Act
         ValidationResult result = ValidationResult.valid();
 
+        // Assert
         assertTrue(result.isValid());
         assertFalse(result.isError());
         assertFalse(result.isWarning());
-        assertNull(result.getMessage());
         assertEquals(ValidationResult.Type.VALID, result.getType());
+        assertNull(result.getMessage());
     }
 
     @Test
-    void testErrorResult() {
-        String errorMessage = "Scene ID needed";
+    void error_createsErrorResult() {
+        // Arrange
+        String errorMessage = "Test error message";
+
+        // Act
         ValidationResult result = ValidationResult.error(errorMessage);
 
-        assertFalse(result.isValid());
+        // Assert
         assertTrue(result.isError());
+        assertFalse(result.isValid());
         assertFalse(result.isWarning());
-        assertEquals(errorMessage, result.getMessage());
         assertEquals(ValidationResult.Type.ERROR, result.getType());
+        assertEquals(errorMessage, result.getMessage());
     }
 
     @Test
-    void testWarningResult() {
-        String warningMessage = "No background music found";
+    void warning_createsWarningResult() {
+        // Arrange
+        String warningMessage = "Test warning message";
+
+        // Act
         ValidationResult result = ValidationResult.warning(warningMessage);
 
+        // Assert
+        assertTrue(result.isWarning());
         assertTrue(result.isValid());  // Warning is still valid
         assertFalse(result.isError());
-        assertTrue(result.isWarning());
-        assertEquals(warningMessage, result.getMessage());
         assertEquals(ValidationResult.Type.WARNING, result.getType());
+        assertEquals(warningMessage, result.getMessage());
     }
 
     @Test
-    void testToString() {
+    void toString_containsTypeAndMessage() {
+        // Arrange
         ValidationResult result = ValidationResult.error("Test error");
+
+        // Act
         String str = result.toString();
 
+        // Assert
         assertTrue(str.contains("ERROR"));
         assertTrue(str.contains("Test error"));
+    }
+
+    @Test
+    void getType_returnsCorrectType() {
+        // Assert
+        assertEquals(ValidationResult.Type.VALID, ValidationResult.valid().getType());
+        assertEquals(ValidationResult.Type.ERROR, ValidationResult.error("error").getType());
+        assertEquals(ValidationResult.Type.WARNING, ValidationResult.warning("warning").getType());
     }
 }

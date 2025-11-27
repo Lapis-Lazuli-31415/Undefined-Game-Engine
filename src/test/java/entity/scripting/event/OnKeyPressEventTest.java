@@ -17,7 +17,21 @@ class OnKeyPressEventTest {
 
         assertEquals("W", event.getKey());
     }
+    @Test
+    void testSetKey() {
+        OnKeyPressEvent event = new OnKeyPressEvent("W");
 
+        event.setKey("A");
+
+        assertEquals("A", event.getKey());
+    }
+
+    @Test
+    void testGetEventType() {
+        String eventType = OnKeyPressEvent.getEventType();
+
+        assertEquals("On Key Press", eventType);
+    }
     @Test
     void testGetKey() {
         OnKeyPressEvent event = new OnKeyPressEvent("Space");

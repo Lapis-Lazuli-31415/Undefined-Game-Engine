@@ -9,7 +9,7 @@ import entity.scripting.TriggerManager;
 import entity.scripting.event.OnClickEvent;
 import entity.Eventlistener.ClickListener;
 import entity.scripting.environment.Environment;
-import interface_adapter.runtime.EventListenerFactory;
+import interface_adapter.preview.EventListenerFactory;
 
 import javax.swing.*;
 import java.awt.*;

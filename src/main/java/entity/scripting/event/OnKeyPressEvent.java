@@ -20,4 +20,8 @@ public class OnKeyPressEvent extends Event{
     public void setKey(String key) {
         this.key = key;
     }
+    @Override
+    public String toString() {
+        return "OnKeyPressEvent[key=" + key + "]";
+    }
 }
