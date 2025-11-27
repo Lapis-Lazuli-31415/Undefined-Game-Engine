@@ -5,9 +5,18 @@ import javax.swing.*;
 
 import entity.GameObject;
 import entity.Transform;
+import entity.scripting.environment.Environment;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
+import interface_adapter.variable.UpdateVariableController;
+import interface_adapter.variable.VariableViewModel;
+import interface_adapter.variable.UpdateVariablePresenter;
+import use_case.variable.UpdateVariableInteractor;
+import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.DeleteVariablePresenter;
+import use_case.variable.DeleteVariableInteractor;
+
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -32,6 +41,11 @@ public class HomeView extends javax.swing.JFrame {
     private GameObject demoObject;
     private TransformViewModel transformViewModel;
     private TransformController transformController;
+
+    //Variable
+    private VariableViewModel variableViewModel;
+    private UpdateVariableController variableController;
+    private DeleteVariableController deleteVariableController;
 
     public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
@@ -119,7 +133,6 @@ public class HomeView extends javax.swing.JFrame {
         setJMenuBar(menuBar);
 
         // ====== LEFT SIDEBAR (Assets + Filesystem) ======
-        // NOTE: use the fields, not new local variables
         leftSidebar = new JPanel();
         leftSidebar.setLayout(new BoxLayout(leftSidebar, BoxLayout.Y_AXIS));
         leftSidebar.setPreferredSize(new Dimension(200, 700));
@@ -155,7 +168,6 @@ public class HomeView extends javax.swing.JFrame {
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
 
-        // gallery grid view NEED TO ADD SCROLLING
         spritesContent = new JPanel();
         spritesContent.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         spritesContent.setBackground(new Color(70, 70, 70));
@@ -166,30 +178,6 @@ public class HomeView extends javax.swing.JFrame {
         assetsPanel.add(spritesHeader);
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
-
-//        // ---- AUDIO SCROLL PANEL ---- remove for now, might add back later
-//        JPanel audioHeader = new JPanel(new BorderLayout());
-//        audioHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
-//        audioHeader.setOpaque(false);
-//
-//        JLabel audioLabel = new JLabel("Audio");
-//        audioLabel.setForeground(Color.WHITE);
-//
-//        JButton audioAddButton = new JButton("+");
-//        audioAddButton.setMargin(new Insets(0, 4, 0, 4));
-//
-//        audioHeader.add(audioLabel, BorderLayout.WEST);
-//        audioHeader.add(audioAddButton, BorderLayout.EAST);
-//
-//        JPanel audioContent = new JPanel();
-//        audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
-//        audioContent.setBackground(new Color(70, 70, 70));
-//
-//        JScrollPane audioScroll = new JScrollPane(audioContent);
-//        audioScroll.setPreferredSize(new Dimension(180, 140));
-//
-//        assetsPanel.add(audioHeader);
-//        assetsPanel.add(audioScroll);
 
         // ====== FILESYSTEM PANEL ======
         filesystemPanel = new JPanel();
@@ -272,10 +260,9 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
         propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
-        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
+        propertiesScroll.setBorder(null); // keep the inner "Properties" border
 
-
-        // ====== DEMO ENTITY + LAYERS WIRING ======
+        // ====== DEMO ENTITY + TRANSFORM USE CASE WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
         pos.add(0.0); // x
         pos.add(0.0); // y
@@ -295,15 +282,16 @@ public class HomeView extends javax.swing.JFrame {
         );
         demoObject.setTransform(transform);
 
-        // Create view model
+        // Create Transform view model
         transformViewModel = new TransformViewModel();
 
-        // Use app-layer factory to wire up use case
+        // Use app-layer factory to wire up Transform use case
         transformController = TransformUseCaseFactory.create(demoObject, transformViewModel);
 
-        // Hook up ScenePanel to viewModel (Observer)
+        // Hook up ScenePanel to Transform view model (Observer)
         scenePanel = new ScenePanel(transformViewModel);
 
+        // Push initial transform into the use case
         transformController.updateTransform(
                 transform.getX(),
                 transform.getY(),
@@ -311,10 +299,43 @@ public class HomeView extends javax.swing.JFrame {
                 transform.getRotation()
         );
 
+        // Replace "Open Folder" center content with ScenePanel
         centerPanel.remove(openFolderPanel);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
         centerPanel.revalidate();
         centerPanel.repaint();
+
+        // ====== VARIABLE USE CASE WIRING ======
+        Environment globalEnv = new Environment();   // global game variables
+        Environment localEnv = new Environment();    // local (per-object) variables for now
+
+        variableViewModel = new VariableViewModel();
+
+        // Presenters → shared VariableViewModel
+        UpdateVariablePresenter updatePresenter  = new UpdateVariablePresenter(variableViewModel);
+        DeleteVariablePresenter deletePresenter  = new DeleteVariablePresenter(variableViewModel);
+
+        // Interactors → Presenters
+        UpdateVariableInteractor updateInteractor =
+                new UpdateVariableInteractor(globalEnv, localEnv, updatePresenter);
+        DeleteVariableInteractor deleteInteractor =
+                new DeleteVariableInteractor(globalEnv, localEnv, deletePresenter);
+
+        // Controllers → Interactors
+        variableController      = new UpdateVariableController(updateInteractor);
+        deleteVariableController = new DeleteVariableController(deleteInteractor);
+
+
+        // Bind properties panel to BOTH Transform + Variable use cases
+        if (propertiesPanel instanceof PropertiesPanel props) {
+            props.bind(
+                    transformViewModel,
+                    transformController,
+                    () -> scenePanel.repaint()
+            );
+            props.setVariableViewModel(variableViewModel);
+            props.setVariableController(variableController);
+        }
 
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.bind(
@@ -322,24 +343,13 @@ public class HomeView extends javax.swing.JFrame {
                     transformController,
                     () -> scenePanel.repaint()
             );
+            props.setVariableViewModel(variableViewModel);
+            props.setVariableController(variableController);
+            props.setDeleteVariableController(deleteVariableController);
         }
 
 
-
-        centerPanel.remove(openFolderPanel);
-        centerPanel.add(scenePanel, BorderLayout.CENTER);
-        centerPanel.revalidate();
-        centerPanel.repaint();
-
-        // Bind properties panel to VM + controller
-        if (propertiesPanel instanceof PropertiesPanel props) {
-            props.bind(
-                    transformViewModel,
-                    transformController,
-                    () -> scenePanel.repaint()
-            );
-        }
-
+        // ====== LAYOUT ROOT PANELS ======
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);
         getContentPane().add(propertiesScroll, BorderLayout.EAST);

@@ -7,6 +7,7 @@ import use_case.variable.UpdateVariableInputData;
 public class UpdateVariableController {
 
     private final UpdateVariableInputBoundary updateInteractor;
+    private boolean editingGameController = false;
 
     public UpdateVariableController(UpdateVariableInputBoundary updateInteractor) {
         this.updateInteractor = updateInteractor;

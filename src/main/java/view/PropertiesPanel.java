@@ -9,6 +9,10 @@ import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 
+import interface_adapter.variable.VariableViewModel;
+import interface_adapter.variable.UpdateVariableController;
+import interface_adapter.variable.DeleteVariableController;
+
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
 
@@ -31,7 +35,7 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     private JTextField rotationField;
     private JTextField scaleField;
 
-    // View model / Controller
+    // Transform View model / Controller
     private TransformViewModel viewModel;
     private TransformController controller;
     private Runnable onChangeCallback;
@@ -58,6 +62,10 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     private JPanel boolVarsPanel;
     private JPanel selectedVarRow = null;
 
+    private VariableViewModel variableViewModel;
+    private UpdateVariableController variableController;
+    private DeleteVariableController deleteVariableController;
+    private JCheckBox globalCheckbox;
 
     public PropertiesPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -341,6 +349,12 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
 
+        globalCheckbox = new JCheckBox("Global");
+        globalCheckbox.setOpaque(false);
+        globalCheckbox.setForeground(Color.WHITE);
+        panel.add(globalCheckbox, gbc);
+
+        gbc.gridy++;
         JPanel intHeaderPanel = new JPanel(new BorderLayout());
         intHeaderPanel.setOpaque(false);
 
@@ -408,7 +422,6 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
 
         panel.add(boolBtnRow, gbc);
 
-        // Button actions –-> UI only for now (backend later)
 
         addIntBtn.addActionListener(e -> {
             String name = JOptionPane.showInputDialog(
@@ -426,9 +439,9 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
             );
             if (valueStr == null || valueStr.isBlank()) return;
 
+            double value;
             try {
-                Double.parseDouble(valueStr); // numeric check
-                addIntVariableRow(name, valueStr);
+                value = Double.parseDouble(valueStr);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -436,22 +449,45 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
                         "Error",
                         JOptionPane.ERROR_MESSAGE
                 );
+                return;
             }
+
+            if (variableController != null) {
+                boolean isGlobal = (globalCheckbox != null && globalCheckbox.isSelected());
+                variableController.updateVariable(name, "Numeric", isGlobal, valueStr);
+            }
+
+
+            addIntVariableRow(name, valueStr);
         });
 
         removeIntBtn.addActionListener(e -> {
+            boolean isGlobal = (globalCheckbox != null && globalCheckbox.isSelected());
+            String nameToDelete = null;
+
             if (selectedVarRow != null && selectedVarRow.getParent() == intVarsPanel) {
+                nameToDelete = extractVariableNameFromRow(selectedVarRow);
+                if (deleteVariableController != null && nameToDelete != null) {
+                    deleteVariableController.deleteVariable(nameToDelete, "Numeric", isGlobal);
+                }
                 intVarsPanel.remove(selectedVarRow);
                 selectedVarRow = null;
             } else {
                 int count = intVarsPanel.getComponentCount();
                 if (count > 0) {
+                    JPanel row = (JPanel) intVarsPanel.getComponent(count - 1);
+                    nameToDelete = extractVariableNameFromRow(row);
+                    if (deleteVariableController != null && nameToDelete != null) {
+                        deleteVariableController.deleteVariable(nameToDelete, "Numeric", isGlobal);
+                    }
                     intVarsPanel.remove(count - 1); // fallback: remove last
                 }
             }
+
             intVarsPanel.revalidate();
             intVarsPanel.repaint();
         });
+
 
         addBoolBtn.addActionListener(e -> {
             String name = JOptionPane.showInputDialog(
@@ -471,20 +507,38 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
             if (choice == JOptionPane.CANCEL_OPTION || choice == JOptionPane.CLOSED_OPTION) return;
 
             boolean value = (choice == JOptionPane.YES_OPTION);
+
+            if (variableController != null) {
+                boolean isGlobal = (globalCheckbox != null && globalCheckbox.isSelected());
+                variableController.updateVariable(name, "Boolean", isGlobal, Boolean.toString(value));
+            }
+
             addBoolVariableRow(name, value);
         });
 
-
         removeBoolBtn.addActionListener(e -> {
+            boolean isGlobal = (globalCheckbox != null && globalCheckbox.isSelected());
+            String nameToDelete = null;
+
             if (selectedVarRow != null && selectedVarRow.getParent() == boolVarsPanel) {
+                nameToDelete = extractVariableNameFromRow(selectedVarRow);
+                if (deleteVariableController != null && nameToDelete != null) {
+                    deleteVariableController.deleteVariable(nameToDelete, "Boolean", isGlobal);
+                }
                 boolVarsPanel.remove(selectedVarRow);
                 selectedVarRow = null;
             } else {
                 int count = boolVarsPanel.getComponentCount();
                 if (count > 0) {
+                    JPanel row = (JPanel) boolVarsPanel.getComponent(count - 1);
+                    nameToDelete = extractVariableNameFromRow(row);
+                    if (deleteVariableController != null && nameToDelete != null) {
+                        deleteVariableController.deleteVariable(nameToDelete, "Boolean", isGlobal);
+                    }
                     boolVarsPanel.remove(count - 1); // fallback: remove last
                 }
             }
+
             boolVarsPanel.revalidate();
             boolVarsPanel.repaint();
         });
@@ -638,7 +692,7 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         combo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
     }
 
-    // --- Public API for binding from HomeView ---
+    // --- Public API for binding Transform from HomeView ---
 
     public void bind(TransformViewModel viewModel,
                      TransformController controller,
@@ -666,6 +720,20 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
 
         // Initial sync FROM VM TO UI
         syncFromViewModel();
+    }
+
+
+    public void setVariableViewModel(VariableViewModel variableViewModel) {
+        this.variableViewModel = variableViewModel;
+        // You can later add listeners if you want Variables VM → UI updates
+    }
+
+    public void setVariableController(UpdateVariableController variableController) {
+        this.variableController = variableController;
+    }
+
+    public void setDeleteVariableController(DeleteVariableController deleteVariableController) {
+        this.deleteVariableController = deleteVariableController;
     }
 
     private void syncFromViewModel() {
@@ -753,6 +821,19 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         }
     }
 
+    // Extracts "x" from a display like "x = 5" or "flag = true"
+    private String extractVariableNameFromRow(JPanel row) {
+        Component comp = row.getComponent(0);  // BorderLayout.CENTER
+        if (comp instanceof JTextField) {
+            String text = ((JTextField) comp).getText();
+            int eqIndex = text.indexOf('=');
+            if (eqIndex > 0) {
+                return text.substring(0, eqIndex).trim();
+            }
+        }
+        return null;
+    }
+
 
     //  Trigger getters
 
@@ -779,12 +860,7 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if ("state".equals(evt.getPropertyName())) {
-            // Defer the UI update until after the current event finishes to avoid
-            // "Attempt to mutate in notification"
             SwingUtilities.invokeLater(this::syncFromViewModel);
         }
     }
-
-
-
 }
