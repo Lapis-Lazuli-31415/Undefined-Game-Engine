@@ -11,6 +11,8 @@ import interface_adapter.saving.SaveProjectPresenter;
 import interface_adapter.saving.SaveProjectViewModel;
 import use_case.saving.SaveProjectInteractor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -58,6 +60,35 @@ public class SaveDemo {
         } else {
             System.out.println("SUCCESS: " + resultMessage);
         }
+
+        System.out.println("\n--- Starting Load Verification ---");
+
+        try {
+            // 1. We use the same DataAccessObject to load the file we just made
+            // Note: In a real app, this would be done via a LoadProjectController/Interactor
+            File fileToLoad = new File("test.json");
+
+            // 2. Call the load method
+            Project loadedProject = dataAccess.load(fileToLoad);
+
+            // 3. Verify the data
+            System.out.println("Loaded Project Name: " + loadedProject.getName());
+
+            // Dig deep to ensure the structure survived (Project -> Scene -> GameObject)
+            if (!loadedProject.getScenes().isEmpty()) {
+                Scene loadedScene = loadedProject.getScenes().get(0);
+                GameObject loadedObj = loadedScene.getGameObjects().get(0);
+
+                System.out.println("Loaded Object Name: " + loadedObj.getName()); // Should be "obj-bear"
+            }
+
+            System.out.println("VERIFICATION PASSED: Data matches!");
+
+        } catch (IOException e) {
+            System.err.println("LOAD FAILED: Could not read the file back.");
+            e.printStackTrace();
+        }
+
     }
 
     // HELPER TO BUILD PROJECT
