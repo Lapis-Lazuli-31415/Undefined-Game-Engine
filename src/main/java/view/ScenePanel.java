@@ -58,15 +58,16 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             Transform transform = new Transform(position, 0f, scale);
             SpriteRenderer spriteRenderer = new SpriteRenderer(image, true);
 
+            // not sure if i should assign environment = null, i only did that as a filler
             GameObject gameObject = new GameObject(id, name, true, new ArrayList<>(), null);
             gameObject.setTransform(transform);
             gameObject.addProperty(spriteRenderer);
 
             gameObjects.add(gameObject);
 
-            // Select the newly added object
             selectObject(gameObject);
 
+            // log for debugging
             System.out.println("[ScenePanel] Added sprite: " + name + " (Total objects: " + gameObjects.size() + ")");
             repaint();
         }
@@ -92,10 +93,6 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         if (onSelectionChangeCallback != null) {
             onSelectionChangeCallback.run();
         }
-    }
-
-    public boolean hasSprite(entity.Image image) {
-        return findGameObjectByImage(image) != null;
     }
 
     private GameObject findGameObjectByImage(entity.Image image) {
@@ -142,7 +139,6 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             return false;
         }
 
-        //  prolly should extract this
         int spriteW = spriteRenderer.getWidth();
         int spriteH = spriteRenderer.getHeight();
 
@@ -179,6 +175,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int panelW = getWidth();
             int panelH = getHeight();
 
+            // almost same as the old implementation, but i refactored it into separate methods
             for (GameObject obj : gameObjects) {
                 renderGameObject(g2, obj, panelW, panelH);
             }
