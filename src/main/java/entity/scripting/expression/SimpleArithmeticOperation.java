@@ -4,7 +4,7 @@ import entity.scripting.environment.Environment;
 import entity.scripting.error.NumericComparisonException;
 import entity.scripting.error.SimpleArithmeticException;
 
-public class SimpleArithmeticOperation extends NumericExpression{
+public class SimpleArithmeticOperation implements NumericExpression{
     private NumericExpression left;
     private String operator;
     private NumericExpression right;
