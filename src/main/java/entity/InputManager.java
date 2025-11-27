@@ -308,7 +308,6 @@ public class InputManager extends KeyAdapter {
     private boolean mouseJustClicked;
     private int mouseButton;
 
-    // ===== 新增：保存 MouseAdapter 实例 =====
     private final MouseAdapter mouseAdapter;
 
     public InputManager() {
@@ -320,7 +319,6 @@ public class InputManager extends KeyAdapter {
         this.mouseJustClicked = false;
         this.mouseButton = 0;
 
-        // 在构造函数中创建 MouseAdapter，只创建一次
         this.mouseAdapter = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -377,9 +375,7 @@ public class InputManager extends KeyAdapter {
 
     // ========== MOUSE METHODS ==========
 
-    /**
-     * 返回同一个 MouseAdapter 实例
-     */
+
     public MouseAdapter getMouseListener() {
         return mouseAdapter;
     }
