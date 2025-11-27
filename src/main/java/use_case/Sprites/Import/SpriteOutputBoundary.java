@@ -1,4 +1,4 @@
-package use_case.Sprites;
+package use_case.Sprites.Import;
 
 /**
  * Output Boundary for actions related to importing and managing sprites.

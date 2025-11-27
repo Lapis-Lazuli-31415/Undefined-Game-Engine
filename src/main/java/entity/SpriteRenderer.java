@@ -1,12 +1,13 @@
 package entity;
 
-import java.awt.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class SpriteRenderer extends Property {
 
     private Image sprite;
     private boolean visible;
     private int opacity;
+    private int zIndex;
 
     public SpriteRenderer(Image sprite, boolean visible) {
         this.sprite = sprite;
@@ -14,6 +15,7 @@ public class SpriteRenderer extends Property {
         this.opacity = 100;
     }
 
+    @JsonIgnore // #TODO: IGNORE FOR NOW!! wait till misa does image
     public Image getSprite() {
         return sprite;
     }
@@ -32,5 +34,26 @@ public class SpriteRenderer extends Property {
 
     public void setVisible(boolean visiblity) {
         this.visible = visiblity;
+    }
+
+    // for Jackson saving part
+    public Image getImage() {
+        return sprite;
+    }
+
+    public int getZIndex() {
+        return zIndex;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public int getWidth() {
+        return this.sprite.getWidth();
+    }
+
+    public int getHeight() {
+        return this.sprite.getHeight();
     }
 }
