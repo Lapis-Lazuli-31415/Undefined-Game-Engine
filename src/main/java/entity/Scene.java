@@ -38,4 +38,11 @@ public class Scene {
                 .map(GameObject::getName)
                 .toList();
     }
+
+    public boolean hasGameObject(String name) {
+        if (gameObjects == null) return false;
+        return gameObjects.stream()
+                .anyMatch(go -> go.getName().equals(name));
+    }
+
 }
