@@ -5,7 +5,7 @@ import java.util.List;
 
 public class OnKeyPressEvent extends Event{
     public static final String EVENT_TYPE = "On Key Press";
-    public static final List<String> REQUIRED_PARAMETERS = List.of("key");
+    public static final List<String> REQUIRED_PARAMETERS = List.of("Key");
 
     public OnKeyPressEvent() {
         super(EVENT_TYPE);
