@@ -3,22 +3,31 @@ package use_case.variable;
 import entity.scripting.environment.Environment;
 import entity.scripting.environment.Unassign;
 import entity.scripting.error.EnvironmentException;
-import entity.scripting.expression.variable.BooleanVariable;
-import entity.scripting.expression.variable.NumericVariable;
 import entity.scripting.expression.variable.Variable;
+import use_case.variable.factory.VariableFactory;
+import use_case.variable.factory.DefaultVariableFactoryRegistry;
 
 public class DeleteVariableInteractor implements DeleteVariableInputBoundary {
 
     private final Environment globalEnv;
     private final Environment localEnv;
     private final DeleteVariableOutputBoundary presenter;
+    private final DefaultVariableFactoryRegistry factoryRegistry;
 
     public DeleteVariableInteractor(Environment globalEnv,
                                     Environment localEnv,
                                     DeleteVariableOutputBoundary presenter) {
+        this(globalEnv, localEnv, presenter, new DefaultVariableFactoryRegistry());
+    }
+
+    public DeleteVariableInteractor(Environment globalEnv,
+                                    Environment localEnv,
+                                    DeleteVariableOutputBoundary presenter,
+                                    DefaultVariableFactoryRegistry factoryRegistry) {
         this.globalEnv = globalEnv;
         this.localEnv = localEnv;
         this.presenter = presenter;
+        this.factoryRegistry = factoryRegistry;
     }
 
     @Override
@@ -39,7 +48,7 @@ public class DeleteVariableInteractor implements DeleteVariableInputBoundary {
         Environment targetEnv = inputData.isGlobal() ? globalEnv : localEnv;
 
         try {
-            handleType(targetEnv, inputData, name, type);
+            handleWithFactory(targetEnv, inputData, name, type);
         } catch (EnvironmentException e) {
             presenter.prepareFailureView(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -47,46 +56,19 @@ public class DeleteVariableInteractor implements DeleteVariableInputBoundary {
         }
     }
 
-
-    private void handleType(Environment env,
-                            DeleteVariableInputData inputData,
-                            String name,
-                            String type)
+    private void handleWithFactory(Environment env,
+                                   DeleteVariableInputData inputData,
+                                   String name,
+                                   String type)
             throws EnvironmentException {
 
-        if (type.equals("Numeric")) {
-            handleNumeric(env, inputData, name);
-        } else if (type.equals("Boolean")) {
-            handleBoolean(env, inputData, name);
-        } else {
+        VariableFactory factory = factoryRegistry.get(type);
+
+        if (factory == null) {
             throw new IllegalArgumentException("Unsupported variable type: " + type);
         }
-    }
 
-
-    private void handleNumeric(Environment env,
-                               DeleteVariableInputData inputData,
-                               String name)
-            throws EnvironmentException {
-
-        NumericVariable variable = new NumericVariable(name, inputData.isGlobal());
-
-        Unassign.unassign(env, variable);
-
-        DeleteVariableOutputData output = new DeleteVariableOutputData(
-                name,
-                inputData.isGlobal(),
-                variable.getVariableType()
-        );
-        presenter.prepareSuccessView(output);
-    }
-
-    private void handleBoolean(Environment env,
-                               DeleteVariableInputData inputData,
-                               String name)
-            throws EnvironmentException {
-
-        BooleanVariable variable = new BooleanVariable(name, inputData.isGlobal());
+        Variable<?> variable = factory.createVariable(name, inputData.isGlobal());
 
         Unassign.unassign(env, variable);
 
