@@ -8,6 +8,7 @@ import java.awt.*;
 import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
+import view.property.trigger.TriggerManagerPanel;
 
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
@@ -59,6 +60,8 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     private JTextField boolNameField;
     private JCheckBox boolValueCheck;
 
+    private final TriggerManagerPanel triggerManagerPanel;
+
     public PropertiesPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setPreferredSize(new Dimension(260, 700));
@@ -71,11 +74,13 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
                 new EmptyBorder(5, 5, 5, 5)
         ));
 
+        triggerManagerPanel = new TriggerManagerPanel();
+
         add(createTransformSection());
         add(Box.createVerticalStrut(10));
         add(createSpriteRendererSection());
         add(Box.createVerticalStrut(10));
-        add(createTriggerSection());
+        add(triggerManagerPanel);
         add(Box.createVerticalStrut(10));
         add(createVariableSection());
         add(Box.createVerticalGlue());
