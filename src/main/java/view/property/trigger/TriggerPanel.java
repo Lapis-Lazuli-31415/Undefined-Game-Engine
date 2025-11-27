@@ -42,7 +42,7 @@ public class TriggerPanel extends JPanel {
         // Row 1
         GridBagConstraints contentGbc = PropertyPanelUtility.baseGbc();
         contentGbc.gridy = 1;
-        contentGbc.insets = new Insets(0, 2, 5, 2); // Spacing between sections
+        contentGbc.insets = new Insets(0, 2, 10, 2); // Spacing between sections
         add(new EventPanel(triggerIndex, viewModel, factory), contentGbc);
 
         // 4. Conditions Section

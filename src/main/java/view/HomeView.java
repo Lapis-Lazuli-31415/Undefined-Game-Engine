@@ -124,7 +124,7 @@ public class HomeView extends javax.swing.JFrame {
         // ====== MAIN FRAME SETTINGS ======
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Game Editor");
-        setPreferredSize(new java.awt.Dimension(1200, 700));
+        setPreferredSize(new java.awt.Dimension(1300, 700));
 
         getContentPane().setLayout(new BorderLayout());
 
