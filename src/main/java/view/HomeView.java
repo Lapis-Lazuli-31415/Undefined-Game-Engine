@@ -285,6 +285,14 @@ public class HomeView extends javax.swing.JFrame {
         // ====== RIGHT PROPERTIES PANEL ======
         propertiesPanel = new PropertiesPanel();
 
+        // Wrap in a scroll pane so the whole properties area scrolls
+        JScrollPane propertiesScroll = new JScrollPane(propertiesPanel);
+        propertiesScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
+        propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
+        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
+
 
         // ====== DEMO ENTITY + LAYERS WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
@@ -346,7 +354,7 @@ public class HomeView extends javax.swing.JFrame {
 
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);
-        getContentPane().add(propertiesPanel, BorderLayout.EAST);
+        getContentPane().add(propertiesScroll, BorderLayout.EAST);
 
         pack();
         setLocationRelativeTo(null);
