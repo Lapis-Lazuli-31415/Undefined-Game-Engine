@@ -6,11 +6,9 @@
       "variables" : { }
     },
     "assets" : [ {
-      "id" : "80dde4ef-6bb8-4037-9a6c-d5c0d87493ad",
+      "id" : "cc4b3385-1941-4682-93af-569f3f463fe1",
       "name" : "bear.png",
-      "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png",
-      "width" : 2670,
-      "height" : 2028
+      "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png"
     } ],
     "scenes" : [ {
       "id" : "scene-01",
@@ -23,7 +21,9 @@
           "visible" : true,
           "opacity" : 100,
           "zindex" : 0,
-          "image" : "80dde4ef-6bb8-4037-9a6c-d5c0d87493ad"
+          "width" : 2670,
+          "height" : 2028,
+          "image" : "cc4b3385-1941-4682-93af-569f3f463fe1"
         } ],
         "transform" : {
           "rotation" : 45.0,

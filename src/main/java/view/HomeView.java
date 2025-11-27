@@ -278,6 +278,7 @@ public class HomeView extends javax.swing.JFrame {
         scale.add(1.0); // scaleX
         scale.add(1.0); // scaleY
 
+
         Transform transform = new Transform(pos, 0f, scale);
 
         demoObject = new GameObject(

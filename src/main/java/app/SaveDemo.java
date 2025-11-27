@@ -16,10 +16,7 @@ import java.util.Vector;
 
 
 import java.awt.*;
-/**
- * A standalone runner to test the Saving Feature.
- * Right-click this file and select "Run 'SaveDemo.main()'"
- */
+
 public class SaveDemo {
 
     public static void main(String[] args) {

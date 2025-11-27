@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import entity.Project;
 import use_case.saving.SaveProjectDataAccessInterface;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -16,6 +15,12 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
 
     private final ObjectMapper mapper;
 
+    /**
+     * Constructs a new JsonProjectDataAccess object.
+     * Initializes the underlying ObjectMapper with specific configurations:
+     *      - SerializationFeature.INDENT_OUTPUT - Enabled for pretty-printing.
+     *     -  PropertyNamingStrategies.SNAKE_CASE - Enforced for JSON keys.
+     */
     public JsonProjectDataAccess() {
         this.mapper = new ObjectMapper();
 
@@ -24,6 +29,12 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);// force snake_case
     }
 
+    /**
+     * Serializes and saves the Project object to a JSON file.
+     *
+     * The project is wrapped in a root Map where the key is the project's name.
+     * Saves to the "database.json".
+     */
     @Override
     public void save(Project project) throws IOException {
         // create a Map to get the root key: "project_name" (FOR NOW!!)
