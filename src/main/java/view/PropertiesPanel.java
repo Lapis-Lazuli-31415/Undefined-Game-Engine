@@ -9,6 +9,7 @@ import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import view.property.trigger.TriggerManagerPanel;
+import view.util.PropertyPanelUtility;
 
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
@@ -188,9 +189,7 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         JLabel intHeader = createSubHeaderLabel("Integers:");
         intHeaderPanel.add(intHeader, BorderLayout.WEST);
 
-        JButton addIntBtn = new JButton("+");
-        addIntBtn.setMargin(new Insets(0, 4, 0, 4));
-        addIntBtn.setPreferredSize(new Dimension(26, 22));   // small
+        JButton addIntBtn = PropertyPanelUtility.createAddButton();
         intHeaderPanel.add(addIntBtn, BorderLayout.EAST);
 
         panel.add(intHeaderPanel, gbc);
@@ -225,9 +224,7 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         JLabel boolHeader = createSubHeaderLabel("Booleans:");
         boolHeaderPanel.add(boolHeader, BorderLayout.WEST);
 
-        JButton addBoolBtn = new JButton("+");
-        addBoolBtn.setMargin(new Insets(0, 4, 0, 4));
-        addBoolBtn.setPreferredSize(new Dimension(26, 22));  // same small size
+        JButton addBoolBtn = PropertyPanelUtility.createAddButton();
         boolHeaderPanel.add(addBoolBtn, BorderLayout.EAST);
 
         panel.add(boolHeaderPanel, gbc);

@@ -13,6 +13,7 @@ import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import use_case.Sprites.Import.ImportSpriteInteractor;
+import view.util.PropertyPanelUtility;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -167,7 +168,7 @@ public class HomeView extends javax.swing.JFrame {
         JLabel spritesLabel = new JLabel("Sprites");
         spritesLabel.setForeground(Color.WHITE);
 
-        spritesAddButton = new JButton("+");
+        spritesAddButton = PropertyPanelUtility.createAddButton();
         spritesAddButton.setMargin(new Insets(0, 4, 0, 4));
         spritesAddButton.addActionListener(e -> openLocalSpriteImport());
 
