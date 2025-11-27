@@ -6,19 +6,31 @@ import entity.scripting.error.EnvironmentException;
 import entity.scripting.expression.variable.BooleanVariable;
 import entity.scripting.expression.variable.NumericVariable;
 import entity.scripting.expression.variable.Variable;
+import use_case.variable.factory.VariableFactory;
+import use_case.variable.factory.DefaultVariableFactoryRegistry;
 
 public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
 
     private final Environment globalEnv;
     private final Environment localEnv;
     private final UpdateVariableOutputBoundary presenter;
+    private final DefaultVariableFactoryRegistry factoryRegistry;
 
     public UpdateVariableInteractor(Environment globalEnv,
                                     Environment localEnv,
-                                    UpdateVariableOutputBoundary presenter) {
+                                    UpdateVariableOutputBoundary presenter){
+        this(globalEnv,localEnv,presenter,new DefaultVariableFactoryRegistry());
+
+    }
+
+    public UpdateVariableInteractor(Environment globalEnv,
+                                    Environment localEnv,
+                                    UpdateVariableOutputBoundary presenter,
+                                    DefaultVariableFactoryRegistry factoryRegistry) {
         this.globalEnv = globalEnv;
         this.localEnv = localEnv;
         this.presenter = presenter;
+        this.factoryRegistry = factoryRegistry;
     }
 
     @Override
@@ -45,110 +57,73 @@ public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
         Environment targetEnv = inputData.isGlobal() ? globalEnv : localEnv;
 
         // check type
-        boolean numericExists = false;
-        boolean booleanExists = false;
-
-        try{
-            targetEnv.get(new NumericVariable(name, inputData.isGlobal()));
-            numericExists = true;
-        } catch (EnvironmentException ignored) { }
-
-        try{
-            targetEnv.get(new BooleanVariable(name, inputData.isGlobal()));
-            booleanExists = true;
-        } catch (EnvironmentException ignored) { }
-
-        if (numericExists && type.equals("Boolean")) {
-            presenter.prepareFailureView(
-                    "Invalid update: existing Numeric variable '" + name + "' cannot be updated as Boolean.");
-            return;
+        Variable<?> existing = findExistingVariable(targetEnv, name);
+        if (existing != null) {
+            String existingType = existing.getVariableType();
+            if (!existingType.equals(type)) {
+                presenter.prepareFailureView("Invalid update: existing" + existingType +
+                        " variable" + name + "cannot be updated as " + type + ".");
+                return;
+            }
         }
 
-        if (booleanExists && type.equals("Numeric")) {
-            presenter.prepareFailureView(
-                    "Invalid update: existing Boolean variable '" + name + "' cannot be updated as Numeric."
-            );
-            return;
-        }
-
-        try {
-            handleType(targetEnv, inputData, name, type, rawValue);
-        } catch (EnvironmentException e) {
+        try{
+            handleWithFactory(targetEnv, inputData, name, type, rawValue);
+        } catch (EnvironmentException e){
             presenter.prepareFailureView(e.getMessage());
-        } catch (NumberFormatException e) {
-            presenter.prepareFailureView("Invalid numeric value: '" + rawValue);
-        } catch (IllegalArgumentException e) {
+        } catch (NumberFormatException e){
+            //numeric parse error from NumericVariableFactory
+            presenter.prepareFailureView("Invalid numeric value: " + rawValue);
+        } catch (IllegalArgumentException e){
+            // boolean parse error or unknown type
             presenter.prepareFailureView(e.getMessage());
         }
     }
 
-    private void handleType(Environment env,
-                            UpdateVariableInputData inputData,
-                            String name,
-                            String type,
-                            String rawValue)
+    private Variable<?> findExistingVariable(Environment env, String name) {
+        for (String typeName : factoryRegistry.getRegisteredTypes()) {
+            VariableFactory factory = factoryRegistry.get(typeName);
+            Variable<?> probe = factory.createVariable(name, false);
+
+            try {
+                env.get(probe);
+                return probe;
+            } catch (EnvironmentException ignored) { }
+        }
+        return null;
+    }
+
+    private void handleWithFactory(Environment env,
+                                   UpdateVariableInputData inputData,
+                                   String name,
+                                   String type,
+                                   String rawValue)
             throws EnvironmentException {
 
-        if (type.equals("Numeric")) {
-            handleNumeric(env, inputData, name, rawValue);
-        } else if (type.equals("Boolean")) {
-            handleBoolean(env, inputData, name, rawValue);
-        } else {
+        VariableFactory factory = factoryRegistry.get(type);
+
+        if  (factory == null) {
             throw new IllegalArgumentException("Unsupported variable type: " + type);
         }
-    }
 
-    // helper functions
+        Variable<?> variable = factory.createVariable(name, inputData.isGlobal());
+        Object parsedValue = factory.parseValue(rawValue);
 
-    private void handleNumeric(Environment env,
-                               UpdateVariableInputData inputData,
-                               String name,
-                               String rawValue)
-            throws EnvironmentException, NumberFormatException {
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        Variable rawVariable = (Variable) variable;
+        Assign.assign(env, rawVariable, parsedValue);
 
-        NumericVariable variable = new NumericVariable(name, inputData.isGlobal());
-
-        double parsed = Double.parseDouble(rawValue);
-
-        Assign.assign(env, variable, parsed);
+        String formattedValue = factory.formatValue(parsedValue);
 
         UpdateVariableOutputData output = new UpdateVariableOutputData(
                 name,
-                Double.toString(parsed),
+                formattedValue,
                 inputData.isGlobal(),
                 variable.getVariableType()
         );
         presenter.prepareSuccessView(output);
     }
 
-    private void handleBoolean(Environment env,
-                               UpdateVariableInputData inputData,
-                               String name,
-                               String rawValue)
-            throws EnvironmentException {
-
-        BooleanVariable variable = new BooleanVariable(name, inputData.isGlobal());
-
-        String normalized = rawValue.toLowerCase();
-        boolean parsed;
-        if ("true".equals(normalized)) {
-            parsed = true;
-        } else if ("false".equals(normalized)) {
-            parsed = false;
-        } else {
-            throw new IllegalArgumentException("Invalid boolean value: '" + rawValue);
-        }
-
-        Assign.assign(env, variable, parsed);
-
-        UpdateVariableOutputData output = new UpdateVariableOutputData(
-                name,
-                Boolean.toString(parsed),
-                inputData.isGlobal(),
-                variable.getVariableType()
-        );
-        presenter.prepareSuccessView(output);
-    }
 
     private static String safeTrim(String s) {
         return s == null ? "" : s.trim();
