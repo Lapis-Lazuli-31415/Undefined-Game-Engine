@@ -46,6 +46,7 @@ public class NumericComparisonCondition extends Condition{
         double leftValue = left.evaluate(globalEnvironment, localEnvironment);
         double rightValue = right.evaluate(globalEnvironment, localEnvironment);
 
+        System.out.println("Comparing " + leftValue + " " + comparator + " " + rightValue);
         return switch (comparator) {
             case ">" -> leftValue > rightValue;
             case "=" -> leftValue == rightValue;

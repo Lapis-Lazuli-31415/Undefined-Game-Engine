@@ -59,6 +59,7 @@ public class NumericVariableAssignmentAction extends Action{
         } else {
             Assign.assign(localEnvironment, variable, value);
         }
+        System.out.println("Assigned " + value + " to variable " + variable.getName());
     }
 
 }

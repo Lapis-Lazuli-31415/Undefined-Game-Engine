@@ -163,7 +163,7 @@ public class RuntimeEnvironment {
                     OnKeyPressEvent keyEvent = (OnKeyPressEvent) event;
                     listener = listenerFactory.createKeyPressListener(keyEvent);
                     keyListenerCount++;
-                    System.out.println("  + Created KeyPressListener for key: " + keyEvent.getKey());
+
 
                 } else if (event instanceof OnClickEvent) {
                     if (canvas.isUsingButtonMode()) {

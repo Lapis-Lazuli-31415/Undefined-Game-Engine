@@ -13,73 +13,53 @@ class OnKeyPressEventTest {
 
     @Test
     void testConstructor() {
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
-
-        assertEquals("W", event.getKey());
-    }
-    @Test
-    void testSetKey() {
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
-
-        event.setKey("A");
-
-        assertEquals("A", event.getKey());
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        assertNotNull(event);
     }
 
     @Test
     void testGetEventType() {
         String eventType = OnKeyPressEvent.getEventType();
-
         assertEquals("On Key Press", eventType);
     }
-    @Test
-    void testGetKey() {
-        OnKeyPressEvent event = new OnKeyPressEvent("Space");
 
-        assertEquals("Space", event.getKey());
+    @Test
+    void testEventTypeConstant() {
+        assertEquals("On Key Press", OnKeyPressEvent.EVENT_TYPE);
     }
 
     @Test
-    void testGetKeyPreservesOriginal() {
-        // Test that original input is preserved (not normalized)
-        OnKeyPressEvent event1 = new OnKeyPressEvent("w");
-        assertEquals("w", event1.getKey());
+    void testRequiredParameters() {
+        assertEquals(1, OnKeyPressEvent.REQUIRED_PARAMETERS.size());
+        assertTrue(OnKeyPressEvent.REQUIRED_PARAMETERS.contains("key"));
+    }
 
-        OnKeyPressEvent event2 = new OnKeyPressEvent("W");
-        assertEquals("W", event2.getKey());
+    @Test
+    void testIsRequiredParameter_key_returnsTrue() {
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        assertTrue(event.isRequiredParameter("key"));
+    }
 
-        OnKeyPressEvent event3 = new OnKeyPressEvent("Space");
-        assertEquals("Space", event3.getKey());
+    @Test
+    void testIsRequiredParameter_other_returnsFalse() {
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        assertFalse(event.isRequiredParameter("other"));
+        assertFalse(event.isRequiredParameter("value"));
+        assertFalse(event.isRequiredParameter(""));
+    }
+
+    @Test
+    void testGetRequiredParameters() {
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        assertEquals(OnKeyPressEvent.REQUIRED_PARAMETERS, event.getRequiredParameters());
     }
 
     @Test
     void testToString() {
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = new OnKeyPressEvent();
         String str = event.toString();
 
+        assertNotNull(str);
         assertTrue(str.contains("OnKeyPressEvent"));
-        assertTrue(str.contains("W"));
-    }
-
-    @Test
-    void testDifferentKeys() {
-        String[] keys = {"W", "A", "S", "D", "Space", "Enter", "Escape", "Up", "Down"};
-
-        for (String key : keys) {
-            OnKeyPressEvent event = new OnKeyPressEvent(key);
-            assertEquals(key, event.getKey());
-        }
-    }
-
-    @Test
-    void testNullKey() {
-        OnKeyPressEvent event = new OnKeyPressEvent(null);
-        assertNull(event.getKey());
-    }
-
-    @Test
-    void testEmptyKey() {
-        OnKeyPressEvent event = new OnKeyPressEvent("");
-        assertEquals("", event.getKey());
     }
 }

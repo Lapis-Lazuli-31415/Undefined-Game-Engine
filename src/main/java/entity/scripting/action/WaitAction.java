@@ -33,6 +33,7 @@ public class WaitAction extends Action{
         }
 
         long milliseconds = (long) seconds * 1000;
+        System.out.println("Waiting for " + milliseconds + " milliseconds");
 
         Thread.sleep(milliseconds);
     }

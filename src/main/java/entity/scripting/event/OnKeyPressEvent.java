@@ -24,8 +24,8 @@ public class OnKeyPressEvent extends Event{
     public List<String> getRequiredParameters() {
         return REQUIRED_PARAMETERS;
     }
-    @Override
-    public String toString() {
-        return "OnKeyPressEvent[key=" + key + "]";
+
+    public String getKey() {
+        return getEventParameter("key");
     }
 }

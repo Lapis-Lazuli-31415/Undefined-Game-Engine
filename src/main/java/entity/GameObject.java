@@ -121,9 +121,6 @@ public class GameObject {
     public List<Property> getProperties() {
         return new ArrayList<>(properties);
     }
-    public TriggerManager getTriggerManager() {
-        return triggerManager;
-    }
     public void addProperty(Property property) {
         // If your Property has a key, you can de-duplicate by key:
         properties.add(property);
