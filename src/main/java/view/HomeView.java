@@ -1,22 +1,18 @@
 package view;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Vector;
 import javax.swing.*;
 
 import entity.GameObject;
 import entity.Transform;
-import entity.scripting.environment.Environment;
+import entity.scripting.TriggerManager;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
-import interface_adapter.variable.UpdateVariableController;
-import interface_adapter.variable.VariableViewModel;
-import interface_adapter.variable.UpdateVariablePresenter;
-import use_case.variable.UpdateVariableInteractor;
-import interface_adapter.variable.DeleteVariableController;
-import interface_adapter.variable.DeleteVariablePresenter;
-import use_case.variable.DeleteVariableInteractor;
-
+import use_case.Sprites.Import.ImportSpriteInteractor;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -38,14 +34,22 @@ public class HomeView extends javax.swing.JFrame {
 
     // Demo wiring
     private ScenePanel scenePanel;
-    private GameObject demoObject;
+    private static GameObject DEMO_OBJECT = new GameObject(
+            "demo-1",
+            "Demo Sprite",
+            true,
+            new ArrayList<>(),
+            null,
+            new Transform(new Vector<Double>(Arrays.asList(0.0, 0.0)), 0f, new Vector<Double>(Arrays.asList(1.0, 1.0))),
+            new TriggerManager()
+    );
     private TransformViewModel transformViewModel;
     private TransformController transformController;
 
-    //Variable
-    private VariableViewModel variableViewModel;
-    private UpdateVariableController variableController;
-    private DeleteVariableController deleteVariableController;
+    // TODO: Delete this after gameObject selection is implemented
+    public static GameObject getDemoGameObject() {
+        return DEMO_OBJECT;
+    }
 
     public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
@@ -55,6 +59,7 @@ public class HomeView extends javax.swing.JFrame {
         this.assetLibViewModel = assetLibViewModel;
 
         wireImportSpriteUseCase();
+        loadExistingAssets();
         initComponents();
         setupAssetLibListener();
         setupImportSpriteListener();
@@ -74,8 +79,8 @@ public class HomeView extends javax.swing.JFrame {
                 new interface_adapter.Sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
 
             // create interactor
-            use_case.Sprites.ImportSpriteInteractor interactor =
-                new use_case.Sprites.ImportSpriteInteractor(
+            ImportSpriteInteractor interactor =
+                new ImportSpriteInteractor(
                     spriteDAO,
                     presenter,
                     assetLibViewModel.getAssetLib()
@@ -133,6 +138,7 @@ public class HomeView extends javax.swing.JFrame {
         setJMenuBar(menuBar);
 
         // ====== LEFT SIDEBAR (Assets + Filesystem) ======
+        // NOTE: use the fields, not new local variables
         leftSidebar = new JPanel();
         leftSidebar.setLayout(new BoxLayout(leftSidebar, BoxLayout.Y_AXIS));
         leftSidebar.setPreferredSize(new Dimension(200, 700));
@@ -168,6 +174,7 @@ public class HomeView extends javax.swing.JFrame {
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
 
+        // gallery grid view NEED TO ADD SCROLLING
         spritesContent = new JPanel();
         spritesContent.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         spritesContent.setBackground(new Color(70, 70, 70));
@@ -178,6 +185,30 @@ public class HomeView extends javax.swing.JFrame {
         assetsPanel.add(spritesHeader);
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
+
+//        // ---- AUDIO SCROLL PANEL ---- remove for now, might add back later
+//        JPanel audioHeader = new JPanel(new BorderLayout());
+//        audioHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+//        audioHeader.setOpaque(false);
+//
+//        JLabel audioLabel = new JLabel("Audio");
+//        audioLabel.setForeground(Color.WHITE);
+//
+//        JButton audioAddButton = new JButton("+");
+//        audioAddButton.setMargin(new Insets(0, 4, 0, 4));
+//
+//        audioHeader.add(audioLabel, BorderLayout.WEST);
+//        audioHeader.add(audioAddButton, BorderLayout.EAST);
+//
+//        JPanel audioContent = new JPanel();
+//        audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
+//        audioContent.setBackground(new Color(70, 70, 70));
+//
+//        JScrollPane audioScroll = new JScrollPane(audioContent);
+//        audioScroll.setPreferredSize(new Dimension(180, 140));
+//
+//        assetsPanel.add(audioHeader);
+//        assetsPanel.add(audioScroll);
 
         // ====== FILESYSTEM PANEL ======
         filesystemPanel = new JPanel();
@@ -260,9 +291,10 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
         propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
-        propertiesScroll.setBorder(null); // keep the inner "Properties" border
+        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
 
-        // ====== DEMO ENTITY + TRANSFORM USE CASE WIRING ======
+
+        // ====== DEMO ENTITY + LAYERS WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
         pos.add(0.0); // x
         pos.add(0.0); // y
@@ -273,25 +305,17 @@ public class HomeView extends javax.swing.JFrame {
 
         Transform transform = new Transform(pos, 0f, scale);
 
-        demoObject = new GameObject(
-                "demo-1",
-                "Demo Sprite",
-                true,
-                new java.util.ArrayList<>(),
-                null
-        );
-        demoObject.setTransform(transform);
+        DEMO_OBJECT.setTransform(transform);
 
-        // Create Transform view model
+        // Create view model
         transformViewModel = new TransformViewModel();
 
-        // Use app-layer factory to wire up Transform use case
-        transformController = TransformUseCaseFactory.create(demoObject, transformViewModel);
+        // Use app-layer factory to wire up use case
+        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
-        // Hook up ScenePanel to Transform view model (Observer)
+        // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);
 
-        // Push initial transform into the use case
         transformController.updateTransform(
                 transform.getX(),
                 transform.getY(),
@@ -299,57 +323,35 @@ public class HomeView extends javax.swing.JFrame {
                 transform.getRotation()
         );
 
-        // Replace "Open Folder" center content with ScenePanel
         centerPanel.remove(openFolderPanel);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
         centerPanel.revalidate();
         centerPanel.repaint();
 
-        // ====== VARIABLE USE CASE WIRING ======
-        Environment globalEnv = new Environment();   // global game variables
-        Environment localEnv = new Environment();    // local (per-object) variables for now
-
-        variableViewModel = new VariableViewModel();
-
-        // Presenters → shared VariableViewModel
-        UpdateVariablePresenter updatePresenter  = new UpdateVariablePresenter(variableViewModel);
-        DeleteVariablePresenter deletePresenter  = new DeleteVariablePresenter(variableViewModel);
-
-        // Interactors → Presenters
-        UpdateVariableInteractor updateInteractor =
-                new UpdateVariableInteractor(globalEnv, localEnv, updatePresenter);
-        DeleteVariableInteractor deleteInteractor =
-                new DeleteVariableInteractor(globalEnv, localEnv, deletePresenter);
-
-        // Controllers → Interactors
-        variableController      = new UpdateVariableController(updateInteractor);
-        deleteVariableController = new DeleteVariableController(deleteInteractor);
-
-
-        // Bind properties panel to BOTH Transform + Variable use cases
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.bind(
                     transformViewModel,
                     transformController,
                     () -> scenePanel.repaint()
             );
-            props.setVariableViewModel(variableViewModel);
-            props.setVariableController(variableController);
         }
 
+
+
+        centerPanel.remove(openFolderPanel);
+        centerPanel.add(scenePanel, BorderLayout.CENTER);
+        centerPanel.revalidate();
+        centerPanel.repaint();
+
+        // Bind properties panel to VM + controller
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.bind(
                     transformViewModel,
                     transformController,
                     () -> scenePanel.repaint()
             );
-            props.setVariableViewModel(variableViewModel);
-            props.setVariableController(variableController);
-            props.setDeleteVariableController(deleteVariableController);
         }
 
-
-        // ====== LAYOUT ROOT PANELS ======
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);
         getContentPane().add(propertiesScroll, BorderLayout.EAST);
@@ -455,6 +457,36 @@ public class HomeView extends javax.swing.JFrame {
         spritesContent.revalidate();
         spritesContent.repaint();
     }
+    private void loadExistingAssets() {
+        try {
+            // Create DAO to access uploads directory
+            data_access.FileSystemSpriteDataAccessObject spriteDAO =
+                    new data_access.FileSystemSpriteDataAccessObject();
+
+            // Get all existing image files
+            java.util.List<java.io.File> existingImages = spriteDAO.getAllExistingImages();
+
+            // Load each image into the asset library
+            for (java.io.File imageFile : existingImages) {
+                try {
+                    // Create Image entity from file path
+                    entity.Image image = new entity.Image(imageFile.toPath());
+
+                    // Add to asset library
+                    assetLibViewModel.getAssetLib().add(image);
+                } catch (Exception e) {
+                    // Log error but continue loading other images
+                    System.err.println("Failed to load image: " + imageFile.getName() + " - " + e.getMessage());
+                }
+            }
+        } catch (java.io.IOException e) {
+            JOptionPane.showMessageDialog(null,
+                    "Failed to load existing sprites: " + e.getMessage(),
+                    "Loading Error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
 
     private void openLocalSpriteImport() {
         JFileChooser fileChooser = new JFileChooser();

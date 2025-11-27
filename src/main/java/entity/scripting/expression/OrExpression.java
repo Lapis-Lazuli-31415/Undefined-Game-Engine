@@ -3,7 +3,7 @@ package entity.scripting.expression;
 import entity.scripting.environment.Environment;
 import entity.scripting.expression.variable.BooleanVariable;
 
-public class OrExpression extends BooleanExpression{
+public class OrExpression implements BooleanExpression{
     private BooleanExpression left;
     private BooleanExpression right;
 

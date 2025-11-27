@@ -25,4 +25,10 @@ public class VariableMap<T> {
     public boolean contains(String name){
         return variables.containsKey(name);
     }
+
+    // needed for Jackson to see and save the internal map
+    public Map<String, T> getVariables() {
+        return variables;
+    }
+
 }

@@ -1,13 +1,26 @@
 package entity.scripting.event;
 
+import java.util.List;
+
 public class OnClickEvent extends Event{
-    private static String EVENT_TYPE = "On Click";
+    public static final String EVENT_TYPE = "On Click";
+    public static final List<String> REQUIRED_PARAMETERS = List.of();
 
     public OnClickEvent() {
-        super("On Click");
+        super(EVENT_TYPE);
     }
 
     public static String getEventType() {
         return EVENT_TYPE;
+    }
+
+    @Override
+    public boolean isRequiredParameter(String key){
+        return false;
+    }
+
+    @Override
+    public List<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 }

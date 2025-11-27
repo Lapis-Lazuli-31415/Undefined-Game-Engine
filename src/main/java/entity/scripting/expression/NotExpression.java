@@ -2,7 +2,7 @@ package entity.scripting.expression;
 
 import entity.scripting.environment.Environment;
 
-public class NotExpression extends BooleanExpression {
+public class NotExpression implements BooleanExpression {
     private BooleanExpression expression;
 
     public NotExpression(BooleanExpression expression) {

@@ -4,12 +4,24 @@ import entity.scripting.environment.Environment;
 import entity.scripting.error.EnvironmentException;
 import entity.scripting.error.WaitActionException;
 import entity.scripting.expression.NumericExpression;
+import entity.scripting.expression.value.NumericValue;
 
 public class WaitAction extends Action{
+    public static final String ACTION_TYPE = "Wait";
+
     private NumericExpression secondsExpression;
 
     public WaitAction(NumericExpression secondsExpression) {
         this.secondsExpression = secondsExpression;
+    }
+
+    public WaitAction() {
+        final NumericExpression DEFAULT_SECOND = new NumericValue(0);
+        new WaitAction(DEFAULT_SECOND);
+    }
+
+    public static String getEventType() {
+        return ACTION_TYPE;
     }
 
     @Override
