@@ -8,6 +8,7 @@ import entity.Transform;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
+import use_case.Sprites.Import.ImportSpriteInteractor;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -41,6 +42,7 @@ public class HomeView extends javax.swing.JFrame {
         this.assetLibViewModel = assetLibViewModel;
 
         wireImportSpriteUseCase();
+        loadExistingAssets();
         initComponents();
         setupAssetLibListener();
         setupImportSpriteListener();
@@ -60,8 +62,8 @@ public class HomeView extends javax.swing.JFrame {
                 new interface_adapter.Sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
 
             // create interactor
-            use_case.Sprites.ImportSpriteInteractor interactor =
-                new use_case.Sprites.ImportSpriteInteractor(
+            ImportSpriteInteractor interactor =
+                new ImportSpriteInteractor(
                     spriteDAO,
                     presenter,
                     assetLibViewModel.getAssetLib()
@@ -437,6 +439,36 @@ public class HomeView extends javax.swing.JFrame {
         spritesContent.revalidate();
         spritesContent.repaint();
     }
+    private void loadExistingAssets() {
+        try {
+            // Create DAO to access uploads directory
+            data_access.FileSystemSpriteDataAccessObject spriteDAO =
+                    new data_access.FileSystemSpriteDataAccessObject();
+
+            // Get all existing image files
+            java.util.List<java.io.File> existingImages = spriteDAO.getAllExistingImages();
+
+            // Load each image into the asset library
+            for (java.io.File imageFile : existingImages) {
+                try {
+                    // Create Image entity from file path
+                    entity.Image image = new entity.Image(imageFile.toPath());
+
+                    // Add to asset library
+                    assetLibViewModel.getAssetLib().add(image);
+                } catch (Exception e) {
+                    // Log error but continue loading other images
+                    System.err.println("Failed to load image: " + imageFile.getName() + " - " + e.getMessage());
+                }
+            }
+        } catch (java.io.IOException e) {
+            JOptionPane.showMessageDialog(null,
+                    "Failed to load existing sprites: " + e.getMessage(),
+                    "Loading Error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
 
     private void openLocalSpriteImport() {
         JFileChooser fileChooser = new JFileChooser();

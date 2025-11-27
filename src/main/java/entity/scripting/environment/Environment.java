@@ -76,7 +76,20 @@ public class Environment {
 
         VariableMap<?> variableMap = variables.get(variableType);
 
-        variableMap.unset(name);
+        variableMap.delete(name);
+    }
+
+    public <T> boolean contains(Variable<T> variable) {
+        String variableType = variable.getVariableType();
+        String name = variable.getName();
+
+        if (!variables.containsKey(variableType)){
+            return false;
+        }
+
+        VariableMap<?> variableMap = variables.get(variableType);
+
+        return variableMap.contains(name);
     }
 
     // needed for Jackson to see and save the internal map
