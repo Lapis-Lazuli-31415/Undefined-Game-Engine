@@ -12,6 +12,10 @@ public class TriggerManagerState {
         triggers = new ArrayList<>();
     }
 
+    public int getTriggerCount() {
+        return triggers.size();
+    }
+
     public void addTrigger(String event, Map<String, String> eventParameters,
                            List<String> conditions, List<String> actions) {
         TriggerState triggerState = new TriggerState(event, eventParameters, conditions, actions);

@@ -44,6 +44,29 @@ public class GameObject {
         this.environments=environments;
     }
 
+    public GameObject(String id,
+                      String name,
+                      boolean active,
+                      ArrayList<Property> properties,
+                      Environment environments,
+                      Transform transform,
+                      TriggerManager triggerManager) {
+        this.id = id;
+        this.name = name;
+        this.active = active;
+
+        // keep signature, but handle null safely
+        if (properties != null) {
+            this.properties = properties;
+        } else {
+            this.properties = new ArrayList<>();
+        }
+
+        this.environments = environments;
+        this.transform = transform;
+        this.triggerManager = triggerManager;
+    }
+
 
     // --- Basic getters/setters ---
 

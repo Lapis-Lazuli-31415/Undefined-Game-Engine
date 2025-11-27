@@ -1,10 +1,14 @@
 package view;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Vector;
 import javax.swing.*;
 
 import entity.GameObject;
 import entity.Transform;
+import entity.scripting.TriggerManager;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
@@ -29,7 +33,15 @@ public class HomeView extends javax.swing.JFrame {
 
     // Demo wiring
     private ScenePanel scenePanel;
-    private static GameObject DEMO_OBJECT;
+    private static GameObject DEMO_OBJECT = new GameObject(
+            "demo-1",
+            "Demo Sprite",
+            true,
+            new ArrayList<>(),
+            null,
+            new Transform(new Vector<Double>(Arrays.asList(0.0, 0.0)), 0f, new Vector<Double>(Arrays.asList(1.0, 1.0))),
+            new TriggerManager()
+    );
     private TransformViewModel transformViewModel;
     private TransformController transformController;
 
@@ -283,13 +295,6 @@ public class HomeView extends javax.swing.JFrame {
 
         Transform transform = new Transform(pos, 0f, scale);
 
-        DEMO_OBJECT = new GameObject(
-                "demo-1",
-                "Demo Sprite",
-                true,
-                new java.util.ArrayList<>(),
-                null
-        );
         DEMO_OBJECT.setTransform(transform);
 
         // Create view model
