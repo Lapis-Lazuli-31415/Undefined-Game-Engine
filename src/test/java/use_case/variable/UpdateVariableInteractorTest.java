@@ -169,6 +169,36 @@ class UpdateVariableInteractorTest {
     }
 
     @Test
+    void testUpdateExistingNumericVariableAsBooleanShouldFail() throws Exception {
+        // First: create a numeric variable
+        UpdateVariableInputData numericInput = new UpdateVariableInputData(
+                "x", "123", false, "Numeric"
+        );
+        interactor.execute(numericInput);
+
+        // Ensure first update succeeded
+        assertTrue(presenter.isSuccessCalled);
+        presenter.reset();
+
+        // Second: try to update x as a Boolean
+        UpdateVariableInputData booleanInput = new UpdateVariableInputData(
+                "x", "true", false, "Boolean"
+        );
+
+        interactor.execute(booleanInput);
+
+        // Expect failure
+        assertTrue(presenter.isFailureCalled, "Failure view should be called");
+        assertTrue(presenter.errorMessage.contains("Invalid"),
+                "Error message should indicate invalid update");
+
+        // Ensure original numeric value is unchanged in the environment
+        NumericVariable x = new NumericVariable("x", false);
+        assertEquals(123.0, localEnv.get(x));
+    }
+
+
+    @Test
     void testUpdateVariable_InvalidBooleanValue() {
         UpdateVariableInputData input = new UpdateVariableInputData(
                 "flag", "maybe", false, "Boolean"

@@ -44,6 +44,33 @@ public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
 
         Environment targetEnv = inputData.isGlobal() ? globalEnv : localEnv;
 
+        // check type
+        boolean numericExists = false;
+        boolean booleanExists = false;
+
+        try{
+            targetEnv.get(new NumericVariable(name, inputData.isGlobal()));
+            numericExists = true;
+        } catch (EnvironmentException ignored) { }
+
+        try{
+            targetEnv.get(new BooleanVariable(name, inputData.isGlobal()));
+            booleanExists = true;
+        } catch (EnvironmentException ignored) { }
+
+        if (numericExists && type.equals("Boolean")) {
+            presenter.prepareFailureView(
+                    "Invalid update: existing Numeric variable '" + name + "' cannot be updated as Boolean.");
+            return;
+        }
+
+        if (booleanExists && type.equals("Numeric")) {
+            presenter.prepareFailureView(
+                    "Invalid update: existing Boolean variable '" + name + "' cannot be updated as Numeric."
+            );
+            return;
+        }
+
         try {
             handleType(targetEnv, inputData, name, type, rawValue);
         } catch (EnvironmentException e) {
