@@ -1,41 +1,39 @@
 {
-  "project_name" : {
-    "id" : "proj-001",
-    "name" : "project_name",
-    "global_environment" : {
-      "variables" : { }
-    },
-    "assets" : [ {
-      "id" : "cc4b3385-1941-4682-93af-569f3f463fe1",
-      "name" : "bear.png",
-      "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png"
-    } ],
-    "scenes" : [ {
-      "id" : "scene-01",
-      "name" : "Forest Level",
-      "game_objects" : [ {
-        "id" : "obj-bear",
-        "name" : "Bear",
-        "active" : true,
-        "properties" : [ {
-          "visible" : true,
-          "opacity" : 100,
-          "zindex" : 0,
-          "width" : 2670,
-          "height" : 2028,
-          "image" : "cc4b3385-1941-4682-93af-569f3f463fe1"
-        } ],
-        "transform" : {
-          "rotation" : 45.0,
-          "x" : 100.0,
-          "y" : 200.0,
-          "scale_x" : 1.0,
-          "scale_y" : 1.0
-        },
-        "environment" : {
-          "variables" : { }
-        }
-      } ]
+  "id" : "proj-001",
+  "name" : "project_name",
+  "global_environment" : {
+    "variables" : { }
+  },
+  "assets" : [ {
+    "id" : "1cdee0d4-ccfc-4c8d-b646-2b395e1f41e9",
+    "name" : "bear.png",
+    "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png"
+  } ],
+  "scenes" : [ {
+    "id" : "scene-01",
+    "name" : "Forest Level",
+    "game_objects" : [ {
+      "id" : "obj-bear",
+      "name" : "Bear",
+      "active" : true,
+      "properties" : [ {
+        "visible" : true,
+        "opacity" : 100,
+        "width" : 2670,
+        "height" : 2028,
+        "zindex" : 0,
+        "image" : "1cdee0d4-ccfc-4c8d-b646-2b395e1f41e9"
+      } ],
+      "transform" : {
+        "rotation" : 45.0,
+        "x" : 100.0,
+        "y" : 200.0,
+        "scale_x" : 1.0,
+        "scale_y" : 1.0
+      },
+      "environment" : {
+        "variables" : { }
+      }
     } ]
-  }
+  } ]
 }

@@ -1,5 +1,6 @@
 package data_access.saving;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -37,12 +38,21 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
      */
     @Override
     public void save(Project project) throws IOException {
-        // create a Map to get the root key: "project_name" (FOR NOW!!)
-        // TODO: make it so the root key is the actual project name
-        Map<String, Project> rootObject = Collections.singletonMap(project.getName(), project);
 
-        // write to file (e.g., "database.json")
         File file = new File("test.json");
-        mapper.writeValue(file, rootObject);
+        mapper.writeValue(file, project);
     }
+
+    /**
+     * Loads the single project contained in the JSON file.
+     *
+     * @param jsonFile The file to read (e.g., new File("test.json"))
+     * @return The Project object found in the file.
+     * @throws IOException If the file is missing or the format is wrong.
+     */
+    public Project load(File jsonFile) throws IOException {
+        return mapper.readValue(jsonFile, Project.class);
+    }
+
+
 }
