@@ -6,7 +6,7 @@
       "variables" : { }
     },
     "assets" : [ {
-      "id" : "e3941f1d-9826-4209-aa9d-12a05a8b4624",
+      "id" : "80dde4ef-6bb8-4037-9a6c-d5c0d87493ad",
       "name" : "bear.png",
       "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png",
       "width" : 2670,
@@ -23,7 +23,7 @@
           "visible" : true,
           "opacity" : 100,
           "zindex" : 0,
-          "image" : "e3941f1d-9826-4209-aa9d-12a05a8b4624"
+          "image" : "80dde4ef-6bb8-4037-9a6c-d5c0d87493ad"
         } ],
         "transform" : {
           "rotation" : 45.0,

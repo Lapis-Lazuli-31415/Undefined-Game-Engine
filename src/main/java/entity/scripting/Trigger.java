@@ -14,14 +14,19 @@ public class Trigger {
     private List<Action> actions;
     private boolean active;
 
-    public Trigger(Event event) {
+    public Trigger(Event event, boolean active) {
         this.event = event;
         conditions = new ArrayList<>();
         actions = new ArrayList<>();
+        this.active = active;
     }
 
     public Event getEvent() {
         return event;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
     public List<Condition> getConditions() {
@@ -36,16 +41,32 @@ public class Trigger {
         conditions.add(condition);
     }
 
+    public void setCondition(int index, Condition condition) {
+        conditions.set(index, condition);
+    }
+
     public void addAction(Action action) {
         actions.add(action);
+    }
+
+    public void setAction(int index, Action action) {
+        actions.set(index, action);
     }
 
     public void deleteCondition(Condition condition) {
         conditions.remove(condition);
     }
 
+    public void deleteCondition(int index){
+        conditions.remove(index);
+    }
+
     public void deleteAction(Action action) {
         actions.remove(action);
+    }
+
+    public void deleteAction(int index){
+        actions.remove(index);
     }
 
     public boolean isActive() {

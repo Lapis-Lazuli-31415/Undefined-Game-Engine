@@ -1,6 +1,9 @@
 package view;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Vector;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.*;
@@ -8,6 +11,7 @@ import javax.swing.*;
 import entity.GameObject;
 import entity.Scene;
 import entity.Transform;
+import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
 import interface_adapter.preview.PreviewController;
 import interface_adapter.preview.PreviewState;
@@ -46,7 +50,15 @@ public class HomeView extends javax.swing.JFrame {
 
     // Demo wiring
     private ScenePanel scenePanel;
-    private GameObject demoObject;
+    private static GameObject DEMO_OBJECT = new GameObject(
+            "demo-1",
+            "Demo Sprite",
+            true,
+            new ArrayList<>(),
+            null,
+            new Transform(new Vector<Double>(Arrays.asList(0.0, 0.0)), 0f, new Vector<Double>(Arrays.asList(1.0, 1.0))),
+            new TriggerManager()
+    );
     private TransformViewModel transformViewModel;
     private TransformController transformController;
     // ===== ADDED BY CHENG: Preview system fields =====
@@ -54,6 +66,11 @@ public class HomeView extends javax.swing.JFrame {
     private PreviewViewModel previewViewModel;
     private PreviewWindow currentPreview;  // Track current preview window
 // ===== END ADDED BY CHENG =====
+
+    // TODO: Delete this after gameObject selection is implemented
+    public static GameObject getDemoGameObject() {
+        return DEMO_OBJECT;
+    }
 
     public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
@@ -137,7 +154,7 @@ public class HomeView extends javax.swing.JFrame {
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(new JMenu("Project"));
         menuBar.add(new JMenu("Scene"));
-//        menuBar.add(new JMenu("Debug")); no need for now
+        menuBar.add(new JMenu("Debug"));
         menuBar.add(new JMenu("Save"));
         menuBar.add(new JMenu("Help"));
         setJMenuBar(menuBar);
@@ -293,6 +310,14 @@ public class HomeView extends javax.swing.JFrame {
         // ====== RIGHT PROPERTIES PANEL ======
         propertiesPanel = new PropertiesPanel();
 
+        // Wrap in a scroll pane so the whole properties area scrolls
+        JScrollPane propertiesScroll = new JScrollPane(propertiesPanel);
+        propertiesScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
+        propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
+        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
+
 
         // ====== DEMO ENTITY + LAYERS WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
@@ -305,20 +330,13 @@ public class HomeView extends javax.swing.JFrame {
 
         Transform transform = new Transform(pos, 0f, scale);
 
-        demoObject = new GameObject(
-                "demo-1",
-                "Demo Sprite",
-                true,
-                new java.util.ArrayList<>(),
-                null
-        );
-        demoObject.setTransform(transform);
+        DEMO_OBJECT.setTransform(transform);
 
         // Create view model
         transformViewModel = new TransformViewModel();
 
         // Use app-layer factory to wire up use case
-        transformController = TransformUseCaseFactory.create(demoObject, transformViewModel);
+        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
         // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);

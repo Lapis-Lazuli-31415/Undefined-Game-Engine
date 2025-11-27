@@ -3,7 +3,9 @@ package app;
 import data_access.saving.JsonProjectDataAccess;
 import entity.*;
 import entity.Image;
+import entity.scripting.Trigger;
 import entity.scripting.environment.Environment;
+import entity.scripting.event.EmptyEvent;
 import interface_adapter.saving.SaveProjectController;
 import interface_adapter.saving.SaveProjectPresenter;
 import interface_adapter.saving.SaveProjectViewModel;
@@ -77,6 +79,8 @@ public class SaveDemo {
 
         // properties (Sprite)
         ArrayList<Property> properties = new ArrayList<>();
+
+
 
         try {
             // pass the path to the image
