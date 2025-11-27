@@ -430,7 +430,7 @@ public class HomeView extends javax.swing.JFrame {
         if (displayName.length() > 10) {
             displayName = displayName.substring(0, 8) + "...";
         }
-        JLabel nameLabel = new JLabel(displayName);
+        final JLabel nameLabel = new JLabel(displayName);
         nameLabel.setForeground(Color.WHITE);
         nameLabel.setFont(new Font("Arial", Font.PLAIN, 9));
         nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -443,12 +443,17 @@ public class HomeView extends javax.swing.JFrame {
                 cardPanel.setBackground(new Color(80, 80, 80));
                 cardPanel.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 2));
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 cardPanel.setBackground(new Color(60, 60, 60));
                 cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
             }
+
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 System.out.println("Selected sprite: " + image.getName());
+                if (scenePanel != null) {
+                    scenePanel.addOrSelectSprite(image);
+                }
             }
         });
 
@@ -458,6 +463,7 @@ public class HomeView extends javax.swing.JFrame {
         spritesContent.revalidate();
         spritesContent.repaint();
     }
+
     private void loadExistingAssets() {
         try {
             // Create DAO to access uploads directory
@@ -475,12 +481,14 @@ public class HomeView extends javax.swing.JFrame {
 
                     // Add to asset library
                     assetLibViewModel.getAssetLib().add(image);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     // Log error but continue loading other images
                     System.err.println("Failed to load image: " + imageFile.getName() + " - " + e.getMessage());
                 }
             }
-        } catch (java.io.IOException e) {
+        }
+        catch (java.io.IOException e) {
             JOptionPane.showMessageDialog(null,
                     "Failed to load existing sprites: " + e.getMessage(),
                     "Loading Error",
