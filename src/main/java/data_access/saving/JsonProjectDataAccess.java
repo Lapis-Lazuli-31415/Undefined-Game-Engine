@@ -22,8 +22,6 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);// enable pretty printing (for indentation)
 
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);// force snake_case
-
-        mapper.addMixIn(Color.class, ColorMixIn.class); // remove useless colour stuff
     }
 
     @Override
