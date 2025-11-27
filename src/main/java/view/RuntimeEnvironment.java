@@ -10,7 +10,7 @@ import entity.scripting.event.OnClickEvent;
 import entity.scripting.environment.Environment;
 import entity.Eventlistener.EventListener;
 import entity.InputManager;
-import interface_adapter.preview.EventListenerFactory;
+import interface_adapter.runtime.EventListenerFactory;
 import interface_adapter.runtime.TriggerExecutionPresenter;
 import use_case.runtime.TriggerExecutionInputBoundary;
 import use_case.runtime.TriggerExecutionInputData;

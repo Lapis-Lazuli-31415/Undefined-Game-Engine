@@ -137,7 +137,7 @@ public class HomeView extends javax.swing.JFrame {
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(new JMenu("Project"));
         menuBar.add(new JMenu("Scene"));
-        menuBar.add(new JMenu("Debug"));
+//        menuBar.add(new JMenu("Debug")); no need for now
         menuBar.add(new JMenu("Save"));
         menuBar.add(new JMenu("Help"));
         setJMenuBar(menuBar);

@@ -1,4 +1,4 @@
-package interface_adapter.preview;
+package interface_adapter.runtime;
 
 import entity.GameObject;
 import entity.InputManager;

@@ -3,10 +3,9 @@ package view;
 import entity.Scene;
 import entity.GameObject;
 import entity.scripting.environment.Environment;
-import entity.scripting.Trigger;
 import entity.scripting.TriggerManager;
 import entity.InputManager;
-import interface_adapter.preview.EventListenerFactory;
+import interface_adapter.runtime.EventListenerFactory;
 
 import javax.swing.*;
 import java.awt.*;
