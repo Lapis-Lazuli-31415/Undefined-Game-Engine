@@ -6,12 +6,22 @@ import java.util.Arrays;
 import java.util.Vector;
 import javax.swing.*;
 
+import entity.GameController;
 import entity.GameObject;
 import entity.Transform;
 import entity.scripting.TriggerManager;
+import entity.scripting.environment.Environment;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
+import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.UpdateVariableController;
+import interface_adapter.variable.UpdateVariablePresenter;
+import interface_adapter.variable.DeleteVariablePresenter;
+import interface_adapter.variable.VariableViewModel;
+import use_case.variable.UpdateVariableInteractor;
+import use_case.variable.DeleteVariableInteractor;
+
 import use_case.Sprites.Import.ImportSpriteInteractor;
 
 public class HomeView extends javax.swing.JFrame {
@@ -31,6 +41,17 @@ public class HomeView extends javax.swing.JFrame {
     // sprite import
     private interface_adapter.Sprites.ImportSpriteController importSpriteController;
     private interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel;
+
+    // set global environment owned by controller, and local environment
+    private final Environment globalEnvironment = new Environment();
+
+    //global controller for the scene
+    private final GameController gameController = new GameController(globalEnvironment);
+
+    // UI wiring
+    private VariableViewModel variableViewModel;
+    private UpdateVariableController updateVariableController;
+    private DeleteVariableController deleteVariableController;
 
     // Demo wiring
     private ScenePanel scenePanel;
@@ -307,6 +328,10 @@ public class HomeView extends javax.swing.JFrame {
 
         DEMO_OBJECT.setTransform(transform);
 
+        //attach a local environment to the demo object
+        Environment localEnvironment = new Environment();
+        DEMO_OBJECT.setEnvironment(localEnvironment);
+
         // Create view model
         transformViewModel = new TransformViewModel();
 
@@ -336,21 +361,38 @@ public class HomeView extends javax.swing.JFrame {
             );
         }
 
+        // wiring variable use case
+        variableViewModel = new VariableViewModel();
+
+        UpdateVariablePresenter updatePresenter = new UpdateVariablePresenter(variableViewModel);
+        DeleteVariablePresenter deletePresenter = new DeleteVariablePresenter(variableViewModel);
+
+        Environment localEnv = DEMO_OBJECT.getEnvironment();
+
+        UpdateVariableInteractor updateVariableInteractor =
+                new UpdateVariableInteractor(globalEnvironment, localEnv, updatePresenter);
+
+        DeleteVariableInteractor deleteVariableInteractor =
+                new DeleteVariableInteractor(globalEnvironment, localEnv, deletePresenter);
+
+        updateVariableController = new UpdateVariableController(updateVariableInteractor);
+        deleteVariableController = new DeleteVariableController(deleteVariableInteractor);
 
 
-        centerPanel.remove(openFolderPanel);
-        centerPanel.add(scenePanel, BorderLayout.CENTER);
-        centerPanel.revalidate();
-        centerPanel.repaint();
-
-        // Bind properties panel to VM + controller
-        if (propertiesPanel instanceof PropertiesPanel props) {
-            props.bind(
-                    transformViewModel,
-                    transformController,
-                    () -> scenePanel.repaint()
-            );
-        }
+//
+//        centerPanel.remove(openFolderPanel);
+//        centerPanel.add(scenePanel, BorderLayout.CENTER);
+//        centerPanel.revalidate();
+//        centerPanel.repaint();
+//
+//        // Bind properties panel to VM + controller
+//        if (propertiesPanel instanceof PropertiesPanel props) {
+//            props.bind(
+//                    transformViewModel,
+//                    transformController,
+//                    () -> scenePanel.repaint()
+//            );
+//        }
 
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);
