@@ -17,11 +17,10 @@ public class Image extends Asset {
         this.width = image != null ? image.getWidth() : 0;
         this.height = image != null ? image.getHeight() : 0;
     }
-  
- 
-    @ JsonIgnore // #TODO: IGNORE FOR NOW!! wait till misa does image
+
+    @JsonIgnore
     public BufferedImage getBufferedImage() {
-        return bimg;
+        return image;  // Fix: bimg -> image
     }
 
     protected int getWidth() {
@@ -30,9 +29,5 @@ public class Image extends Asset {
 
     protected int getHeight() {
         return height;
-    }
-
-    public BufferedImage getBufferedImage() {
-        return image;
     }
 }
