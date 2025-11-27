@@ -1,4 +1,4 @@
-package use_case.create_scene;
+package use_case.component_management.create_scene;
 
 public class CreateSceneInputData {
     private final String name;

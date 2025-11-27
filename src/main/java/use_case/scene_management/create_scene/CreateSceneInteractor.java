@@ -1,4 +1,4 @@
-package use_case.create_scene;
+package use_case.component_management.create_scene;
 
 import entity.Scene;
 
@@ -34,4 +34,3 @@ public class CreateSceneInteractor implements CreateSceneInputBoundary {
             );
         }
     }
-}
