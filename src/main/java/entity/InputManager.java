@@ -369,6 +369,9 @@ public class InputManager extends KeyAdapter {
 
     private String getKeyText(KeyEvent e) {
         int keyCode = e.getKeyCode();
+        if (keyCode == KeyEvent.VK_SPACE) {
+            return "SPACE";
+        }
         String keyText = KeyEvent.getKeyText(keyCode);
         return keyText.toUpperCase();
     }

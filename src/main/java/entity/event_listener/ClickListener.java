@@ -79,23 +79,6 @@ public class ClickListener implements EventListener {
      *
      * @return true if mouse click is inside GameObject's bounding box
      */
-//    private boolean isClickedByCollision() {
-//        if (inputManager == null || gameObject == null) {
-//            return false;
-//        }
-//
-//        // Check if mouse was just clicked (left button)
-//        if (!inputManager.isLeftClickJustPressed()) {
-//            return false;
-//        }
-//
-//        // Get mouse position
-//        int mouseX = inputManager.getMouseX();
-//        int mouseY = inputManager.getMouseY();
-//
-//        // Check collision with GameObject's bounding box
-//        return isPointInGameObject(mouseX, mouseY);
-//    }
     private boolean isClickedByCollision() {
         if (inputManager == null || gameObject == null) {
             return false;
