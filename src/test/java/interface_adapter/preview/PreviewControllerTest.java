@@ -16,6 +16,8 @@ import use_case.preview.PreviewInputBoundary;
 import use_case.preview.PreviewInputData;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,17 +37,20 @@ class PreviewControllerTest {
         controller = new PreviewController(testInteractor);
     }
 
+    // Helper method to create OnKeyPressEvent with a key
+    private OnKeyPressEvent createKeyPressEvent(String key) {
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        event.addEventParameter("Key", key);
+        return event;
+    }
+
     // ========== PreviewController Tests ==========
 
     @Test
     void execute_withValidScene_callsInteractor() {
-        // Arrange
         Scene scene = createTestScene();
-
-        // Act
         controller.execute(scene);
 
-        // Assert
         assertTrue(testInteractor.executeCalled);
         assertNotNull(testInteractor.lastInputData);
         assertEquals(scene, testInteractor.lastInputData.getScene());
@@ -53,20 +58,15 @@ class PreviewControllerTest {
 
     @Test
     void execute_withNullScene_callsInteractor() {
-        // Act
         controller.execute(null);
 
-        // Assert
         assertTrue(testInteractor.executeCalled);
         assertNull(testInteractor.lastInputData.getScene());
     }
 
     @Test
     void stop_callsInteractorStop() {
-        // Act
         controller.stop();
-
-        // Assert
         assertTrue(testInteractor.stopCalled);
     }
 
@@ -74,100 +74,92 @@ class PreviewControllerTest {
 
     @Test
     void innerFactory_createKeyPressListener_returnsKeyPressListener() {
-        // Arrange
         InputManager inputManager = new InputManager();
         PreviewController.EventListenerFactory factory =
                 new PreviewController.EventListenerFactory(inputManager);
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = createKeyPressEvent("W");
 
-        // Act
         EventListener listener = factory.createKeyPressListener(event);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof KeyPressListener);
     }
 
     @Test
     void innerFactory_createClickListener_returnsClickListener() {
-        // Arrange
         InputManager inputManager = new InputManager();
         PreviewController.EventListenerFactory factory =
                 new PreviewController.EventListenerFactory(inputManager);
 
-        // Act
         EventListener listener = factory.createClickListener("TestButton");
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
     }
 
     @Test
     void innerFactory_createListener_withOnKeyPressEvent_returnsKeyPressListener() {
-        // Arrange
         InputManager inputManager = new InputManager();
         PreviewController.EventListenerFactory factory =
                 new PreviewController.EventListenerFactory(inputManager);
-        OnKeyPressEvent event = new OnKeyPressEvent("A");
+        OnKeyPressEvent event = createKeyPressEvent("A");
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createListener(event, obj);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof KeyPressListener);
     }
 
     @Test
     void innerFactory_createListener_withOnClickEvent_returnsClickListener() {
-        // Arrange
         InputManager inputManager = new InputManager();
         PreviewController.EventListenerFactory factory =
                 new PreviewController.EventListenerFactory(inputManager);
         OnClickEvent event = new OnClickEvent();
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createListener(event, obj);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
     }
 
     @Test
     void innerFactory_createListener_withOnClickEventAndNullGameObject_returnsClickListener() {
-        // Arrange
         InputManager inputManager = new InputManager();
         PreviewController.EventListenerFactory factory =
                 new PreviewController.EventListenerFactory(inputManager);
         OnClickEvent event = new OnClickEvent();
 
-        // Act
         EventListener listener = factory.createListener(event, null);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
     }
 
     @Test
     void innerFactory_createListener_withUnknownEventType_returnsNull() {
-        // Arrange
         InputManager inputManager = new InputManager();
         PreviewController.EventListenerFactory factory =
                 new PreviewController.EventListenerFactory(inputManager);
 
         // Create a custom Event that's not OnKeyPress or OnClick
-        Event unknownEvent = new Event("Unknown") {};
+        Event unknownEvent = new Event("Unknown") {
+            @Override
+            public boolean isRequiredParameter(String key) {
+                return false;
+            }
+
+            @Override
+            public List<String> getRequiredParameters() {
+                return Collections.emptyList();
+            }
+        };
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createListener(unknownEvent, obj);
 
-        // Assert
         assertNull(listener);
     }
 

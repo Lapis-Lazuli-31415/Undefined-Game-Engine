@@ -748,13 +748,13 @@ public class HomeView extends javax.swing.JFrame {
         );
         testObject.setTransform(transform);
 
-//        // 3. Add OnClickEvent trigger so button mode will create a button
-//        entity.scripting.event.OnClickEvent clickEvent = new entity.scripting.event.OnClickEvent();
-//        entity.scripting.Trigger clickTrigger = new entity.scripting.Trigger(clickEvent);
-//        clickTrigger.addAction(new entity.scripting.action.PrintAction("Object clicked!"));
-//        testObject.getTriggerManager().getAllTriggers().add(clickTrigger);
+        // 3. Add OnClickEvent trigger so button mode will create a button
+        entity.scripting.event.OnClickEvent clickEvent = new entity.scripting.event.OnClickEvent();
+        entity.scripting.Trigger clickTrigger = new entity.scripting.Trigger(clickEvent, true);
+        clickTrigger.addAction(new entity.scripting.action.PrintAction("Object clicked!"));
+        testObject.getTriggerManager().getAllTriggers().add(clickTrigger);
 
-        objects.add(testObject);
+        objects.add(DEMO_OBJECT);
 
         return new Scene(
                 "demo-scene",

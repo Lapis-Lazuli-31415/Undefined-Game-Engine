@@ -37,7 +37,7 @@ public class ClickDetectionTest {
                 testObject.setTransform(transform);
 
                 OnClickEvent clickEvent = new OnClickEvent();
-                Trigger clickTrigger = new Trigger(clickEvent);
+                Trigger clickTrigger = new Trigger(clickEvent, true);
 
                 clickTrigger.addAction(new PrintAction("SUCCESS! Object was clicked!"));
 

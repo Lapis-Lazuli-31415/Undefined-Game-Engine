@@ -26,6 +26,6 @@ public class OnKeyPressEvent extends Event{
     }
 
     public String getKey() {
-        return getEventParameter("key");
+        return getEventParameter("Key");
     }
 }

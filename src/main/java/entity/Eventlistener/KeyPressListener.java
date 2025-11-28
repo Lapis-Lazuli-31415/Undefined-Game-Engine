@@ -34,8 +34,7 @@ public class KeyPressListener implements EventListener {
      */
     public KeyPressListener(OnKeyPressEvent event, InputManager inputManager) {
         // Normalize the key: convert to uppercase and trim whitespace
-        this.normalizedKey = normalizeKey(event.getKey());
-        this.inputManager = inputManager;
+        this.normalizedKey = normalizeKey(event.getEventParameter("Key"));        this.inputManager = inputManager;
 
         System.out.println("  [KeyPressListener] Created for key: '" +
                 event.getKey() + "' → normalized: '" + normalizedKey + "'");

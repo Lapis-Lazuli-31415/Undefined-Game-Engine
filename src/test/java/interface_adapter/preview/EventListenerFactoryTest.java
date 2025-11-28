@@ -7,12 +7,15 @@ import entity.Eventlistener.ClickListener;
 import entity.Eventlistener.EventListener;
 import entity.Eventlistener.KeyPressListener;
 import entity.scripting.environment.Environment;
+import entity.scripting.event.Event;
 import entity.scripting.event.OnClickEvent;
 import entity.scripting.event.OnKeyPressEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,63 +35,67 @@ class EventListenerFactoryTest {
         inputManager = new InputManager();
         factory = new EventListenerFactory(inputManager);
     }
+
+    // Helper method to create OnKeyPressEvent with a key
+    private OnKeyPressEvent createKeyPressEvent(String key) {
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        event.addEventParameter("Key", key);
+        return event;
+    }
+
     @Test
     void createListener_withUnknownEventType_returnsNull() {
-        // Arrange - create a custom Event that's not OnKeyPress or OnClick
-        entity.scripting.event.Event unknownEvent = new entity.scripting.event.Event("Unknown") {
-            // Anonymous subclass of Event
+        // Create a custom Event that's not OnKeyPress or OnClick
+        Event unknownEvent = new Event("Unknown") {
+            @Override
+            public boolean isRequiredParameter(String key) {
+                return false;
+            }
+
+            @Override
+            public List<String> getRequiredParameters() {
+                return Collections.emptyList();
+            }
         };
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createListener(unknownEvent, obj);
 
-        // Assert
         assertNull(listener);
     }
+
     @Test
     void constructor_defaultCollisionDetection_isTrue() {
-        // Assert
         assertTrue(factory.isUsingCollisionDetection());
     }
 
     @Test
     void constructor_withCollisionDetectionFalse_isFalse() {
-        // Arrange
         EventListenerFactory factoryNoCollision = new EventListenerFactory(inputManager, false);
-
-        // Assert
         assertFalse(factoryNoCollision.isUsingCollisionDetection());
     }
 
     @Test
     void getInputManager_returnsSameInstance() {
-        // Assert
         assertSame(inputManager, factory.getInputManager());
     }
 
     @Test
     void createKeyPressListener_returnsKeyPressListener() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = createKeyPressEvent("W");
 
-        // Act
         EventListener listener = factory.createKeyPressListener(event);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof KeyPressListener);
     }
 
     @Test
     void createClickListener_collisionMode_returnsCollisionListener() {
-        // Arrange
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createClickListener(obj);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
         assertTrue(((ClickListener) listener).isUsingCollisionDetection());
@@ -96,14 +103,11 @@ class EventListenerFactoryTest {
 
     @Test
     void createClickListener_buttonMode_returnsButtonListener() {
-        // Arrange
         EventListenerFactory buttonFactory = new EventListenerFactory(inputManager, false);
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = buttonFactory.createClickListener(obj);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
         assertFalse(((ClickListener) listener).isUsingCollisionDetection());
@@ -111,10 +115,8 @@ class EventListenerFactoryTest {
 
     @Test
     void createButtonClickListener_returnsButtonModeListener() {
-        // Act
         EventListener listener = factory.createButtonClickListener("TestButton");
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
         assertFalse(((ClickListener) listener).isUsingCollisionDetection());
@@ -122,13 +124,10 @@ class EventListenerFactoryTest {
 
     @Test
     void createCollisionClickListener_returnsCollisionModeListener() {
-        // Arrange
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createCollisionClickListener(obj);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
         assertTrue(((ClickListener) listener).isUsingCollisionDetection());
@@ -136,38 +135,30 @@ class EventListenerFactoryTest {
 
     @Test
     void createListener_withOnKeyPressEvent_returnsKeyPressListener() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("A");
+        OnKeyPressEvent event = createKeyPressEvent("A");
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createListener(event, obj);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof KeyPressListener);
     }
 
     @Test
     void createListener_withOnClickEvent_returnsClickListener() {
-        // Arrange
         OnClickEvent event = new OnClickEvent();
         GameObject obj = createTestGameObject();
 
-        // Act
         EventListener listener = factory.createListener(event, obj);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
     }
 
     @Test
     void createClickListener_withNullGameObject_handlesGracefully() {
-        // Act
         EventListener listener = factory.createClickListener(null);
 
-        // Assert
         assertNotNull(listener);
         assertTrue(listener instanceof ClickListener);
     }

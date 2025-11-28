@@ -33,7 +33,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_triggerWithNoConditionsAndOneAction_executesSuccessfully() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(), true);
         trigger.addAction(new PrintAction("Test action"));
 
         GameObject obj = createTestGameObject();
@@ -54,7 +54,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withNullEnvironmentInGameObject_createsNewEnvironment() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true);
         trigger.addAction(new PrintAction("Test"));
 
         // Create GameObject with null environment
@@ -78,7 +78,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withConditionThatThrowsException_returnsFalse() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         // Add a condition that throws exception
@@ -104,7 +104,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withConditionThatFails_presentsConditionsNotMet() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         // Add a condition that always fails
@@ -133,7 +133,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withConditionThatPasses_executesActions() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         // Add a condition that always passes
@@ -161,7 +161,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withMultipleConditionsAllPass_executesActions() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         // Add multiple conditions that all pass
@@ -189,7 +189,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withMultipleConditionsOneFails_doesNotExecuteActions() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         // Add conditions - one will fail
@@ -222,7 +222,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withActionThatThrowsException_presentsError() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
 
         // Add an action that throws exception
         trigger.addAction(new entity.scripting.action.Action() {
@@ -247,7 +247,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_triggerWithMultipleActions_executesAllActions() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Action 1"));
         trigger.addAction(new PrintAction("Action 2"));
         trigger.addAction(new PrintAction("Action 3"));
@@ -268,7 +268,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_triggerWithNoActions_executesSuccessfullyWithZeroActions() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         // No actions added
 
         GameObject obj = createTestGameObject();
@@ -287,7 +287,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withNullGameObject_executesWithUnknownName() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         Environment globalEnv = new Environment();
@@ -305,7 +305,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withOnKeyPressEvent_returnsCorrectEventName() {
         // Arrange
-        Trigger trigger = new Trigger(new OnKeyPressEvent("W"));
+        Trigger trigger = new Trigger(new OnKeyPressEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         GameObject obj = createTestGameObject();
@@ -324,7 +324,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void execute_withOnClickEvent_returnsCorrectEventName() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         trigger.addAction(new PrintAction("Test"));
 
         GameObject obj = createTestGameObject();
@@ -343,7 +343,7 @@ class TriggerExecutionInteractorTest {
     @Test
     void getters_returnCorrectValues() {
         // Arrange
-        Trigger trigger = new Trigger(new OnClickEvent());
+        Trigger trigger = new Trigger(new OnClickEvent(),true );
         GameObject obj = createTestGameObject();
         Environment globalEnv = new Environment();
 

@@ -26,165 +26,152 @@ class KeyPressListenerTest {
         dummyComponent = new JPanel();
     }
 
+    // Helper method to create OnKeyPressEvent with a key
+    private OnKeyPressEvent createKeyPressEvent(String key) {
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        event.addEventParameter("Key", key);
+        return event;
+    }
+
     @Test
     void isTriggered_keyNotPressed_returnsFalse() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = createKeyPressEvent("W");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
-        // Assert
         assertFalse(listener.isTriggered());
     }
+
     @Test
     void normalizeKey_nullKey_returnsUnknown() {
-        OnKeyPressEvent event = new OnKeyPressEvent(null);
+        OnKeyPressEvent event = new OnKeyPressEvent();
+        // Don't add any parameter - key will be empty/null
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("UNKNOWN", listener.getKey());
     }
 
     @Test
     void normalizeKey_emptyKey_returnsUnknown() {
-        OnKeyPressEvent event = new OnKeyPressEvent("");
+        OnKeyPressEvent event = createKeyPressEvent("");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("UNKNOWN", listener.getKey());
     }
 
     @Test
     void normalizeKey_whitespaceKey_returnsUnknown() {
-        OnKeyPressEvent event = new OnKeyPressEvent("   ");
+        OnKeyPressEvent event = createKeyPressEvent("   ");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("UNKNOWN", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_spacebar_returnsSpace() {
-        OnKeyPressEvent event = new OnKeyPressEvent("spacebar");
+        OnKeyPressEvent event = createKeyPressEvent("spacebar");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("SPACE", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_spaceBar_returnsSpace() {
-        OnKeyPressEvent event = new OnKeyPressEvent("space bar");
+        OnKeyPressEvent event = createKeyPressEvent("space bar");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("SPACE", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_esc_returnsEscape() {
-        OnKeyPressEvent event = new OnKeyPressEvent("esc");
+        OnKeyPressEvent event = createKeyPressEvent("esc");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("ESCAPE", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_ctrl_returnsControl() {
-        OnKeyPressEvent event = new OnKeyPressEvent("ctrl");
+        OnKeyPressEvent event = createKeyPressEvent("ctrl");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("CONTROL", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_ctl_returnsControl() {
-        OnKeyPressEvent event = new OnKeyPressEvent("ctl");
+        OnKeyPressEvent event = createKeyPressEvent("ctl");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("CONTROL", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_option_returnsAlt() {
-        OnKeyPressEvent event = new OnKeyPressEvent("option");
+        OnKeyPressEvent event = createKeyPressEvent("option");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("ALT", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_upArrow_returnsUp() {
-        OnKeyPressEvent event = new OnKeyPressEvent("uparrow");
+        OnKeyPressEvent event = createKeyPressEvent("uparrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("UP", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_upArrowWithSpace_returnsUp() {
-        OnKeyPressEvent event = new OnKeyPressEvent("up arrow");
+        OnKeyPressEvent event = createKeyPressEvent("up arrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("UP", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_downArrow_returnsDown() {
-        OnKeyPressEvent event = new OnKeyPressEvent("downarrow");
+        OnKeyPressEvent event = createKeyPressEvent("downarrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("DOWN", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_downArrowWithSpace_returnsDown() {
-        OnKeyPressEvent event = new OnKeyPressEvent("down arrow");
+        OnKeyPressEvent event = createKeyPressEvent("down arrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("DOWN", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_leftArrow_returnsLeft() {
-        OnKeyPressEvent event = new OnKeyPressEvent("leftarrow");
+        OnKeyPressEvent event = createKeyPressEvent("leftarrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("LEFT", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_leftArrowWithSpace_returnsLeft() {
-        OnKeyPressEvent event = new OnKeyPressEvent("left arrow");
+        OnKeyPressEvent event = createKeyPressEvent("left arrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("LEFT", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_rightArrow_returnsRight() {
-        OnKeyPressEvent event = new OnKeyPressEvent("rightarrow");
+        OnKeyPressEvent event = createKeyPressEvent("rightarrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("RIGHT", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_rightArrowWithSpace_returnsRight() {
-        OnKeyPressEvent event = new OnKeyPressEvent("right arrow");
+        OnKeyPressEvent event = createKeyPressEvent("right arrow");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("RIGHT", listener.getKey());
     }
 
     @Test
     void handleKeyVariations_return_returnsEnter() {
-        OnKeyPressEvent event = new OnKeyPressEvent("return");
+        OnKeyPressEvent event = createKeyPressEvent("return");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
         assertEquals("ENTER", listener.getKey());
     }
+
     @Test
     void isTriggered_correctKeyPressed_returnsTrue() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = createKeyPressEvent("W");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
 
-        // Simulate key press
         KeyEvent keyEvent = new KeyEvent(
                 dummyComponent, KeyEvent.KEY_PRESSED,
                 System.currentTimeMillis(), 0,
@@ -192,17 +179,14 @@ class KeyPressListenerTest {
         );
         inputManager.keyPressed(keyEvent);
 
-        // Assert
         assertTrue(listener.isTriggered());
     }
 
     @Test
     void isTriggered_wrongKeyPressed_returnsFalse() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = createKeyPressEvent("W");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
 
-        // Press different key
         KeyEvent keyEvent = new KeyEvent(
                 dummyComponent, KeyEvent.KEY_PRESSED,
                 System.currentTimeMillis(), 0,
@@ -210,38 +194,30 @@ class KeyPressListenerTest {
         );
         inputManager.keyPressed(keyEvent);
 
-        // Assert
         assertFalse(listener.isTriggered());
     }
 
     @Test
     void isTriggered_afterUpdate_returnsFalse() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = createKeyPressEvent("W");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
 
-        // Press key
         KeyEvent keyEvent = new KeyEvent(
                 dummyComponent, KeyEvent.KEY_PRESSED,
                 System.currentTimeMillis(), 0,
                 KeyEvent.VK_W, 'W'
         );
         inputManager.keyPressed(keyEvent);
-
-        // Update clears just pressed state
         inputManager.update();
 
-        // Assert - should be false after update
         assertFalse(listener.isTriggered());
     }
 
     @Test
     void isTriggered_caseInsensitive() {
-        // Arrange - listener for lowercase 'w'
-        OnKeyPressEvent event = new OnKeyPressEvent("w");
+        OnKeyPressEvent event = createKeyPressEvent("w");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
 
-        // Press uppercase W
         KeyEvent keyEvent = new KeyEvent(
                 dummyComponent, KeyEvent.KEY_PRESSED,
                 System.currentTimeMillis(), 0,
@@ -249,45 +225,20 @@ class KeyPressListenerTest {
         );
         inputManager.keyPressed(keyEvent);
 
-        // Assert
         assertTrue(listener.isTriggered());
     }
 
-//    @Test
-//    void isTriggered_spaceKey() {
-//        // Arrange
-//        OnKeyPressEvent event = new OnKeyPressEvent("Space");
-//        KeyPressListener listener = new KeyPressListener(event, inputManager);
-//
-//        // Press space
-//        KeyEvent keyEvent = new KeyEvent(
-//                dummyComponent, KeyEvent.KEY_PRESSED,
-//                System.currentTimeMillis(), 0,
-//                KeyEvent.VK_SPACE, ' '
-//        );
-//        inputManager.keyPressed(keyEvent);
-//
-//        // Assert
-//        assertTrue(listener.isTriggered());
-//    }
-
     @Test
     void getKey_returnsNormalizedKey() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("w");
+        OnKeyPressEvent event = createKeyPressEvent("w");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
-        // Assert - should be uppercase
         assertEquals("W", listener.getKey());
     }
 
     @Test
     void toString_containsKeyName() {
-        // Arrange
-        OnKeyPressEvent event = new OnKeyPressEvent("W");
+        OnKeyPressEvent event = createKeyPressEvent("W");
         KeyPressListener listener = new KeyPressListener(event, inputManager);
-
-        // Assert
         assertTrue(listener.toString().contains("W"));
     }
 }

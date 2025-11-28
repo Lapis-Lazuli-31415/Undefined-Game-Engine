@@ -623,7 +623,7 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         Dimension naturalSize = super.getPreferredSize();
 
         // Return a dimension with your FIXED WIDTH (260), but the DYNAMIC HEIGHT
-        return new Dimension(290, naturalSize.height);
+        return new Dimension(400, naturalSize.height);
     }
 
     @Override
