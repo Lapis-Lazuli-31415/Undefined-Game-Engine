@@ -1,22 +1,26 @@
 package entity;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class Scene {
 
-    private final String id;
+    private final UUID id;
     private final String name;
-    private ArrayList<GameObject> gameObjects;
-    private Music backgroundMusic;
+    private List<GameObject> gameObjects;
 
-    public Scene(String id, String name, ArrayList<GameObject> gameObjects, Music backgroundMusic) {
+    public Scene(UUID id, String name, List<GameObject> gameObjects) {
         this.id = id;
         this.name = name;
         this.gameObjects = gameObjects;
-        this.backgroundMusic = backgroundMusic;
     }
 
-    public String getId() {
+    public static Scene create(String name) {
+        return new Scene(UUID.randomUUID(), name, new ArrayList<>());
+    }
+
+    public UUID getId() {
         return id;
     }
 
@@ -24,7 +28,21 @@ public class Scene {
         return name;
     }
 
-    public ArrayList<GameObject> getGameObjects() {
+    public List<GameObject> getGameObjects() {
         return gameObjects;
     }
+
+    public List<String> getGameObjectNames() {
+        if (gameObjects == null) return List.of();
+        return gameObjects.stream()
+                .map(GameObject::getName)
+                .toList();
+    }
+
+    public boolean hasGameObject(String name) {
+        if (gameObjects == null) return false;
+        return gameObjects.stream()
+                .anyMatch(go -> go.getName().equals(name));
+    }
+
 }
