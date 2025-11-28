@@ -288,12 +288,11 @@ public class GameCanvas extends JPanel {
         super.paintComponent(g);
 
         // Only render sprites in sprite mode
-        if (!useButtonMode) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
             renderGameObjects(g2d);
-        }
+
 
         // Draw FPS counter (both modes)
         if (showFps) {
@@ -301,16 +300,51 @@ public class GameCanvas extends JPanel {
         }
     }
 
+//    /**
+//     * Render all game objects (SPRITE MODE).
+//     *
+//     * @param g2d Graphics2D context
+//     */
+//    private void renderGameObjects(Graphics2D g2d) {
+//        for (GameObject obj : gameObjects) {
+//            if (!obj.isActive()) continue;
+//            renderGameObject(g2d, obj);
+//        }
+//    }
     /**
      * Render all game objects (SPRITE MODE).
+     * Objects are sorted by zIndex - lower zIndex renders first (behind),
+     * higher zIndex renders last (in front).
      *
      * @param g2d Graphics2D context
      */
     private void renderGameObjects(Graphics2D g2d) {
-        for (GameObject obj : gameObjects) {
+        // Create a copy and sort by zIndex
+        ArrayList<GameObject> sortedObjects = new ArrayList<>(gameObjects);
+        sortedObjects.sort((a, b) -> {
+            int zA = getZIndex(a);
+            int zB = getZIndex(b);
+            return Integer.compare(zA, zB);  // Lower zIndex first (behind)
+        });
+
+        for (GameObject obj : sortedObjects) {
             if (!obj.isActive()) continue;
             renderGameObject(g2d, obj);
         }
+    }
+
+    /**
+     * Get zIndex from GameObject's SpriteRenderer.
+     *
+     * @param obj The game object
+     * @return zIndex value, or 0 if not found
+     */
+    private int getZIndex(GameObject obj) {
+        SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
+        if (spriteRenderer != null) {
+            return spriteRenderer.getZIndex();
+        }
+        return 0;  // Default zIndex
     }
 
     /**

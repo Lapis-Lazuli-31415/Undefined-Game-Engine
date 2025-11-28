@@ -130,6 +130,44 @@ public class GameObject {
         properties.remove(property);
     }
 
+// --- Copy method for preview isolation ---
 
+    /**
+     * Create a deep copy of this GameObject.
+     *
+     * @return A new GameObject with copied state
+     */
+    public GameObject copy() {
+        // Copy properties
+        ArrayList<Property> copiedProperties = new ArrayList<>();
+        for (Property prop : this.properties) {
+            if (prop instanceof SpriteRenderer) {
+                copiedProperties.add(((SpriteRenderer) prop).copy());
+            } else {
+                copiedProperties.add(prop);
+            }
+        }
+
+        // Copy transform
+        Transform copiedTransform = (this.transform != null) ? this.transform.copy() : null;
+
+        // Copy environment
+        Environment copiedEnvironment = (this.environments != null) ? this.environments.copy() : new Environment();
+
+        // Copy trigger manager
+        TriggerManager copiedTriggerManager = (this.triggerManager != null)
+                ? this.triggerManager.copy()
+                : new TriggerManager();
+
+        return new GameObject(
+                this.id,
+                this.name,
+                this.active,
+                copiedProperties,
+                copiedEnvironment,
+                copiedTransform,
+                copiedTriggerManager
+        );
+    }
 
 }

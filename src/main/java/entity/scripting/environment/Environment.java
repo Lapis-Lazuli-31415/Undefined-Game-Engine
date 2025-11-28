@@ -96,4 +96,16 @@ public class Environment {
     public Map<String, VariableMap<?>> getVariables() {
         return variables;
     }
+    // --- Copy method for preview isolation ---
+
+    /**
+     * Create a deep copy of this Environment.
+     * For preview, we start with a fresh environment.
+     *
+     * @return A new empty Environment
+     */
+    public Environment copy() {
+        // For preview, start fresh - variables will be set during gameplay
+        return new Environment();
+    }
 }

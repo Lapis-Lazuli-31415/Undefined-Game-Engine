@@ -595,7 +595,6 @@ public class HomeView extends javax.swing.JFrame {
      */
     private void onPlayClicked() {
         try {
-            // 1. Get current scene (UI responsibility)
             Scene scene = getCurrentScene();
 
             if (scene == null) {
@@ -608,8 +607,10 @@ public class HomeView extends javax.swing.JFrame {
                 return;
             }
 
-            // 2. Delegate to Controller (Clean Architecture flow starts here)
-            previewController.execute(scene);
+            // Create a deep copy for preview (changes won't affect original)
+            Scene previewScene = scene.copy();
+
+            previewController.execute(previewScene);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -621,7 +622,6 @@ public class HomeView extends javax.swing.JFrame {
             );
         }
     }
-
     /**
      * Handle Stop button click
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
