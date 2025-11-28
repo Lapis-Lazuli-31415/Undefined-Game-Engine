@@ -607,10 +607,7 @@ public class HomeView extends javax.swing.JFrame {
                 return;
             }
 
-            // Create a deep copy for preview (changes won't affect original)
-            Scene previewScene = scene.copy();
-
-            previewController.execute(previewScene);
+            previewController.execute(scene);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -674,10 +671,13 @@ public class HomeView extends javax.swing.JFrame {
             }
         }
 
-        // Open preview if ready
+        // Open preview if ready - create copy here!
         if (state.isReadyToPreview() && state.getScene() != null) {
+            // Create deep copy AFTER validation passes
+            Scene previewScene = state.getScene().copy();
+
             Environment globalEnv = createGlobalEnvironment();
-            currentPreview = new PreviewWindow(state.getScene(), globalEnv);
+            currentPreview = new PreviewWindow(previewScene, globalEnv);
             currentPreview.display();
             System.out.println("✅ Preview started");
         }
