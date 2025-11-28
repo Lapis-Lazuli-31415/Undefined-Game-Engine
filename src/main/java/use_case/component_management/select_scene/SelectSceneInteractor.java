@@ -15,7 +15,7 @@ public class SelectSceneInteractor implements SelectSceneInputBoundary{
     public void selectScene(String sceneName) {
         var scene = sceneRepository.getSceneByName(sceneName);
         if (scene != null) {
-            presenter.sceneSelected(sceneName);
+            presenter.sceneSelected(scene);
         }
     }
 }
