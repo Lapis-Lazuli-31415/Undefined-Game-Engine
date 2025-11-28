@@ -1,4 +1,4 @@
-package entity.Eventlistener;
+package entity.event_listener;
 
 /**
  * EventListener - Base interface for all event listeners

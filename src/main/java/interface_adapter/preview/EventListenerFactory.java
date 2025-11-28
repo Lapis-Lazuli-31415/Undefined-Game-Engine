@@ -2,9 +2,9 @@ package interface_adapter.preview;
 
 import entity.GameObject;
 import entity.InputManager;
-import entity.Eventlistener.EventListener;
-import entity.Eventlistener.KeyPressListener;
-import entity.Eventlistener.ClickListener;
+import entity.event_listener.EventListener;
+import entity.event_listener.KeyPressListener;
+import entity.event_listener.ClickListener;
 import entity.scripting.event.Event;
 import entity.scripting.event.OnKeyPressEvent;
 import entity.scripting.event.OnClickEvent;

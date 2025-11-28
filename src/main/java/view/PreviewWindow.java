@@ -190,7 +190,7 @@ public class PreviewWindow {
                     JButton objButton = new JButton(obj.getName());
                     objButton.addActionListener(e -> {
                         // Get the click listener and trigger it
-                        entity.Eventlistener.ClickListener listener = canvas.getClickListener(obj);
+                        entity.event_listener.ClickListener listener = canvas.getClickListener(obj);
                         if (listener != null) {
                             listener.notifyClicked();
                             System.out.println("Button clicked: " + obj.getName());

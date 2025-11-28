@@ -1,4 +1,4 @@
-package entity.Eventlistener;
+package entity.event_listener;
 
 import entity.GameObject;
 import entity.Transform;

@@ -7,7 +7,7 @@ import entity.Property;
 import entity.scripting.Trigger;
 import entity.scripting.TriggerManager;
 import entity.scripting.event.OnClickEvent;
-import entity.Eventlistener.ClickListener;
+import entity.event_listener.ClickListener;
 import entity.scripting.environment.Environment;
 import interface_adapter.preview.EventListenerFactory;
 
