@@ -310,7 +310,6 @@ public class PreviewWindow {
 
         // Request focus for keyboard input
         canvas.requestFocus();
-
         // Auto-start the game loop
         runtime.start();
 

@@ -288,12 +288,11 @@ public class GameCanvas extends JPanel {
         super.paintComponent(g);
 
         // Only render sprites in sprite mode
-        if (!useButtonMode) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
             renderGameObjects(g2d);
-        }
+
 
         // Draw FPS counter (both modes)
         if (showFps) {

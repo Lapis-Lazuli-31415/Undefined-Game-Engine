@@ -29,6 +29,16 @@ import use_case.Sprites.Import.ImportSpriteInteractor;
 //import interface_adapter.preview.PreviewState;
 //import java.beans.PropertyChangeEvent;
 //import java.beans.PropertyChangeListener;
+import entity.scripting.event.OnClickEvent;
+import entity.scripting.event.OnKeyPressEvent;
+import entity.scripting.action.WaitAction;
+import entity.scripting.action.NumericVariableAssignmentAction;
+import entity.scripting.action.BooleanVariableAssignmentAction;
+import entity.scripting.expression.value.NumericValue;
+import entity.scripting.expression.value.BooleanValue;
+import entity.scripting.expression.variable.NumericVariable;
+import entity.scripting.expression.variable.BooleanVariable;
+import entity.scripting.Trigger;
 //// ===== END ADDED BY CHENG =====
 
 public class HomeView extends javax.swing.JFrame {
@@ -66,7 +76,6 @@ public class HomeView extends javax.swing.JFrame {
     private PreviewController previewController;
     private PreviewViewModel previewViewModel;
     private PreviewWindow currentPreview;  // Track current preview window
-    private EditorState editorState;
 // ===== END ADDED BY CHENG =====
 
     // TODO: Delete this after gameObject selection is implemented
@@ -74,9 +83,8 @@ public class HomeView extends javax.swing.JFrame {
         return DEMO_OBJECT;
     }
 
-    public HomeView(EditorState editorState) {
+    public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
-        this.editorState = editorState;
         initializePreviewSystem();  // ===== ADDED BY CHENG =====
     }
 
@@ -688,10 +696,159 @@ public class HomeView extends javax.swing.JFrame {
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      */
     private Scene getCurrentScene() {
-        if (editorState == null) {
-            return null;
-        }
-        return editorState.getCurrentScene();
+//        if (editorState == null) {
+//            return null;
+//        }
+//        return editorState.getCurrentScene();
+        return createTestScene();
+    }
+// ========== 添加到 HomeView 类中 ==========
+
+    /**
+     * Create a test scene with triggers for testing preview functionality
+     * TEMPORARY: Used until getCurrentScene() is properly implemented by teammates
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     */
+    private Scene createTestScene() {
+        // 1. Create Scene
+        Scene scene = Scene.create("TestScene");
+
+        // 2. Create GameObject - Player (OnClickEvent + WaitAction)
+        GameObject player = new GameObject(
+                "player1",
+                "Player",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        // Set transform for player
+        Vector<Double> playerPos = new Vector<>(Arrays.asList(100.0, 100.0));
+        Vector<Double> playerScale = new Vector<>(Arrays.asList(1.0, 1.0));
+        player.setTransform(new Transform(playerPos, 0f, playerScale));
+
+        // Create OnClick Trigger: Click to wait 1 second
+        Trigger clickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+        clickTrigger.addAction(new entity.scripting.action.WaitAction(
+                new entity.scripting.expression.value.NumericValue(1.0)
+        ));
+        player.getTriggerManager().addTrigger(clickTrigger);
+
+        scene.addGameObject(player);
+
+        // 3. Create GameObject - Enemy (OnKeyPressEvent + NumericVariableAssignmentAction)
+        GameObject enemy = new GameObject(
+                "enemy1",
+                "Enemy",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> enemyPos = new Vector<>(Arrays.asList(300.0, 200.0));
+        Vector<Double> enemyScale = new Vector<>(Arrays.asList(1.0, 1.0));
+        enemy.setTransform(new Transform(enemyPos, 0f, enemyScale));
+
+        // Create OnKeyPress Trigger: Press SPACE to set score = 100
+        entity.scripting.event.OnKeyPressEvent keyEvent = new entity.scripting.event.OnKeyPressEvent();
+        keyEvent.addEventParameter("Key", "SPACE");
+        Trigger keyPressTrigger = new Trigger(keyEvent, true);
+
+        entity.scripting.expression.variable.NumericVariable scoreVar =
+                new entity.scripting.expression.variable.NumericVariable("score", false);
+        entity.scripting.action.NumericVariableAssignmentAction scoreAction =
+                new entity.scripting.action.NumericVariableAssignmentAction(
+                        scoreVar,
+                        new entity.scripting.expression.value.NumericValue(100.0)
+                );
+        keyPressTrigger.addAction(scoreAction);
+
+        enemy.getTriggerManager().addTrigger(keyPressTrigger);
+        scene.addGameObject(enemy);
+
+        // 4. Create GameObject - Coin (OnClickEvent + BooleanVariableAssignmentAction)
+        GameObject coin = new GameObject(
+                "coin1",
+                "Coin",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> coinPos = new Vector<>(Arrays.asList(500.0, 150.0));
+        Vector<Double> coinScale = new Vector<>(Arrays.asList(1.0, 1.0));
+        coin.setTransform(new Transform(coinPos, 0f, coinScale));
+
+        // Create OnClick Trigger: Click to set collected = true
+        Trigger coinClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+
+        entity.scripting.expression.variable.BooleanVariable collectedVar =
+                new entity.scripting.expression.variable.BooleanVariable("collected", true);
+        entity.scripting.action.BooleanVariableAssignmentAction collectAction =
+                new entity.scripting.action.BooleanVariableAssignmentAction(
+                        collectedVar,
+                        new entity.scripting.expression.value.BooleanValue(true)
+                );
+        coinClickTrigger.addAction(collectAction);
+
+        coin.getTriggerManager().addTrigger(coinClickTrigger);
+        scene.addGameObject(coin);
+
+        // 5. Create GameObject - Boss (OnKeyPressEvent + Multiple Actions)
+        GameObject boss = new GameObject(
+                "boss1",
+                "Boss",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> bossPos = new Vector<>(Arrays.asList(400.0, 400.0));
+        Vector<Double> bossScale = new Vector<>(Arrays.asList(2.0, 2.0));
+        boss.setTransform(new Transform(bossPos, 0f, bossScale));
+
+        // Create complex Trigger: Press E to trigger multiple actions
+        entity.scripting.event.OnKeyPressEvent bossKeyEvent = new entity.scripting.event.OnKeyPressEvent();
+        bossKeyEvent.addEventParameter("Key", "E");
+        Trigger bossKeyTrigger = new Trigger(bossKeyEvent, true);
+
+        // Action 1: Set bossHealth = 500
+        entity.scripting.expression.variable.NumericVariable healthVar =
+                new entity.scripting.expression.variable.NumericVariable("bossHealth", true);
+        bossKeyTrigger.addAction(
+                new entity.scripting.action.NumericVariableAssignmentAction(
+                        healthVar,
+                        new entity.scripting.expression.value.NumericValue(500.0)
+                )
+        );
+
+        // Action 2: Set bossActive = true
+        entity.scripting.expression.variable.BooleanVariable activeVar =
+                new entity.scripting.expression.variable.BooleanVariable("bossActive", true);
+        bossKeyTrigger.addAction(
+                new entity.scripting.action.BooleanVariableAssignmentAction(
+                        activeVar,
+                        new entity.scripting.expression.value.BooleanValue(true)
+                )
+        );
+
+        // Action 3: Wait 2 seconds
+        bossKeyTrigger.addAction(
+                new entity.scripting.action.WaitAction(
+                        new entity.scripting.expression.value.NumericValue(2.0)
+                )
+        );
+
+        boss.getTriggerManager().addTrigger(bossKeyTrigger);
+        scene.addGameObject(boss);
+
+        System.out.println("✅ Created test scene with " + scene.getGameObjects().size() + " GameObjects");
+        System.out.println("   Player: OnClick → Wait 1s");
+        System.out.println("   Enemy: OnKeyPress(SPACE) → Set score=100");
+        System.out.println("   Coin: OnClick → Set collected=true");
+        System.out.println("   Boss: OnKeyPress(E) → Set health=500, active=true, Wait 2s");
+
+        return scene;
     }
 
     /**
@@ -710,8 +867,7 @@ public class HomeView extends javax.swing.JFrame {
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                EditorState editorState = new EditorState();
-                new HomeView(editorState).setVisible(true);
+                new HomeView().setVisible(true);
             }
         });
     }
