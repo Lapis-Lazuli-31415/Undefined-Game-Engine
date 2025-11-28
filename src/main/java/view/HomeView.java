@@ -35,7 +35,7 @@ public class HomeView extends javax.swing.JFrame {
     // ====== FIELDS ======
     private JPanel leftSidebar;
     private JPanel assetsPanel;
-    private JPanel filesystemPanel;
+    private JPanel gameComponentsPanel;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
@@ -232,16 +232,16 @@ public class HomeView extends javax.swing.JFrame {
 //        assetsPanel.add(audioHeader);
 //        assetsPanel.add(audioScroll);
 
-        // ====== FILESYSTEM PANEL ======
-        filesystemPanel = new JPanel();
-        filesystemPanel.setLayout(new BorderLayout());
-        filesystemPanel.setBorder(BorderFactory.createTitledBorder("FileSystem"));
-        filesystemPanel.add(new JTextField("Search Files"), BorderLayout.NORTH);
+        // ====== Game Components PANEL ======
+        gameComponentsPanel = new JPanel();
+        gameComponentsPanel.setLayout(new BorderLayout());
+        gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
+        gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
 
         // ====== Assemble Sidebar ======
         leftSidebar.add(assetsPanel);
         leftSidebar.add(Box.createVerticalStrut(10));
-        leftSidebar.add(filesystemPanel);
+        leftSidebar.add(gameComponentsPanel);
 
         // ====== CENTER PANEL ======
         centerPanel = new JPanel();
@@ -255,8 +255,8 @@ public class HomeView extends javax.swing.JFrame {
         JLabel tabLabel = new JLabel("   Start");
         tabLabel.setForeground(Color.WHITE);
 
-        JButton addTabButton = new JButton("+");
-        addTabButton.setPreferredSize(new Dimension(45, 35));
+//        JButton addTabButton = new JButton("+");
+//        addTabButton.setPreferredSize(new Dimension(45, 35));
 
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
@@ -282,7 +282,7 @@ public class HomeView extends javax.swing.JFrame {
         rightTabControls.add(stopButton);
 
         tabBar.add(tabLabel, BorderLayout.WEST);
-        tabBar.add(addTabButton, BorderLayout.CENTER);
+//      tabBar.add(addTabButton, BorderLayout.CENTER);
         tabBar.add(rightTabControls, BorderLayout.EAST);
 
         // Center placeholder content (Open Folder)
