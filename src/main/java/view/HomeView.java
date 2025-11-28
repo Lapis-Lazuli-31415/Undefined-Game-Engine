@@ -13,6 +13,7 @@ import entity.Scene;
 import entity.Transform;
 import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
+import interface_adapter.EditorState;
 import interface_adapter.preview.PreviewController;
 import interface_adapter.preview.PreviewState;
 import interface_adapter.preview.PreviewViewModel;
@@ -20,15 +21,15 @@ import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import use_case.Sprites.Import.ImportSpriteInteractor;
-// ===== ADDED BY CHENG: Imports for preview functionality =====
-import entity.Scene;
-import entity.scripting.environment.Environment;
-import interface_adapter.preview.PreviewController;
-import interface_adapter.preview.PreviewViewModel;
-import interface_adapter.preview.PreviewState;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-// ===== END ADDED BY CHENG =====
+//// ===== ADDED BY CHENG: Imports for preview functionality =====
+//
+//import entity.scripting.environment.Environment;
+//import interface_adapter.preview.PreviewController;
+//import interface_adapter.preview.PreviewViewModel;
+//import interface_adapter.preview.PreviewState;
+//import java.beans.PropertyChangeEvent;
+//import java.beans.PropertyChangeListener;
+//// ===== END ADDED BY CHENG =====
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -65,6 +66,7 @@ public class HomeView extends javax.swing.JFrame {
     private PreviewController previewController;
     private PreviewViewModel previewViewModel;
     private PreviewWindow currentPreview;  // Track current preview window
+    private EditorState editorState;
 // ===== END ADDED BY CHENG =====
 
     // TODO: Delete this after gameObject selection is implemented
@@ -72,8 +74,9 @@ public class HomeView extends javax.swing.JFrame {
         return DEMO_OBJECT;
     }
 
-    public HomeView() {
+    public HomeView(EditorState editorState) {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
+        this.editorState = editorState;
         initializePreviewSystem();  // ===== ADDED BY CHENG =====
     }
 
@@ -681,18 +684,14 @@ public class HomeView extends javax.swing.JFrame {
     }
 
     /**
-     * Get current scene from scene manager
+     * Get current scene from EditorState
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
-     *
-     * TODO: Replace with actual SceneManager implementation when available
-     * Currently returns a test scene for development
      */
     private Scene getCurrentScene() {
-        // TODO: Replace with actual implementation
-        // Example: return sceneManager.getCurrentScene();
-
-        // For testing: create a test scene using Lynn's demoObject
-        return createTestScene();
+        if (editorState == null) {
+            return null;
+        }
+        return editorState.getCurrentScene();
     }
 
     /**
@@ -704,71 +703,15 @@ public class HomeView extends javax.swing.JFrame {
      */
     private Environment createGlobalEnvironment() {
         Environment env = new Environment();
-
-        // Add initial global variables here if needed
-        // Example:
-        // try {
-        //     env.set("game", "score", Integer.class, 0);
-        //     env.set("game", "level", Integer.class, 1);
-        // } catch (Exception e) {
-        //     e.printStackTrace();
-        // }
-
         return env;
-    }
-
-    /**
-     * Create test scene (temporary implementation)
-     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
-     *
-     * TODO: Remove this when getCurrentScene() is properly implemented
-     */
-    private Scene createTestScene() {
-        java.util.ArrayList<GameObject> objects = new java.util.ArrayList<>();
-
-        // 1. Create Transform - position in center
-        java.util.Vector<Double> position = new java.util.Vector<>();
-        position.add(400.0);  // x
-        position.add(300.0);  // y
-
-        java.util.Vector<Double> scale = new java.util.Vector<>();
-        scale.add(1.0);
-        scale.add(1.0);
-
-        Transform transform = new Transform(position, 0f, scale);
-
-        // 2. Create GameObject
-        java.util.ArrayList<entity.Property> properties = new java.util.ArrayList<>();
-        GameObject testObject = new GameObject(
-                "test-1",
-                "TestObject",
-                true,
-                properties,
-                null
-        );
-        testObject.setTransform(transform);
-
-        // 3. Add OnClickEvent trigger so button mode will create a button
-        entity.scripting.event.OnClickEvent clickEvent = new entity.scripting.event.OnClickEvent();
-        entity.scripting.Trigger clickTrigger = new entity.scripting.Trigger(clickEvent, true);
-        clickTrigger.addAction(new entity.scripting.action.PrintAction("Object clicked!"));
-        testObject.getTriggerManager().getAllTriggers().add(clickTrigger);
-
-        objects.add(DEMO_OBJECT);
-
-        return new Scene(
-                "demo-scene",
-                "Demo Scene",
-                objects,
-                null
-        );
     }
     // ========== END PREVIEW SYSTEM METHODS - ADDED BY CHENG ==========
 
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new HomeView().setVisible(true);
+                EditorState editorState = new EditorState();
+                new HomeView(editorState).setVisible(true);
             }
         });
     }

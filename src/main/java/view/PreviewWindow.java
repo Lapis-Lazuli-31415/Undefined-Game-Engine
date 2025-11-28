@@ -9,6 +9,7 @@ import interface_adapter.preview.EventListenerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * PreviewWindow - Auto-starts when opened via Play button.
@@ -145,8 +146,7 @@ public class PreviewWindow {
             }
 
             canvas.setUseButtonMode(newMode);
-            canvas.setGameObjects(scene.getGameObjects());
-
+            canvas.setGameObjects(new ArrayList<>(scene.getGameObjects()));
             // Update object buttons panel
             updateObjectButtonsPanel();
 
@@ -270,21 +270,21 @@ public class PreviewWindow {
 
         // Load GameObjects
         System.out.println("Loading " + scene.getGameObjects().size() + " GameObjects...");
-        canvas.setGameObjects(scene.getGameObjects());
+        canvas.setGameObjects(new ArrayList<>(scene.getGameObjects()));
 
         // Count triggers
         int triggerCount = countTotalTriggers();
         System.out.println("Found " + triggerCount + " triggers");
 
-        // Check for background music
-        if (scene.getBackgroundMusic() != null) {
-            System.out.println("Background music: " + scene.getBackgroundMusic());
-        } else {
-            System.out.println("No background music");
-        }
-        // Update object buttons panel
-        updateObjectButtonsPanel();
-        System.out.println("=== Scene Loaded ===\n");
+//        // Check for background music
+//        if (scene.getBackgroundMusic() != null) {
+//            System.out.println("Background music: " + scene.getBackgroundMusic());
+//        } else {
+//            System.out.println("No background music");
+//        }
+//        // Update object buttons panel
+//        updateObjectButtonsPanel();
+//        System.out.println("=== Scene Loaded ===\n");
     }
 
     /**

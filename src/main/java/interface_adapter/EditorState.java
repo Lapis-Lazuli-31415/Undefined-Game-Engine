@@ -1,7 +1,7 @@
 package interface_adapter;
 
-import entities.Scene;
-import entities.GameObject;
+import entity.Scene;
+import entity.GameObject;
 
 public class EditorState {
 
