@@ -5,31 +5,36 @@ import entity.GameObject;
 
 public class EditorState {
 
-    private Scene currentScene;
-    private GameObject currentGameObject;
+    private static Scene currentScene;
+    private static GameObject currentGameObject;
 
-    public Scene getCurrentScene() {
+    // --- Scene getters/setters ---
+    public static Scene getCurrentScene() {
         return currentScene;
     }
 
-    public void setCurrentScene(Scene scene) {
-        this.currentScene = scene;
-        this.currentGameObject = null; // reset game object when scene changes
+    public static void setCurrentScene(Scene scene) {
+        currentScene = scene;
+
+        // Optional: clear selected game object if it doesn't belong to the new scene
+        if (currentGameObject != null && (scene == null || !scene.hasGameObject(currentGameObject))) {
+            currentGameObject = null;
+        }
     }
 
-    public GameObject getCurrentGameObject() {
+    // --- GameObject getters/setters ---
+    public static GameObject getCurrentGameObject() {
         return currentGameObject;
     }
 
-    public void setCurrentGameObject(GameObject gameObject) {
-        this.currentGameObject = gameObject;
+    public static void setCurrentGameObject(GameObject gameObject) {
+        currentGameObject = gameObject;
     }
 
-    public boolean hasScene() {
-        return currentScene != null;
-    }
-
-    public boolean hasGameObject() {
-        return currentGameObject != null;
+    // --- Convenience reset method ---
+    public static void reset() {
+        currentScene = null;
+        currentGameObject = null;
     }
 }
+

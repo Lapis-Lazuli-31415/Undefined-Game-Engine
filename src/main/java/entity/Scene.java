@@ -39,11 +39,13 @@ public class Scene {
                 .toList();
     }
 
-    public boolean hasGameObject(String name) {
-        if (gameObjects == null) return false;
-        return gameObjects.stream()
-                .anyMatch(go -> go.getName().equals(name));
+    public boolean hasGameObject(GameObject gameObject) {
+        if (gameObject == null) {
+            return false;
+        }
+        return gameObjects.contains(gameObject);
     }
+
 
 
     /**
