@@ -103,8 +103,8 @@ public class EventListenerFactory {
      * @return Appropriate EventListener, or null if event type unknown
      */
     public EventListener createListener(Event event, GameObject gameObject) {
-        if (event instanceof OnKeyPressEvent) {
-            return createKeyPressListener((OnKeyPressEvent) event);
+        if (event instanceof OnKeyPressEvent onKeyPressEvent) {
+            return createKeyPressListener(onKeyPressEvent);
         } else if (event instanceof OnClickEvent) {
             return createClickListener(gameObject);
         }

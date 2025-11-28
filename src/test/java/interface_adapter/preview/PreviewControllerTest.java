@@ -168,7 +168,7 @@ class PreviewControllerTest {
     private Scene createTestScene() {
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(createTestGameObject());
-        return new Scene("test-id", "Test Scene", objects, null);
+        return new Scene("test-id", "Test Scene", objects);
     }
 
     private GameObject createTestGameObject() {
