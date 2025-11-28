@@ -32,6 +32,12 @@ public class HomeView extends javax.swing.JFrame {
     private interface_adapter.Sprites.ImportSpriteController importSpriteController;
     private interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel;
 
+    // unsplash import
+    private interface_adapter.Sprites.ImportSpriteFromUnsplashController unsplashController;
+    private interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
+    private ImportSpriteFromUnsplashView unsplashView;
+    String unsplashApiKey = System.getenv("UNSPLASH_ACCESS_KEY");       // dont forget to configure env
+
     // Demo wiring
     private ScenePanel scenePanel;
     private static GameObject DEMO_OBJECT = new GameObject(
@@ -59,6 +65,7 @@ public class HomeView extends javax.swing.JFrame {
         this.assetLibViewModel = assetLibViewModel;
 
         wireImportSpriteUseCase();
+        wireUnsplashImportUseCase();
         loadExistingAssets();
         initComponents();
         setupAssetLibListener();
@@ -92,6 +99,54 @@ public class HomeView extends javax.swing.JFrame {
         } catch (java.io.IOException e) {
             JOptionPane.showMessageDialog(null,
                 "Failed to initialize sprite import: " + e.getMessage(),
+                "Initialization Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void wireUnsplashImportUseCase() {
+        try {
+            if (unsplashApiKey == null || unsplashApiKey.trim().isEmpty()) {
+                System.err.println("UNSPLASH_ACCESS_KEY environment variable is not set. Unsplash import will be disabled.");
+                return;
+            }
+
+            // init DAOs
+            data_access.UnsplashApiDataAccessObject unsplashDAO =
+                new data_access.UnsplashApiDataAccessObject(unsplashApiKey);
+
+            data_access.FileSystemSpriteDataAccessObject spriteDAO =
+                new data_access.FileSystemSpriteDataAccessObject();
+
+            // create view model
+            unsplashViewModel = new interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel();
+
+            // create presenter
+            interface_adapter.Sprites.ImportSpriteFromUnsplashPresenter presenter =
+                new interface_adapter.Sprites.ImportSpriteFromUnsplashPresenter(unsplashViewModel, assetLibViewModel);
+
+            // create interactor
+            use_case.Sprites.Import.ImportSpriteFromUnsplashInteractor interactor =
+                new use_case.Sprites.Import.ImportSpriteFromUnsplashInteractor(
+                    unsplashDAO,
+                    spriteDAO,
+                    presenter,
+                    assetLibViewModel.getAssetLib()
+                );
+
+            // create controller
+            unsplashController = new interface_adapter.Sprites.ImportSpriteFromUnsplashController(interactor);
+
+            // create view
+            unsplashView = new ImportSpriteFromUnsplashView(unsplashViewModel, unsplashController);
+
+            System.out.println("Unsplash import initialized successfully.");
+
+        } catch (Exception e) {
+            System.err.println("Failed to initialize Unsplash import: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                "Failed to initialize Unsplash import: " + e.getMessage(),
                 "Initialization Error",
                 JOptionPane.ERROR_MESSAGE);
         }
@@ -137,6 +192,11 @@ public class HomeView extends javax.swing.JFrame {
         menuBar.add(new JMenu("Help"));
         setJMenuBar(menuBar);
 
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        JPanel homeTabContent = new JPanel(new BorderLayout());
+
         // ====== LEFT SIDEBAR (Assets + Filesystem) ======
         // NOTE: use the fields, not new local variables
         leftSidebar = new JPanel();
@@ -169,7 +229,7 @@ public class HomeView extends javax.swing.JFrame {
 
         spritesAddButton = new JButton("+");
         spritesAddButton.setMargin(new Insets(0, 4, 0, 4));
-        spritesAddButton.addActionListener(e -> openLocalSpriteImport());
+        spritesAddButton.addActionListener(e -> openSpriteImportMenu());
 
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
@@ -352,9 +412,20 @@ public class HomeView extends javax.swing.JFrame {
             );
         }
 
-        getContentPane().add(leftSidebar, BorderLayout.WEST);
-        getContentPane().add(centerPanel, BorderLayout.CENTER);
-        getContentPane().add(propertiesScroll, BorderLayout.EAST);
+        // Add all components to home tab content
+        homeTabContent.add(leftSidebar, BorderLayout.WEST);
+        homeTabContent.add(centerPanel, BorderLayout.CENTER);
+        homeTabContent.add(propertiesScroll, BorderLayout.EAST);
+
+        // Add home tab to tabbed pane
+        tabbedPane.addTab("Home", homeTabContent);
+
+        // unsplash import tab
+        if (unsplashView != null) {
+            tabbedPane.addTab("Import from Unsplash", unsplashView);
+        }
+
+        getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
         pack();
         setLocationRelativeTo(null);
@@ -496,6 +567,24 @@ public class HomeView extends javax.swing.JFrame {
     }
 
 
+    private void openSpriteImportMenu() {
+        JPopupMenu importMenu = new JPopupMenu();
+
+        JMenuItem localImport = new JMenuItem("Import from Local");
+        localImport.addActionListener(e -> openLocalSpriteImport());
+        importMenu.add(localImport);
+
+        // Only add Unsplash option if it's available
+        if (unsplashView != null) {
+            JMenuItem unsplashImport = new JMenuItem("Import from Unsplash");
+            unsplashImport.addActionListener(e -> openUnsplashImportDialog());
+            importMenu.add(unsplashImport);
+        }
+
+        // Show menu below the + button
+        importMenu.show(spritesAddButton, 0, spritesAddButton.getHeight());
+    }
+
     private void openLocalSpriteImport() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Import Sprite");
@@ -505,9 +594,24 @@ public class HomeView extends javax.swing.JFrame {
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            // call controller to import sprite
             importSpriteController.importSprite(selectedFile);
         }
+    }
+
+    private void openUnsplashImportDialog() {
+        if (unsplashView == null) {
+            JOptionPane.showMessageDialog(this,
+                "Unsplash import is not available. Please check your API key configuration.",
+                "Feature Unavailable",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Import from Unsplash", true);
+        dialog.setContentPane(unsplashView);
+        dialog.setSize(600, 400);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     public interface_adapter.assets.AssetLibViewModel getAssetLibViewModel() {
