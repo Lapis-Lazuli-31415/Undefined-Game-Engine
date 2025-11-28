@@ -9,7 +9,7 @@ public class SelectScenePresenter implements SelectSceneOutputBoundary {
     private final EditorState state;
     private final SceneSelectionListener listener;
 
-    public SelectScenePresenter(EditorState state,
+    public x(EditorState state,
                                 SceneSelectionListener listener) {
         this.state = state;
         this.listener = listener;

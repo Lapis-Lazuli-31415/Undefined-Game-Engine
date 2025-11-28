@@ -300,17 +300,6 @@ public class GameCanvas extends JPanel {
         }
     }
 
-//    /**
-//     * Render all game objects (SPRITE MODE).
-//     *
-//     * @param g2d Graphics2D context
-//     */
-//    private void renderGameObjects(Graphics2D g2d) {
-//        for (GameObject obj : gameObjects) {
-//            if (!obj.isActive()) continue;
-//            renderGameObject(g2d, obj);
-//        }
-//    }
     /**
      * Render all game objects (SPRITE MODE).
      * Objects are sorted by zIndex - lower zIndex renders first (behind),
