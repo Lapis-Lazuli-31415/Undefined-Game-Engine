@@ -8,6 +8,7 @@ import java.awt.*;
 import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
+import view.property.trigger.TriggerManagerPanel;
 
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
@@ -53,15 +54,17 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     private DefaultListModel<String> actionsModel;
     private JList<String> actionsList;
 
-    // Variables
-    private JTextField intNameField;
-    private JTextField intValueField;
-    private JTextField boolNameField;
-    private JCheckBox boolValueCheck;
+    // Variable containers – rows will just stack and the whole panel scrolls
+    private JPanel intVarsPanel;
+    private JPanel boolVarsPanel;
+    private JPanel selectedVarRow = null;
+
+
+    private final TriggerManagerPanel triggerManagerPanel;
 
     public PropertiesPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setPreferredSize(new Dimension(260, 700));
+//        setPreferredSize(new Dimension(260, 700));
         setBackground(new Color(45, 45, 45));
 
         // Outer "Properties" title with white text
@@ -71,12 +74,15 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
                 new EmptyBorder(5, 5, 5, 5)
         ));
 
+        triggerManagerPanel = new TriggerManagerPanel();
+
+        add(Box.createVerticalStrut(10));
         add(createTransformSection());
-        add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(20));
         add(createSpriteRendererSection());
-        add(Box.createVerticalStrut(10));
-        add(createTriggerSection());
-        add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(20));
+        add(triggerManagerPanel);
+        add(Box.createVerticalStrut(20));
         add(createVariableSection());
         add(Box.createVerticalGlue());
     }
@@ -168,236 +174,233 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         return panel;
     }
 
-    private JPanel createTriggerSection() {
-        JPanel panel = createSectionPanel("Trigger");
-        GridBagConstraints gbc = baseGbc();
-
-        //  EVENT DROPDOWN
-        JLabel eventLabel = createFieldLabel("Event:");
-        panel.add(eventLabel, gbc);
-
-        gbc.gridx = 1;
-        eventCombo = new JComboBox<>(new String[]{"OnClick", "OnKey"});
-        styleCombo(eventCombo);
-        panel.add(eventCombo, gbc);
-
-        //  KEY FIELD (for OnKey)
-        gbc.gridx = 0;
-        gbc.gridy++;
-        JLabel keyLabel = createFieldLabel("Key:");
-        panel.add(keyLabel, gbc);
-
-        gbc.gridx = 1;
-        keyField = smallField("Space");  // default example
-        panel.add(keyField, gbc);
-
-        //  CONDITIONS LIST
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.gridwidth = 2;
-        JLabel condLabel = createFieldLabel("Conditions:");
-        panel.add(condLabel, gbc);
-
-        gbc.gridy++;
-        conditionsModel = new DefaultListModel<>();
-        conditionsList = new JList<>(conditionsModel);
-        conditionsList.setBackground(new Color(40, 40, 40));
-        conditionsList.setForeground(Color.WHITE);
-
-        JScrollPane condScroll = new JScrollPane(conditionsList);
-        condScroll.setPreferredSize(new Dimension(200, 80));
-        panel.add(condScroll, gbc);
-
-        // Condition buttons (Add / Edit / Remove)
-        gbc.gridy++;
-        JPanel condButtons = new JPanel();
-        condButtons.setOpaque(false);
-        condButtons.setLayout(new BoxLayout(condButtons, BoxLayout.X_AXIS));
-
-        JButton addCondBtn = new JButton("Add");
-        JButton editCondBtn = new JButton("Edit");
-        JButton removeCondBtn = new JButton("Remove");
-
-        condButtons.add(addCondBtn);
-        condButtons.add(Box.createHorizontalStrut(4));
-        condButtons.add(editCondBtn);
-        condButtons.add(Box.createHorizontalStrut(4));
-        condButtons.add(removeCondBtn);
-
-        panel.add(condButtons, gbc);
-
-        // Conditions Listener
-        addCondBtn.addActionListener(e -> {
-            String expr = JOptionPane.showInputDialog(
-                    this,
-                    "Enter condition (e.g., hp > 5 or (x + 1) - 25 > 0):",
-                    "Add Condition",
-                    JOptionPane.PLAIN_MESSAGE
-            );
-            if (expr != null && !expr.isBlank()) {
-                conditionsModel.addElement(expr.trim());
-            }
-        });
-
-        editCondBtn.addActionListener(e -> {
-            int idx = conditionsList.getSelectedIndex();
-            if (idx >= 0) {
-                String current = conditionsModel.getElementAt(idx);
-                String expr = JOptionPane.showInputDialog(
-                        this,
-                        "Edit condition:",
-                        current
-                );
-                if (expr != null && !expr.isBlank()) {
-                    conditionsModel.set(idx, expr.trim());
-                }
-            }
-        });
-
-        removeCondBtn.addActionListener(e -> {
-            int idx = conditionsList.getSelectedIndex();
-            if (idx >= 0) {
-                conditionsModel.remove(idx);
-            }
-        });
-
-        // Actions List
-        gbc.gridy++;
-        JLabel actionsLabel = createFieldLabel("Actions:");
-        panel.add(actionsLabel, gbc);
-
-        gbc.gridy++;
-        actionsModel = new DefaultListModel<>();
-        actionsList = new JList<>(actionsModel);
-        actionsList.setBackground(new Color(40, 40, 40));
-        actionsList.setForeground(Color.WHITE);
-
-        JScrollPane actionsScroll = new JScrollPane(actionsList);
-        actionsScroll.setPreferredSize(new Dimension(200, 80));
-        panel.add(actionsScroll, gbc);
-
-        // Action buttons
-        gbc.gridy++;
-        JPanel actionsButtons = new JPanel();
-        actionsButtons.setOpaque(false);
-        actionsButtons.setLayout(new BoxLayout(actionsButtons, BoxLayout.X_AXIS));
-
-        JButton addActionBtn = new JButton("Add");
-        JButton editActionBtn = new JButton("Edit");
-        JButton removeActionBtn = new JButton("Remove");
-
-        actionsButtons.add(addActionBtn);
-        actionsButtons.add(Box.createHorizontalStrut(4));
-        actionsButtons.add(editActionBtn);
-        actionsButtons.add(Box.createHorizontalStrut(4));
-        actionsButtons.add(removeActionBtn);
-
-        panel.add(actionsButtons, gbc);
-
-        // Actions Listener
-        addActionBtn.addActionListener(e -> {
-            String action = JOptionPane.showInputDialog(
-                    this,
-                    "Enter action (e.g., Change Sprite to bear.png):",
-                    "Add Action",
-                    JOptionPane.PLAIN_MESSAGE
-            );
-            if (action != null && !action.isBlank()) {
-                actionsModel.addElement(action.trim());
-            }
-        });
-
-        editActionBtn.addActionListener(e -> {
-            int idx = actionsList.getSelectedIndex();
-            if (idx >= 0) {
-                String current = actionsModel.getElementAt(idx);
-                String action = JOptionPane.showInputDialog(
-                        this,
-                        "Edit action:",
-                        current
-                );
-                if (action != null && !action.isBlank()) {
-                    actionsModel.set(idx, action.trim());
-                }
-            }
-        });
-
-        removeActionBtn.addActionListener(e -> {
-            int idx = actionsList.getSelectedIndex();
-            if (idx >= 0) {
-                actionsModel.remove(idx);
-            }
-        });
-
-        return panel;
-    }
-
-
     private JPanel createVariableSection() {
         JPanel panel = createSectionPanel("Variable");
         GridBagConstraints gbc = baseGbc();
 
-        // Integers header
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
+
+        JPanel intHeaderPanel = new JPanel(new BorderLayout());
+        intHeaderPanel.setOpaque(false);
+
         JLabel intHeader = createSubHeaderLabel("Integers:");
-        panel.add(intHeader, gbc);
+        intHeaderPanel.add(intHeader, BorderLayout.WEST);
 
-        // Integer row - Name
+        JButton addIntBtn = new JButton("+");
+        addIntBtn.setMargin(new Insets(0, 4, 0, 4));
+        addIntBtn.setPreferredSize(new Dimension(26, 22));   // small
+        intHeaderPanel.add(addIntBtn, BorderLayout.EAST);
+
+        panel.add(intHeaderPanel, gbc);
+
         gbc.gridy++;
-        gbc.gridwidth = 1;
-        JLabel nameLabel = createFieldLabel("Name");
-        panel.add(nameLabel, gbc);
+        intVarsPanel = new JPanel();
+        intVarsPanel.setOpaque(false);
+        intVarsPanel.setLayout(new BoxLayout(intVarsPanel, BoxLayout.Y_AXIS));
+        panel.add(intVarsPanel, gbc);
 
-        gbc.gridx = 1;
-        intNameField = smallField("HP");
-        panel.add(intNameField, gbc);
-
-        // Integer row - Value
-        gbc.gridx = 0;
         gbc.gridy++;
-        JLabel valueLabel = createFieldLabel("Value");
-        panel.add(valueLabel, gbc);
+        JPanel intBtnRow = new JPanel();
+        intBtnRow.setOpaque(false);
 
-        gbc.gridx = 1;
-        intValueField = smallField("100");
-        panel.add(intValueField, gbc);
+        JButton removeIntBtn = new JButton("Remove");
+        removeIntBtn.setMargin(new Insets(0, 6, 0, 6));
+        removeIntBtn.setPreferredSize(new Dimension(80, 22));
+        intBtnRow.add(removeIntBtn);
 
-        // Spacer before booleans
-        gbc.gridx = 0;
+        panel.add(intBtnRow, gbc);
+
         gbc.gridy++;
-        gbc.gridwidth = 2;
         panel.add(Box.createVerticalStrut(12), gbc);
 
-        // Booleans header
         gbc.gridy++;
-        JLabel boolHeader = createSubHeaderLabel("Booleans:");
-        panel.add(boolHeader, gbc);
-
-        // Boolean row - Name
-        gbc.gridy++;
-        gbc.gridwidth = 1;
-        JLabel boolNameLabel = createFieldLabel("Name");
-        panel.add(boolNameLabel, gbc);
-
-        gbc.gridx = 1;
-        boolNameField = smallField("isAngry");
-        panel.add(boolNameField, gbc);
-
-        // Boolean row - Value
         gbc.gridx = 0;
-        gbc.gridy++;
-        JLabel boolValueLabel = createFieldLabel("Value");
-        panel.add(boolValueLabel, gbc);
+        gbc.gridwidth = 2;
 
-        gbc.gridx = 1;
-        boolValueCheck = new JCheckBox("true");
-        boolValueCheck.setOpaque(false);
-        boolValueCheck.setForeground(Color.WHITE);
-        panel.add(boolValueCheck, gbc);
+        JPanel boolHeaderPanel = new JPanel(new BorderLayout());
+        boolHeaderPanel.setOpaque(false);
+
+        JLabel boolHeader = createSubHeaderLabel("Booleans:");
+        boolHeaderPanel.add(boolHeader, BorderLayout.WEST);
+
+        JButton addBoolBtn = new JButton("+");
+        addBoolBtn.setMargin(new Insets(0, 4, 0, 4));
+        addBoolBtn.setPreferredSize(new Dimension(26, 22));  // same small size
+        boolHeaderPanel.add(addBoolBtn, BorderLayout.EAST);
+
+        panel.add(boolHeaderPanel, gbc);
+
+        gbc.gridy++;
+        boolVarsPanel = new JPanel();
+        boolVarsPanel.setOpaque(false);
+        boolVarsPanel.setLayout(new BoxLayout(boolVarsPanel, BoxLayout.Y_AXIS));
+        panel.add(boolVarsPanel, gbc);
+
+        gbc.gridy++;
+        JPanel boolBtnRow = new JPanel();
+        boolBtnRow.setOpaque(false);
+
+        JButton removeBoolBtn = new JButton("Remove");
+        removeBoolBtn.setMargin(new Insets(0, 6, 0, 6));
+        removeBoolBtn.setPreferredSize(new Dimension(80, 22));
+        boolBtnRow.add(removeBoolBtn);
+
+        panel.add(boolBtnRow, gbc);
+
+        // Button actions –-> UI only for now (backend later)
+
+        addIntBtn.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog(
+                    this,
+                    "Integer variable name:",
+                    "Add Integer Variable",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+            if (name == null || name.isBlank()) return;
+
+            String valueStr = JOptionPane.showInputDialog(
+                    this,
+                    "Initial value:",
+                    "0"
+            );
+            if (valueStr == null || valueStr.isBlank()) return;
+
+            try {
+                Double.parseDouble(valueStr); // numeric check
+                addIntVariableRow(name, valueStr);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid numeric value: " + valueStr,
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+
+        removeIntBtn.addActionListener(e -> {
+            if (selectedVarRow != null && selectedVarRow.getParent() == intVarsPanel) {
+                intVarsPanel.remove(selectedVarRow);
+                selectedVarRow = null;
+            } else {
+                int count = intVarsPanel.getComponentCount();
+                if (count > 0) {
+                    intVarsPanel.remove(count - 1); // fallback: remove last
+                }
+            }
+            intVarsPanel.revalidate();
+            intVarsPanel.repaint();
+        });
+
+        addBoolBtn.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog(
+                    this,
+                    "Boolean variable name:",
+                    "Add Boolean Variable",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+            if (name == null || name.isBlank()) return;
+
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    "Initial value true?",
+                    "Boolean Value",
+                    JOptionPane.YES_NO_CANCEL_OPTION
+            );
+            if (choice == JOptionPane.CANCEL_OPTION || choice == JOptionPane.CLOSED_OPTION) return;
+
+            boolean value = (choice == JOptionPane.YES_OPTION);
+            addBoolVariableRow(name, value);
+        });
+
+
+        removeBoolBtn.addActionListener(e -> {
+            if (selectedVarRow != null && selectedVarRow.getParent() == boolVarsPanel) {
+                boolVarsPanel.remove(selectedVarRow);
+                selectedVarRow = null;
+            } else {
+                int count = boolVarsPanel.getComponentCount();
+                if (count > 0) {
+                    boolVarsPanel.remove(count - 1); // fallback: remove last
+                }
+            }
+            boolVarsPanel.revalidate();
+            boolVarsPanel.repaint();
+        });
+
 
         return panel;
+    }
+
+    private void addIntVariableRow(String name, String valueStr) {
+        JPanel row = new JPanel(new BorderLayout());
+        row.setOpaque(true);
+        row.setBackground(new Color(45, 45, 45));  // normal bg
+        row.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
+        JTextField display = new JTextField(name + " = " + valueStr);
+        display.setEditable(false);
+        display.setBackground(new Color(60, 60, 60));
+        display.setForeground(Color.WHITE);
+        display.setCaretColor(Color.WHITE);
+        display.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
+
+        row.add(display, BorderLayout.CENTER);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+
+        // Selection logic (row or text click)
+        java.awt.event.MouseAdapter selector = new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (selectedVarRow != null) {
+                    selectedVarRow.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+                }
+                selectedVarRow = row;
+                selectedVarRow.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+            }
+        };
+        row.addMouseListener(selector);
+        display.addMouseListener(selector);
+
+        intVarsPanel.add(row);
+        intVarsPanel.revalidate();
+        intVarsPanel.repaint();
+    }
+
+    private void addBoolVariableRow(String name, boolean value) {
+        JPanel row = new JPanel(new BorderLayout());
+        row.setOpaque(true);
+        row.setBackground(new Color(45, 45, 45));
+        row.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
+        JTextField display = new JTextField(name + " = " + value);
+        display.setEditable(false);
+        display.setBackground(new Color(60, 60, 60));
+        display.setForeground(Color.WHITE);
+        display.setCaretColor(Color.WHITE);
+        display.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
+
+        row.add(display, BorderLayout.CENTER);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+
+        java.awt.event.MouseAdapter selector = new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (selectedVarRow != null) {
+                    selectedVarRow.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+                }
+                selectedVarRow = row;
+                selectedVarRow.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+            }
+        };
+        row.addMouseListener(selector);
+        display.addMouseListener(selector);
+
+        boolVarsPanel.add(row);
+        boolVarsPanel.revalidate();
+        boolVarsPanel.repaint();
     }
 
     // ---------- helper UI methods ----------
@@ -612,6 +615,15 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     public java.util.List<String> getActionTexts() {
         if (actionsModel == null) return java.util.List.of();
         return java.util.Collections.list(actionsModel.elements());
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        // Calculate the height needed by the components (Transform, Triggers, etc.)
+        Dimension naturalSize = super.getPreferredSize();
+
+        // Return a dimension with your FIXED WIDTH (260), but the DYNAMIC HEIGHT
+        return new Dimension(290, naturalSize.height);
     }
 
     @Override

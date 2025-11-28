@@ -1,12 +1,16 @@
 package view;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Vector;
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
 
 import entity.GameObject;
 import entity.Transform;
 import interface_adapter.list_scenes.ListScenesPresenter;
+import entity.scripting.TriggerManager;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
@@ -44,9 +48,22 @@ public class HomeView extends javax.swing.JFrame {
 
     // Demo wiring
     private ScenePanel scenePanel;
-    private GameObject demoObject;
+    private static GameObject DEMO_OBJECT = new GameObject(
+            "demo-1",
+            "Demo Sprite",
+            true,
+            new ArrayList<>(),
+            null,
+            new Transform(new Vector<Double>(Arrays.asList(0.0, 0.0)), 0f, new Vector<Double>(Arrays.asList(1.0, 1.0))),
+            new TriggerManager()
+    );
     private TransformViewModel transformViewModel;
     private TransformController transformController;
+
+    // TODO: Delete this after gameObject selection is implemented
+    public static GameObject getDemoGameObject() {
+        return DEMO_OBJECT;
+    }
 
     public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
@@ -121,7 +138,7 @@ public class HomeView extends javax.swing.JFrame {
         // ====== MAIN FRAME SETTINGS ======
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Game Editor");
-        setPreferredSize(new java.awt.Dimension(1200, 700));
+        setPreferredSize(new java.awt.Dimension(1300, 700));
 
         getContentPane().setLayout(new BorderLayout());
 
@@ -321,6 +338,14 @@ public class HomeView extends javax.swing.JFrame {
         // ====== RIGHT PROPERTIES PANEL ======
         propertiesPanel = new PropertiesPanel();
 
+        // Wrap in a scroll pane so the whole properties area scrolls
+        JScrollPane propertiesScroll = new JScrollPane(propertiesPanel);
+        propertiesScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
+        propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
+        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
+
 
         // ====== DEMO ENTITY + LAYERS WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
@@ -333,20 +358,13 @@ public class HomeView extends javax.swing.JFrame {
 
         Transform transform = new Transform(pos, 0f, scale);
 
-        demoObject = new GameObject(
-                "demo-1",
-                "Demo Sprite",
-                true,
-                new java.util.ArrayList<>(),
-                null
-        );
-        demoObject.setTransform(transform);
+        DEMO_OBJECT.setTransform(transform);
 
         // Create view model
         transformViewModel = new TransformViewModel();
 
         // Use app-layer factory to wire up use case
-        transformController = TransformUseCaseFactory.create(demoObject, transformViewModel);
+        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
         // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);
@@ -389,7 +407,7 @@ public class HomeView extends javax.swing.JFrame {
 
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);
-        getContentPane().add(propertiesPanel, BorderLayout.EAST);
+        getContentPane().add(propertiesScroll, BorderLayout.EAST);
 
         pack();
         setLocationRelativeTo(null);
@@ -464,7 +482,7 @@ public class HomeView extends javax.swing.JFrame {
         if (displayName.length() > 10) {
             displayName = displayName.substring(0, 8) + "...";
         }
-        JLabel nameLabel = new JLabel(displayName);
+        final JLabel nameLabel = new JLabel(displayName);
         nameLabel.setForeground(Color.WHITE);
         nameLabel.setFont(new Font("Arial", Font.PLAIN, 9));
         nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -477,12 +495,17 @@ public class HomeView extends javax.swing.JFrame {
                 cardPanel.setBackground(new Color(80, 80, 80));
                 cardPanel.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 2));
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 cardPanel.setBackground(new Color(60, 60, 60));
                 cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
             }
+
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 System.out.println("Selected sprite: " + image.getName());
+                if (scenePanel != null) {
+                    scenePanel.addOrSelectSprite(image);
+                }
             }
         });
 
@@ -492,6 +515,7 @@ public class HomeView extends javax.swing.JFrame {
         spritesContent.revalidate();
         spritesContent.repaint();
     }
+
     private void loadExistingAssets() {
         try {
             // Create DAO to access uploads directory
@@ -509,12 +533,14 @@ public class HomeView extends javax.swing.JFrame {
 
                     // Add to asset library
                     assetLibViewModel.getAssetLib().add(image);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     // Log error but continue loading other images
                     System.err.println("Failed to load image: " + imageFile.getName() + " - " + e.getMessage());
                 }
             }
-        } catch (java.io.IOException e) {
+        }
+        catch (java.io.IOException e) {
             JOptionPane.showMessageDialog(null,
                     "Failed to load existing sprites: " + e.getMessage(),
                     "Loading Error",

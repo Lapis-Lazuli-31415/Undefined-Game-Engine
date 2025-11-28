@@ -1,8 +1,22 @@
 package entity.scripting.expression.variable;
 
-public interface Variable<T> {
-    public String getName();
-    public boolean isGlobal();
-    public Class<T> getValueType();
-    public String getVariableType();
+public abstract class Variable<T> {
+    private final String name;
+    protected final boolean isGlobal;
+
+    public Variable(String name, boolean isGlobal) {
+        this.name = name;
+        this.isGlobal = isGlobal;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isGlobal() {
+        return isGlobal;
+    }
+
+    public abstract Class<T> getValueType();
+    public abstract String getVariableType();
 }

@@ -1,5 +1,6 @@
 package entity;
 
+import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class GameObject {
     private ArrayList<Property> properties;
     private Environment environments;
     private Transform transform;
+    private TriggerManager triggerManager;
 
     public GameObject(String id,
                       String name,
@@ -40,6 +42,29 @@ public class GameObject {
         }
 
         this.environments=environments;
+    }
+
+    public GameObject(String id,
+                      String name,
+                      boolean active,
+                      ArrayList<Property> properties,
+                      Environment environments,
+                      Transform transform,
+                      TriggerManager triggerManager) {
+        this.id = id;
+        this.name = name;
+        this.active = active;
+
+        // keep signature, but handle null safely
+        if (properties != null) {
+            this.properties = properties;
+        } else {
+            this.properties = new ArrayList<>();
+        }
+
+        this.environments = environments;
+        this.transform = transform;
+        this.triggerManager = triggerManager;
     }
 
 
@@ -79,6 +104,14 @@ public class GameObject {
 
     public void setTransform(Transform transform) {
         this.transform = transform;
+    }
+
+    public TriggerManager getTriggerManager() {
+        return triggerManager;
+    }
+
+    public void setTriggerManager(TriggerManager triggerManager) {
+        this.triggerManager = triggerManager;
     }
 
     // --- Property helpers ---
