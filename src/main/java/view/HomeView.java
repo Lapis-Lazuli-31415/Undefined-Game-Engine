@@ -2,6 +2,7 @@ package view;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
 
 import entity.GameObject;
 import entity.Transform;
@@ -212,37 +213,42 @@ public class HomeView extends javax.swing.JFrame {
         gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
         gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
 
-        // ==== NEW: Scenes Panel wiring ====
-
-        // Use the demo in-memory scene repository.
-        // Replace with your actual SceneRepository implementation when ready.
+        // Repository
         var sceneRepo = new InMemorySceneRepository();
 
-        // Create presenters (UI-facing)
+        // 1. Create the GameComponentsPanel FIRST so the JTree + TreeModel exist
+        gameComponents = new GameComponentsPanel(null, null, null);  // no interactors yet
+
+        // 2. Now retrieve the tree model needed by the ListScenesPresenter
+        DefaultTreeModel treeModel = gameComponents.getTreeModel();
+
+        // 3. Create presenters with the REAL model
+        var listScenesPresenter = new ListScenesPresenter(treeModel);
         var selectScenePresenter = new SelectScenePresenter(null);
         var selectGameObjectPresenter = new SelectGameObjectPresenter(null);
-        var listScenesPresenter = new ListScenesPresenter(null);
 
-        // Create interactors (use cases)
+        // 4. Create interactors
         var listScenesInteractor =
-                new ListScenesInteractor(sceneRepo, listScenesPresenter); // presenter will be assigned later
+                new ListScenesInteractor(sceneRepo, listScenesPresenter);
+
         var selectSceneInteractor =
                 new SelectSceneInteractor(sceneRepo, selectScenePresenter);
+
         var selectGameObjectInteractor =
                 new SelectGameObjectInteractor(sceneRepo, selectGameObjectPresenter);
 
-        // Create panel (implements output boundary & listeners)
-        gameComponents = new GameComponentsPanel(
+        // 5. Now pass the interactors into the panel
+        gameComponents.setInteractors(
                 listScenesInteractor,
                 selectSceneInteractor,
                 selectGameObjectInteractor
         );
 
-        // Now connect presenters to the panel (circular dependency resolution)
+        // 6. Connect presenter listeners (for selection feedback)
         selectScenePresenter.setListener(gameComponents);
         selectGameObjectPresenter.setListener(gameComponents);
 
-        // Add ScenesPanel below the search bar
+        // 7. Add panel to UI
         gameComponentsPanel.add(gameComponents, BorderLayout.CENTER);
 
 

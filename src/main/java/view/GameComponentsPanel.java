@@ -33,9 +33,9 @@ public class GameComponentsPanel extends JPanel
     private final DefaultTreeModel treeModel;
     private final DefaultMutableTreeNode root;
 
-    private final ListScenesInputBoundary listScenesUseCase;
-    private final SelectSceneInputBoundary selectSceneUseCase;
-    private final SelectGameObjectInputBoundary selectGameObjectUseCase;
+    private ListScenesInputBoundary listScenesUseCase;
+    private SelectSceneInputBoundary selectSceneUseCase;
+    private SelectGameObjectInputBoundary selectGameObjectUseCase;
 
     public GameComponentsPanel(ListScenesInputBoundary listScenesUseCase,
                                SelectSceneInputBoundary selectSceneUseCase,
@@ -81,6 +81,24 @@ public class GameComponentsPanel extends JPanel
             if (listScenesUseCase != null) listScenesUseCase.listScenes();
         });
     }
+
+    public DefaultTreeModel getTreeModel() {
+        return treeModel;
+    }
+
+    public void setInteractors(
+            ListScenesInputBoundary listScenesInteractor,
+            SelectSceneInputBoundary selectSceneInteractor,
+            SelectGameObjectInputBoundary selectGameObjectInteractor
+    ) {
+        this.listScenesUseCase = listScenesInteractor;
+        this.selectSceneUseCase = selectSceneInteractor;
+        this.selectGameObjectUseCase = selectGameObjectInteractor;
+
+        // and start by loading scenes:
+        listScenesInteractor.listScenes();
+    }
+
 
     // ListScenesOutputBoundary implementation
     @Override
