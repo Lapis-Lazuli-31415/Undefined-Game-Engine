@@ -326,11 +326,12 @@ public class HomeView extends javax.swing.JFrame {
 
         Transform transform = new Transform(pos, 0f, scale);
 
-        DEMO_OBJECT.setTransform(transform);
-
-        //attach a local environment to the demo object
+        // Attach a local Environment to the demo GameObject so variables have somewhere to live
         Environment localEnvironment = new Environment();
         DEMO_OBJECT.setEnvironment(localEnvironment);
+
+
+        DEMO_OBJECT.setTransform(transform);
 
         // Create view model
         transformViewModel = new TransformViewModel();
@@ -367,6 +368,8 @@ public class HomeView extends javax.swing.JFrame {
         UpdateVariablePresenter updatePresenter = new UpdateVariablePresenter(variableViewModel);
         DeleteVariablePresenter deletePresenter = new DeleteVariablePresenter(variableViewModel);
 
+        // TODO: change demo to selected obj
+
         Environment localEnv = DEMO_OBJECT.getEnvironment();
 
         UpdateVariableInteractor updateVariableInteractor =
@@ -378,21 +381,11 @@ public class HomeView extends javax.swing.JFrame {
         updateVariableController = new UpdateVariableController(updateVariableInteractor);
         deleteVariableController = new DeleteVariableController(deleteVariableInteractor);
 
-
-//
-//        centerPanel.remove(openFolderPanel);
-//        centerPanel.add(scenePanel, BorderLayout.CENTER);
-//        centerPanel.revalidate();
-//        centerPanel.repaint();
-//
-//        // Bind properties panel to VM + controller
-//        if (propertiesPanel instanceof PropertiesPanel props) {
-//            props.bind(
-//                    transformViewModel,
-//                    transformController,
-//                    () -> scenePanel.repaint()
-//            );
-//        }
+        if (propertiesPanel instanceof PropertiesPanel props) {
+            props.setVariableViewModel(variableViewModel);
+            props.setVariableController(updateVariableController);
+            props.setDeleteVariableController(deleteVariableController);
+        }
 
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);

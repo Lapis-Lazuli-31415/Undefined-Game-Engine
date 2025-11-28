@@ -11,4 +11,8 @@ public interface VariableFactory {
     Object parseValue(String rawValue);
 
     String formatValue(Object value);
+
+    default ValuePromptKind getPromptKind() {
+        return ValuePromptKind.TEXT;
+    }
 }

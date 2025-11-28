@@ -35,4 +35,9 @@ public class BooleanVariableFactory implements VariableFactory{
         return value.toString();
     }
 
+    @Override
+    public ValuePromptKind getPromptKind() {
+        return ValuePromptKind.BOOLEAN;
+    }
+
 }
