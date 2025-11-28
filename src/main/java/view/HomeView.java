@@ -5,10 +5,22 @@ import javax.swing.*;
 
 import entity.GameObject;
 import entity.Transform;
+import interface_adapter.list_scenes.ListScenesPresenter;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import use_case.Sprites.Import.ImportSpriteInteractor;
+
+import view.GameComponentsPanel;
+import data_access.InMemorySceneRepository;
+
+import use_case.component_management.list_scenes.ListScenesInteractor;
+import use_case.component_management.select_scene.SelectSceneInteractor;
+import use_case.component_management.select_game_object.SelectGameObjectInteractor;
+
+import interface_adapter.select_scene.SelectScenePresenter;
+import interface_adapter.select_game_object.SelectGameObjectPresenter;
+
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -16,6 +28,7 @@ public class HomeView extends javax.swing.JFrame {
     private JPanel leftSidebar;
     private JPanel assetsPanel;
     private JPanel gameComponentsPanel;
+    private GameComponentsPanel gameComponents;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
@@ -198,6 +211,40 @@ public class HomeView extends javax.swing.JFrame {
         gameComponentsPanel.setLayout(new BorderLayout());
         gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
         gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
+
+        // ==== NEW: Scenes Panel wiring ====
+
+        // Use the demo in-memory scene repository.
+        // Replace with your actual SceneRepository implementation when ready.
+        var sceneRepo = new InMemorySceneRepository();
+
+        // Create presenters (UI-facing)
+        var selectScenePresenter = new SelectScenePresenter(null);
+        var selectGameObjectPresenter = new SelectGameObjectPresenter(null);
+        var listScenesPresenter = new ListScenesPresenter(null);
+
+        // Create interactors (use cases)
+        var listScenesInteractor =
+                new ListScenesInteractor(sceneRepo, listScenesPresenter); // presenter will be assigned later
+        var selectSceneInteractor =
+                new SelectSceneInteractor(sceneRepo, selectScenePresenter);
+        var selectGameObjectInteractor =
+                new SelectGameObjectInteractor(sceneRepo, selectGameObjectPresenter);
+
+        // Create panel (implements output boundary & listeners)
+        gameComponents = new GameComponentsPanel(
+                listScenesInteractor,
+                selectSceneInteractor,
+                selectGameObjectInteractor
+        );
+
+        // Now connect presenters to the panel (circular dependency resolution)
+        selectScenePresenter.setListener(gameComponents);
+        selectGameObjectPresenter.setListener(gameComponents);
+
+        // Add ScenesPanel below the search bar
+        gameComponentsPanel.add(gameComponents, BorderLayout.CENTER);
+
 
         // ====== Assemble Sidebar ======
         leftSidebar.add(assetsPanel);
