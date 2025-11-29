@@ -46,5 +46,19 @@ public class Scene {
         return gameObjects.contains(gameObject);
     }
 
+    public GameObject getGameObjectByName(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (GameObject gameObject : gameObjects) {
+            if (gameObject.getName().equals(name)) {
+                return gameObject;
+            }
+        }
+
+        return null;
+    }
+
 
 }

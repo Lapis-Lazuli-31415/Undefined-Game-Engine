@@ -106,6 +106,15 @@ public class GameObject {
         this.transform = transform;
     }
 
+    public SpriteRenderer getSpriteRenderer() {
+        // TODO: implement
+        return null;
+    }
+
+    public void setSpriteRenderer(SpriteRenderer spriteRenderer) {
+        // TODO: implement
+    }
+
     public TriggerManager getTriggerManager() {
         return triggerManager;
     }
@@ -128,7 +137,5 @@ public class GameObject {
     public void removeProperty(Property property) {
         properties.remove(property);
     }
-
-
 
 }
