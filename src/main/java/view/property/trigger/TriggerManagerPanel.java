@@ -3,8 +3,8 @@ package view.property.trigger;
 import app.use_case_factory.TriggerUseCaseFactory;
 import interface_adapter.trigger.TriggerManagerState;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.create.TriggerCreateController;
-import interface_adapter.trigger.delete.TriggerDeleteController;
 import view.util.PropertyPanelUtility;
 
 import javax.swing.*;
@@ -14,7 +14,8 @@ import java.beans.PropertyChangeListener;
 
 public class TriggerManagerPanel extends JPanel implements PropertyChangeListener {
 
-    private final TriggerManagerViewModel viewModel;
+    private final TriggerManagerViewModel triggerManagerViewModel;
+    private final ConditionEditorViewModel conditionEditorViewModel;
     private final TriggerUseCaseFactory triggerUseCaseFactory;
     private final TriggerCreateController triggerCreateController;
 
@@ -22,8 +23,9 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
 
     public TriggerManagerPanel() {
 
-        viewModel = new TriggerManagerViewModel();
-        triggerUseCaseFactory = new TriggerUseCaseFactory(viewModel);
+        triggerManagerViewModel = new TriggerManagerViewModel();
+        conditionEditorViewModel = new ConditionEditorViewModel();
+        triggerUseCaseFactory = new TriggerUseCaseFactory(triggerManagerViewModel, conditionEditorViewModel);
         triggerCreateController = triggerUseCaseFactory.createTriggerCreateController();
 
         setLayout(new BorderLayout());
@@ -61,7 +63,7 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         add(mainSection, BorderLayout.CENTER);
 
         // 5. Setup Listeners
-        this.viewModel.addPropertyChangeListener(this);
+        this.triggerManagerViewModel.addPropertyChangeListener(this);
         refresh();
     }
 
@@ -73,10 +75,11 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
     private void refresh() {
         triggerListPanel.removeAll();
 
-        TriggerManagerState state = viewModel.getState();
+        TriggerManagerState state = triggerManagerViewModel.getState();
         for (int i = 0; i < state.getTriggerCount(); i++) {
             // Direct constructor call as requested
-            TriggerPanel panel = new TriggerPanel(i, viewModel, triggerUseCaseFactory);
+            TriggerPanel panel = new TriggerPanel(i, triggerManagerViewModel,
+                    conditionEditorViewModel, triggerUseCaseFactory);
 
             // Prevent horizontal stretching issues in BoxLayout
             panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));

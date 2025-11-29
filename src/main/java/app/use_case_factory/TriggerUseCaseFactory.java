@@ -13,12 +13,17 @@ import interface_adapter.trigger.action.create.ActionCreateController;
 import interface_adapter.trigger.action.create.ActionCreatePresenter;
 import interface_adapter.trigger.action.delete.ActionDeleteController;
 import interface_adapter.trigger.action.delete.ActionDeletePresenter;
+import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.condition.change.ConditionChangeController;
 import interface_adapter.trigger.condition.change.ConditionChangePresenter;
 import interface_adapter.trigger.condition.create.ConditionCreateController;
 import interface_adapter.trigger.condition.create.ConditionCreatePresenter;
 import interface_adapter.trigger.condition.delete.ConditionDeleteController;
 import interface_adapter.trigger.condition.delete.ConditionDeletePresenter;
+import interface_adapter.trigger.condition.edit.ConditionEditController;
+import interface_adapter.trigger.condition.edit.ConditionEditPresenter;
+import interface_adapter.trigger.condition.edit.ConditionEditSaveController;
+import interface_adapter.trigger.condition.edit.ConditionEditSavePresenter;
 import interface_adapter.trigger.create.TriggerCreateController;
 import interface_adapter.trigger.create.TriggerCreatePresenter;
 import interface_adapter.trigger.delete.TriggerDeleteController;
@@ -33,6 +38,8 @@ import use_case.trigger.action.delete.ActionDeleteInteractor;
 import use_case.trigger.condition.change.ConditionChangeInteractor;
 import use_case.trigger.condition.create.ConditionCreateInteractor;
 import use_case.trigger.condition.delete.ConditionDeleteInteractor;
+import use_case.trigger.condition.edit.ConditionEditInteractor;
+import use_case.trigger.condition.edit.ConditionEditSaveInteractor;
 import use_case.trigger.create.TriggerCreateInteractor;
 import use_case.trigger.delete.TriggerDeleteInteractor;
 import use_case.trigger.event.change.EventChangeInteractor;
@@ -42,18 +49,33 @@ public class TriggerUseCaseFactory {
 
     // Shared ViewModels
     private final TriggerManagerViewModel triggerManagerViewModel;
+    private final ConditionEditorViewModel conditionEditorViewModel;
 
     // Shared Factories
     private final EventFactory eventFactory;
     private final ConditionFactory conditionFactory;
     private final ActionFactory actionFactory;
 
-    public TriggerUseCaseFactory(TriggerManagerViewModel triggerManagerViewModel) {
+    public TriggerUseCaseFactory(TriggerManagerViewModel triggerManagerViewModel,
+                                 ConditionEditorViewModel conditionEditorViewModel) {
         this.triggerManagerViewModel = triggerManagerViewModel;
+        this.conditionEditorViewModel = conditionEditorViewModel;
 
         this.eventFactory = new DefaultEventFactory();
         this.conditionFactory = new DefaultConditionFactory();
         this.actionFactory = new DefaultActionFactory();
+    }
+
+    public EventFactory getEventFactory() {
+        return eventFactory;
+    }
+
+    public ConditionFactory getConditionFactory() {
+        return conditionFactory;
+    }
+
+    public ActionFactory getActionFactory() {
+        return actionFactory;
     }
 
     // Trigger Use Cases
@@ -165,5 +187,23 @@ public class TriggerUseCaseFactory {
                 new ActionChangeInteractor(presenter, actionFactory);
 
         return new ActionChangeController(interactor);
+    }
+
+    public ConditionEditController createConditionEditController() {
+        ConditionEditPresenter presenter =
+                new ConditionEditPresenter(conditionEditorViewModel);
+
+        ConditionEditInteractor interactor =
+                new ConditionEditInteractor(presenter);
+
+        return new ConditionEditController(interactor);
+    }
+
+    public ConditionEditSaveController createConditionEditSaveController() {
+        ConditionEditSavePresenter presenter = new ConditionEditSavePresenter(conditionEditorViewModel);
+
+        ConditionEditSaveInteractor interactor = new ConditionEditSaveInteractor(presenter);
+
+        return new ConditionEditSaveController(interactor);
     }
 }

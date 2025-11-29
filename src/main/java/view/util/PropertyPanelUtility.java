@@ -177,7 +177,7 @@ public class PropertyPanelUtility {
         button.setForeground(Color.WHITE);
 
         // 4. Size explicitly (Icon size)
-        button.setPreferredSize(new Dimension(20, 20));
+        button.setPreferredSize(new Dimension(18, 18));
 
         return button;
     }
@@ -227,7 +227,7 @@ public class PropertyPanelUtility {
         button.setForeground(Color.WHITE);
 
         // 4. Size explicitly (Icon size)
-        button.setPreferredSize(new Dimension(20, 20));
+        button.setPreferredSize(new Dimension(18, 18));
 
         return button;
     }
@@ -289,7 +289,7 @@ public class PropertyPanelUtility {
         button.setForeground(Color.WHITE);
 
         // 4. Size explicitly (Icon size)
-        button.setPreferredSize(new Dimension(20, 20));
+        button.setPreferredSize(new Dimension(18, 18));
 
         return button;
     }

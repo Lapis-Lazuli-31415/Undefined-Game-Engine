@@ -5,9 +5,11 @@ import entity.scripting.condition.ConditionFactory;
 import entity.scripting.condition.DefaultConditionFactory;
 import interface_adapter.trigger.TriggerManagerState;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.condition.change.ConditionChangeController;
 import interface_adapter.trigger.condition.create.ConditionCreateController;
 import interface_adapter.trigger.condition.delete.ConditionDeleteController;
+import interface_adapter.trigger.condition.edit.ConditionEditController;
 import view.util.PropertyPanelUtility;
 
 import javax.swing.*;
@@ -20,19 +22,22 @@ public class ConditionListPanel extends JPanel {
     private final ConditionCreateController conditionCreateController;
     private final ConditionDeleteController conditionDeleteController;
     private final ConditionChangeController conditionChangeController;
+    private final ConditionEditController conditionEditController;
 
     public ConditionListPanel(int triggerIndex,
-                              TriggerManagerViewModel viewModel,
+                              TriggerManagerViewModel triggerManagerViewModel,
+                              ConditionEditorViewModel conditionEditorViewModel,
                               TriggerUseCaseFactory triggerUseCaseFactory) {
 
         // Initialize triggerUseCaseFactory
-        this.conditionFactory = new DefaultConditionFactory();
+        conditionFactory = triggerUseCaseFactory.getConditionFactory();
         conditionCreateController = triggerUseCaseFactory.createConditionCreateController();
         conditionDeleteController = triggerUseCaseFactory.createConditionDeleteController();
         conditionChangeController = triggerUseCaseFactory.createConditionChangeController();
+        conditionEditController = triggerUseCaseFactory.createConditionEditController();
 
-        TriggerManagerState state = viewModel.getState();
-        List<String> conditions = state.getTriggerConditions(triggerIndex);
+        TriggerManagerState triggerManagerState = triggerManagerViewModel.getState();
+        List<String> conditions = triggerManagerState.getTriggerConditions(triggerIndex);
 
         // 1. Setup Main Section Style
         setLayout(new GridBagLayout());
@@ -61,7 +66,8 @@ public class ConditionListPanel extends JPanel {
         // Populate the list
         for (int i = 0; i < conditions.size(); i++) {
             String conditionType = conditions.get(i);
-            JPanel row = createConditionRow(triggerIndex, i, conditionType, triggerUseCaseFactory);
+            JPanel row = createConditionRow(triggerIndex, i, conditionType,
+                    conditionEditorViewModel, triggerUseCaseFactory);
 
             listContainer.add(row);
             listContainer.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -76,7 +82,9 @@ public class ConditionListPanel extends JPanel {
         add(listContainer, gbc);
     }
 
-    private JPanel createConditionRow(int triggerIndex, int conditionIndex, String currentType, TriggerUseCaseFactory factory) {
+    private JPanel createConditionRow(int triggerIndex, int conditionIndex,
+                                      String currentType, ConditionEditorViewModel viewModel,
+                                      TriggerUseCaseFactory factory) {
         JPanel row = new JPanel(new GridBagLayout());
         row.setOpaque(false);
 
@@ -100,6 +108,22 @@ public class ConditionListPanel extends JPanel {
 
         // B. Edit Button
         JButton editBtn = PropertyPanelUtility.createEditButton();
+
+        editBtn.addActionListener(e -> {
+            conditionEditController.execute(triggerIndex, conditionIndex);
+            String script = viewModel.getState().getCondition();
+
+            // 3. Open Dialog
+            ConditionEditorDialog dialog = new ConditionEditorDialog(
+                    SwingUtilities.getWindowAncestor(this),
+                    triggerIndex,
+                    conditionIndex,
+                    script,
+                    viewModel,
+                    factory
+            );
+            dialog.setVisible(true);
+        });
 
         rowGbc.gridx = 1;
         rowGbc.weightx = 0;

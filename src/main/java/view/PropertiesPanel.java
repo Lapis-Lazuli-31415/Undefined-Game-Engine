@@ -149,10 +149,11 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         JPanel panel = createSectionPanel("Sprite Renderer");
         GridBagConstraints gbc = baseGbc();
 
+        // 1. Label
         JLabel imgLabel = createFieldLabel("Image:");
         panel.add(imgLabel, gbc);
 
-        gbc.gridx = 1;
+        // 2. Text Field Setup
         imageField = new JTextField("bear.png");
         imageField.setBackground(new Color(60, 60, 60));
         imageField.setForeground(Color.WHITE);
@@ -160,16 +161,21 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         imageField.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
         imageField.setEditable(false);
 
-        JButton browseButton = new JButton("...");
-        browseButton.setMargin(new Insets(0, 4, 0, 4));
+        // CRITICAL FIX: Ensure the field has a height, but let width be dynamic (0)
+        imageField.setPreferredSize(new Dimension(0, 22));
 
-        JPanel row = new JPanel();
-        row.setOpaque(false);
-        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-        row.add(imageField);
-        row.add(Box.createHorizontalStrut(4));
-        row.add(browseButton);
+        // 3. Edit Button
+        JButton browseButton = PropertyPanelUtility.createEditButton();
 
+        // 4. Container Row (Using BorderLayout)
+        JPanel row = new JPanel(new BorderLayout(4, 0)); // 4px horizontal gap
+        row.setOpaque(false); // Make sure it's transparent so we see the dark background
+
+        row.add(imageField, BorderLayout.CENTER); // Center fills all available space
+        row.add(browseButton, BorderLayout.EAST); // East stays fixed size
+
+        // 5. Add Row to Main Panel
+        gbc.gridx = 1;
         panel.add(row, gbc);
 
         return panel;
@@ -620,7 +626,7 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         Dimension naturalSize = super.getPreferredSize();
 
         // Return a dimension with your FIXED WIDTH (260), but the DYNAMIC HEIGHT
-        return new Dimension(290, naturalSize.height);
+        return new Dimension(300, naturalSize.height);
     }
 
     @Override

@@ -1,10 +1,12 @@
 package entity.scripting.condition;
 
 import entity.scripting.environment.Environment;
+import entity.scripting.error.ParseSyntaxException;
+import entity.scripting.expression.AndExpression;
 import entity.scripting.expression.BooleanExpression;
-import entity.scripting.expression.NumericExpression;
+import entity.scripting.expression.Expression;
+import entity.scripting.expression.ExpressionFactory;
 import entity.scripting.expression.value.BooleanValue;
-import entity.scripting.expression.value.NumericValue;
 
 public class BooleanComparisonCondition extends Condition {
     public static final String EVENT_TYPE = "Boolean Comparison";
@@ -17,9 +19,7 @@ public class BooleanComparisonCondition extends Condition {
     }
 
     public BooleanComparisonCondition(){
-        final BooleanExpression DEFAULT_LEFT = new BooleanValue(false);
-        final BooleanExpression DEFAULT_RIGHT = new BooleanValue(false);
-        new BooleanComparisonCondition(DEFAULT_LEFT, DEFAULT_RIGHT);
+        this(new BooleanValue(false), new BooleanValue(false));
     }
 
     public void setLeft(BooleanExpression left) {
@@ -40,5 +40,36 @@ public class BooleanComparisonCondition extends Condition {
         boolean rightValue = right.evaluate(globalEnvironment, localEnvironment);
 
         return leftValue == rightValue;
+    }
+
+    @Override
+    public void parse(String string) throws ParseSyntaxException {
+        String[] parts = string.split(";");
+        final int requiredLength = 2;
+
+        if (parts.length != requiredLength) {
+            throw new ParseSyntaxException("Invalid Syntax: expected " + requiredLength +
+                    " parameters but got " + parts.length);
+        }
+
+        String left = parts[0].trim();
+        String right = parts[1].trim();
+
+        Expression<?> leftResult = ExpressionFactory.parse(left);
+        Expression<?> rightResult = ExpressionFactory.parse(right);
+
+        if (!(leftResult instanceof BooleanExpression)) {
+            throw new ParseSyntaxException("Invalid Syntax: " + left + " does not evaluate to a BooleanExpression");
+        } else if (!(rightResult instanceof BooleanExpression)) {
+            throw new ParseSyntaxException("Invalid Syntax: " + right + " does not evaluate to a BooleanExpression");
+        } else {
+            this.left = (BooleanExpression) leftResult;
+            this.right = (BooleanExpression) rightResult;
+        }
+    }
+
+    @Override
+    public String format() {
+        return left.format() + "; " + right.format();
     }
 }
