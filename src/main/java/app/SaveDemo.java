@@ -12,6 +12,7 @@ import interface_adapter.saving.SaveProjectViewModel;
 import use_case.saving.SaveProjectInteractor;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.Vector;
 
 
@@ -106,7 +107,7 @@ public class SaveDemo {
         // scene
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(bear);
-        Scene scene = new Scene("scene-01", "Forest Level", objects, new Music());
+        Scene scene = new Scene(UUID.randomUUID(), "Forest Level", objects);
 
         // project
         ArrayList<Scene> scenes = new ArrayList<>();
