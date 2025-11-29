@@ -309,7 +309,7 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
 
 
-        //====== DEMO ENTITY + LAYERS WIRING ======
+        // ====== DEMO ENTITY + LAYERS WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
         pos.add(0.0); // x
         pos.add(0.0); // y
