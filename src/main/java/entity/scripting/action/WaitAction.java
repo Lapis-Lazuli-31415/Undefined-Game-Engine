@@ -1,7 +1,7 @@
 package entity.scripting.action;
 
+import entity.Scene;
 import entity.scripting.environment.Environment;
-import entity.scripting.error.EnvironmentException;
 import entity.scripting.error.ParseSyntaxException;
 import entity.scripting.error.WaitActionException;
 import entity.scripting.expression.Expression;
@@ -28,7 +28,7 @@ public class WaitAction extends Action{
     }
 
     @Override
-    public void execute(Environment globalEnvironment, Environment localEnvironment) throws Exception {
+    public void execute(Environment globalEnvironment, Environment localEnvironment, Scene scene) throws Exception {
         double seconds = secondsExpression.evaluate(globalEnvironment, localEnvironment);
 
         if (seconds < 0) {

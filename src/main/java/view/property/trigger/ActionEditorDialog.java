@@ -101,7 +101,10 @@ public class ActionEditorDialog extends JDialog implements PropertyChangeListene
 
         JButton cancelBtn = new JButton("Cancel");
         styleButton(cancelBtn);
-        cancelBtn.addActionListener(e -> dispose());
+        cancelBtn.addActionListener(e -> {
+            actionEditorViewModel.removePropertyChangeListener(this);
+            dispose();}
+        );
 
         actionButtons.add(saveBtn);
         actionButtons.add(cancelBtn);
@@ -111,7 +114,7 @@ public class ActionEditorDialog extends JDialog implements PropertyChangeListene
 
         add(footerPanel, BorderLayout.SOUTH);
 
-        setSize(800, 600);
+        setSize(800, 400);
         setLocationRelativeTo(owner);
 
         // Cleanup listener on close

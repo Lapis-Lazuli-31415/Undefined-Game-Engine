@@ -1,5 +1,6 @@
 package entity.scripting.action;
 
+import entity.Scene;
 import entity.scripting.environment.Environment;
 import entity.scripting.error.ParseSyntaxException;
 
@@ -11,7 +12,7 @@ public class EmptyAction extends Action{
     }
 
     @Override
-    public void execute(Environment globalEnvironment, Environment localEnvironment){}
+    public void execute(Environment globalEnvironment, Environment localEnvironment, Scene scene){}
 
     @Override
     public void parse(String string) throws ParseSyntaxException {

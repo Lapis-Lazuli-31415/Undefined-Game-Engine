@@ -1,14 +1,13 @@
 package entity.scripting.action;
 
+import entity.Scene;
 import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;
 import entity.scripting.error.ParseSyntaxException;
-import entity.scripting.expression.BooleanExpression;
 import entity.scripting.expression.Expression;
 import entity.scripting.expression.ExpressionFactory;
 import entity.scripting.expression.NumericExpression;
 import entity.scripting.expression.value.NumericValue;
-import entity.scripting.expression.variable.BooleanVariable;
 import entity.scripting.expression.variable.NumericVariable;
 
 public class NumericVariableAssignmentAction extends Action{
@@ -47,7 +46,7 @@ public class NumericVariableAssignmentAction extends Action{
     }
 
     @Override
-    public void execute(Environment globalEnvironment, Environment localEnvironment) throws Exception {
+    public void execute(Environment globalEnvironment, Environment localEnvironment, Scene scene) throws Exception {
         if (expression == null) {
             return;
         }

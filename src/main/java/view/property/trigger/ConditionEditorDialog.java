@@ -47,7 +47,7 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
         headerPanel.setOpaque(false);
         headerPanel.setBorder(new EmptyBorder(10, 10, 0, 10));
 
-        JLabel titleLabel = new JLabel("Condition");
+        JLabel titleLabel = new JLabel("Condition Script");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
         titleLabel.setForeground(Color.WHITE);
         headerPanel.add(titleLabel);
@@ -99,7 +99,10 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
 
         JButton cancelBtn = new JButton("Cancel");
         styleButton(cancelBtn);
-        cancelBtn.addActionListener(e -> dispose());
+        cancelBtn.addActionListener(e -> {
+                conditionEditorViewModel.removePropertyChangeListener(this);
+                dispose();}
+        );
 
         actionButtons.add(saveBtn);
         actionButtons.add(cancelBtn);
@@ -109,7 +112,7 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
 
         add(footerPanel, BorderLayout.SOUTH);
 
-        setSize(800, 600);
+        setSize(800, 400);
         setLocationRelativeTo(owner);
 
         // Cleanup listener on close
