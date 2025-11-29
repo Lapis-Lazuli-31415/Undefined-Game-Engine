@@ -19,7 +19,7 @@ public class HomeView extends javax.swing.JFrame {
     // ====== FIELDS ======
     private JPanel leftSidebar;
     private JPanel assetsPanel;
-    private JPanel filesystemPanel;
+    private JPanel gameComponentsPanel;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
@@ -124,7 +124,7 @@ public class HomeView extends javax.swing.JFrame {
         // ====== MAIN FRAME SETTINGS ======
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Game Editor");
-        setPreferredSize(new java.awt.Dimension(1200, 700));
+        setPreferredSize(new java.awt.Dimension(1300, 700));
 
         getContentPane().setLayout(new BorderLayout());
 
@@ -210,16 +210,16 @@ public class HomeView extends javax.swing.JFrame {
 //        assetsPanel.add(audioHeader);
 //        assetsPanel.add(audioScroll);
 
-        // ====== FILESYSTEM PANEL ======
-        filesystemPanel = new JPanel();
-        filesystemPanel.setLayout(new BorderLayout());
-        filesystemPanel.setBorder(BorderFactory.createTitledBorder("FileSystem"));
-        filesystemPanel.add(new JTextField("Search Files"), BorderLayout.NORTH);
+        // ====== Game Components PANEL ======
+        gameComponentsPanel = new JPanel();
+        gameComponentsPanel.setLayout(new BorderLayout());
+        gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
+        gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
 
         // ====== Assemble Sidebar ======
         leftSidebar.add(assetsPanel);
         leftSidebar.add(Box.createVerticalStrut(10));
-        leftSidebar.add(filesystemPanel);
+        leftSidebar.add(gameComponentsPanel);
 
         // ====== CENTER PANEL ======
         centerPanel = new JPanel();
@@ -233,8 +233,8 @@ public class HomeView extends javax.swing.JFrame {
         JLabel tabLabel = new JLabel("   Start");
         tabLabel.setForeground(Color.WHITE);
 
-        JButton addTabButton = new JButton("+");
-        addTabButton.setPreferredSize(new Dimension(45, 35));
+//        JButton addTabButton = new JButton("+");
+//        addTabButton.setPreferredSize(new Dimension(45, 35));
 
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
@@ -257,7 +257,7 @@ public class HomeView extends javax.swing.JFrame {
         rightTabControls.add(stopButton);
 
         tabBar.add(tabLabel, BorderLayout.WEST);
-        tabBar.add(addTabButton, BorderLayout.CENTER);
+//      tabBar.add(addTabButton, BorderLayout.CENTER);
         tabBar.add(rightTabControls, BorderLayout.EAST);
 
         // Center placeholder content (Open Folder)
@@ -430,7 +430,7 @@ public class HomeView extends javax.swing.JFrame {
         if (displayName.length() > 10) {
             displayName = displayName.substring(0, 8) + "...";
         }
-        JLabel nameLabel = new JLabel(displayName);
+        final JLabel nameLabel = new JLabel(displayName);
         nameLabel.setForeground(Color.WHITE);
         nameLabel.setFont(new Font("Arial", Font.PLAIN, 9));
         nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -443,12 +443,17 @@ public class HomeView extends javax.swing.JFrame {
                 cardPanel.setBackground(new Color(80, 80, 80));
                 cardPanel.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 2));
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 cardPanel.setBackground(new Color(60, 60, 60));
                 cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
             }
+
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 System.out.println("Selected sprite: " + image.getName());
+                if (scenePanel != null) {
+                    scenePanel.addOrSelectSprite(image);
+                }
             }
         });
 
@@ -458,6 +463,7 @@ public class HomeView extends javax.swing.JFrame {
         spritesContent.revalidate();
         spritesContent.repaint();
     }
+
     private void loadExistingAssets() {
         try {
             // Create DAO to access uploads directory
@@ -475,12 +481,14 @@ public class HomeView extends javax.swing.JFrame {
 
                     // Add to asset library
                     assetLibViewModel.getAssetLib().add(image);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     // Log error but continue loading other images
                     System.err.println("Failed to load image: " + imageFile.getName() + " - " + e.getMessage());
                 }
             }
-        } catch (java.io.IOException e) {
+        }
+        catch (java.io.IOException e) {
             JOptionPane.showMessageDialog(null,
                     "Failed to load existing sprites: " + e.getMessage(),
                     "Loading Error",

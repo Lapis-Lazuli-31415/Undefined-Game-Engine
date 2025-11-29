@@ -58,7 +58,7 @@ public class SaveDemo {
         SaveProjectController controller = new SaveProjectController(interactor);
 
         // execute
-        System.out.println("Saving to 'test.json'...");
+        System.out.println("Saving to 'database.json'...");
         controller.execute(null); // null means "use existing project name"
 
         // RESULTS
@@ -75,7 +75,7 @@ public class SaveDemo {
 
     // HELPER TO BUILD PROJECT
     private static Project createSampleProject() {
-        // --- 1. GLOBAL ENVIRONMENT ---
+        // global environment
         Environment globalEnv = new Environment();
         try {
             // Add some global game state variables

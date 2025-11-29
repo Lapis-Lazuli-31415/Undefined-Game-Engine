@@ -8,6 +8,7 @@ import java.awt.*;
 import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
+import view.property.trigger.TriggerManagerPanel;
 
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
@@ -59,9 +60,11 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     private JPanel selectedVarRow = null;
 
 
+    private final TriggerManagerPanel triggerManagerPanel;
+
     public PropertiesPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setPreferredSize(new Dimension(260, 700));
+//        setPreferredSize(new Dimension(260, 700));
         setBackground(new Color(45, 45, 45));
 
         // Outer "Properties" title with white text
@@ -71,12 +74,15 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
                 new EmptyBorder(5, 5, 5, 5)
         ));
 
+        triggerManagerPanel = new TriggerManagerPanel();
+
+        add(Box.createVerticalStrut(10));
         add(createTransformSection());
-        add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(20));
         add(createSpriteRendererSection());
-        add(Box.createVerticalStrut(10));
-        add(createTriggerSection());
-        add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(20));
+        add(triggerManagerPanel);
+        add(Box.createVerticalStrut(20));
         add(createVariableSection());
         add(Box.createVerticalGlue());
     }
@@ -167,171 +173,6 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
 
         return panel;
     }
-
-    private JPanel createTriggerSection() {
-        JPanel panel = createSectionPanel("Trigger");
-        GridBagConstraints gbc = baseGbc();
-
-        //  EVENT DROPDOWN
-        JLabel eventLabel = createFieldLabel("Event:");
-        panel.add(eventLabel, gbc);
-
-        gbc.gridx = 1;
-        eventCombo = new JComboBox<>(new String[]{"OnClick", "OnKey"});
-        styleCombo(eventCombo);
-        panel.add(eventCombo, gbc);
-
-        //  KEY FIELD (for OnKey)
-        gbc.gridx = 0;
-        gbc.gridy++;
-        JLabel keyLabel = createFieldLabel("Key:");
-        panel.add(keyLabel, gbc);
-
-        gbc.gridx = 1;
-        keyField = smallField("Space");  // default example
-        panel.add(keyField, gbc);
-
-        //  CONDITIONS LIST
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.gridwidth = 2;
-        JLabel condLabel = createFieldLabel("Conditions:");
-        panel.add(condLabel, gbc);
-
-        gbc.gridy++;
-        conditionsModel = new DefaultListModel<>();
-        conditionsList = new JList<>(conditionsModel);
-        conditionsList.setBackground(new Color(40, 40, 40));
-        conditionsList.setForeground(Color.WHITE);
-
-        JScrollPane condScroll = new JScrollPane(conditionsList);
-        condScroll.setPreferredSize(new Dimension(200, 80));
-        panel.add(condScroll, gbc);
-
-        // Condition buttons (Add / Edit / Remove)
-        gbc.gridy++;
-        JPanel condButtons = new JPanel();
-        condButtons.setOpaque(false);
-        condButtons.setLayout(new BoxLayout(condButtons, BoxLayout.X_AXIS));
-
-        JButton addCondBtn = new JButton("Add");
-        JButton editCondBtn = new JButton("Edit");
-        JButton removeCondBtn = new JButton("Remove");
-
-        condButtons.add(addCondBtn);
-        condButtons.add(Box.createHorizontalStrut(4));
-        condButtons.add(editCondBtn);
-        condButtons.add(Box.createHorizontalStrut(4));
-        condButtons.add(removeCondBtn);
-
-        panel.add(condButtons, gbc);
-
-        // Conditions Listener
-        addCondBtn.addActionListener(e -> {
-            String expr = JOptionPane.showInputDialog(
-                    this,
-                    "Enter condition (e.g., hp > 5 or (x + 1) - 25 > 0):",
-                    "Add Condition",
-                    JOptionPane.PLAIN_MESSAGE
-            );
-            if (expr != null && !expr.isBlank()) {
-                conditionsModel.addElement(expr.trim());
-            }
-        });
-
-        editCondBtn.addActionListener(e -> {
-            int idx = conditionsList.getSelectedIndex();
-            if (idx >= 0) {
-                String current = conditionsModel.getElementAt(idx);
-                String expr = JOptionPane.showInputDialog(
-                        this,
-                        "Edit condition:",
-                        current
-                );
-                if (expr != null && !expr.isBlank()) {
-                    conditionsModel.set(idx, expr.trim());
-                }
-            }
-        });
-
-        removeCondBtn.addActionListener(e -> {
-            int idx = conditionsList.getSelectedIndex();
-            if (idx >= 0) {
-                conditionsModel.remove(idx);
-            }
-        });
-
-        // Actions List
-        gbc.gridy++;
-        JLabel actionsLabel = createFieldLabel("Actions:");
-        panel.add(actionsLabel, gbc);
-
-        gbc.gridy++;
-        actionsModel = new DefaultListModel<>();
-        actionsList = new JList<>(actionsModel);
-        actionsList.setBackground(new Color(40, 40, 40));
-        actionsList.setForeground(Color.WHITE);
-
-        JScrollPane actionsScroll = new JScrollPane(actionsList);
-        actionsScroll.setPreferredSize(new Dimension(200, 80));
-        panel.add(actionsScroll, gbc);
-
-        // Action buttons
-        gbc.gridy++;
-        JPanel actionsButtons = new JPanel();
-        actionsButtons.setOpaque(false);
-        actionsButtons.setLayout(new BoxLayout(actionsButtons, BoxLayout.X_AXIS));
-
-        JButton addActionBtn = new JButton("Add");
-        JButton editActionBtn = new JButton("Edit");
-        JButton removeActionBtn = new JButton("Remove");
-
-        actionsButtons.add(addActionBtn);
-        actionsButtons.add(Box.createHorizontalStrut(4));
-        actionsButtons.add(editActionBtn);
-        actionsButtons.add(Box.createHorizontalStrut(4));
-        actionsButtons.add(removeActionBtn);
-
-        panel.add(actionsButtons, gbc);
-
-        // Actions Listener
-        addActionBtn.addActionListener(e -> {
-            String action = JOptionPane.showInputDialog(
-                    this,
-                    "Enter action (e.g., Change Sprite to bear.png):",
-                    "Add Action",
-                    JOptionPane.PLAIN_MESSAGE
-            );
-            if (action != null && !action.isBlank()) {
-                actionsModel.addElement(action.trim());
-            }
-        });
-
-        editActionBtn.addActionListener(e -> {
-            int idx = actionsList.getSelectedIndex();
-            if (idx >= 0) {
-                String current = actionsModel.getElementAt(idx);
-                String action = JOptionPane.showInputDialog(
-                        this,
-                        "Edit action:",
-                        current
-                );
-                if (action != null && !action.isBlank()) {
-                    actionsModel.set(idx, action.trim());
-                }
-            }
-        });
-
-        removeActionBtn.addActionListener(e -> {
-            int idx = actionsList.getSelectedIndex();
-            if (idx >= 0) {
-                actionsModel.remove(idx);
-            }
-        });
-
-        return panel;
-    }
-
 
     private JPanel createVariableSection() {
         JPanel panel = createSectionPanel("Variable");
@@ -774,6 +615,15 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
     public java.util.List<String> getActionTexts() {
         if (actionsModel == null) return java.util.List.of();
         return java.util.Collections.list(actionsModel.elements());
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        // Calculate the height needed by the components (Transform, Triggers, etc.)
+        Dimension naturalSize = super.getPreferredSize();
+
+        // Return a dimension with your FIXED WIDTH (260), but the DYNAMIC HEIGHT
+        return new Dimension(290, naturalSize.height);
     }
 
     @Override
