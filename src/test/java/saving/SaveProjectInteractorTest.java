@@ -35,6 +35,16 @@ class SaveProjectInteractorTest {
         presenter = new MockPresenter();
     }
 
+    /**
+     * Tests the successful execution of the save use case.
+     * This test simulates a standard scenario where the user requests to save the project,
+     * and the file system operation succeeds.
+
+     * Expected Behavior:
+     *  - The DAO's save() method is called exactly once with the correct project.
+     *  - The Presenter's prepareSuccessView() method is called.
+     *  - The Output Data passed to the presenter indicates success and contains the correct project name.
+     */
     @Test
     void testSaveProjectSuccess() {
         // Arrange
@@ -54,6 +64,16 @@ class SaveProjectInteractorTest {
         assertEquals("Test Project", presenter.successData.getProjectName());
     }
 
+    /**
+     * Tests the failure scenario where saving fails due to an I/O error.
+     * This test simulates a condition like a "Disk Full" or "Permission Denied" error
+     * by forcing the mock DAO to throw an IOException.
+     * Expected Behavior:
+     *   - The DAO's save() method is called.
+     *   - The Presenter's prepareFailView() method is called.
+     *   - The Presenter's prepareSuccessView() method is NOT called.
+     *   - The error message passed to the presenter contains the exception message (e.g., "Disk Full").
+     */
     @Test
     void testSaveProjectFailure() {
         // Arrange

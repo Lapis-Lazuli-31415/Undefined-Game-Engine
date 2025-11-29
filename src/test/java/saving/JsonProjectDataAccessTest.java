@@ -12,11 +12,11 @@ import entity.scripting.event.OnClickEvent;
 import entity.scripting.expression.value.NumericValue;
 import entity.scripting.expression.variable.BooleanVariable;
 import entity.scripting.expression.variable.NumericVariable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -25,80 +25,144 @@ import java.util.Vector;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration Test ensuring the entire object graph is saved and loaded correctly via JSON.
+ *  Test ensuring the entire object graph is saved and loaded correctly via JSON.
  */
 class JsonProjectDataAccessTest {
 
     @TempDir
     Path tempDir;
 
-    @Test
-    void testSaveAndLoadFullProjectIntegrity() throws Exception {
-        // 1. Create a Complex Project (GameObjects, Triggers, Variables, Transforms)
-        Project originalProject = createComplexProject();
+    private Project originalProject;
+    private Project loadedProject;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        // Create a Complex Project
+        originalProject = createComplexProject();
 
         // Define a temp file path
         File tempFile = tempDir.resolve("test_save.json").toFile();
         String tempPath = tempFile.getAbsolutePath();
 
-        // 2. SAVE IT
-        JsonProjectDataAccess dataAccess = new JsonProjectDataAccess();
-        // We override the hardcoded "database.json" in this test by calling ObjectMapper directly
-        // OR we can assume save() writes to a file we can move, but since your DAO writes to "database.json"
-        // strictly, we might need to modify the DAO to accept a path, or just write/read normally.
-        // For this test, let's use the mapper inside the DAO to write to our temp file explicitly
-        // to avoid cluttering your project root.
-
-        // Reflection or Modification: Ideally, JsonProjectDataAccess should accept a filepath.
-        // Assuming we use the public method load(path) and a custom save for testing:
+        // SAVE IT
+        // Using ObjectMapper directly to simulate the save since the DAO might have hardcoded paths
+        // in the current implementation, or to ensure we are testing the serialization logic specifically.
         new com.fasterxml.jackson.databind.ObjectMapper()
                 .enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
                 .setPropertyNamingStrategy(com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE)
                 .writeValue(tempFile, originalProject);
 
-        // 3. LOAD IT BACK
-        Project loadedProject = dataAccess.load(tempPath);
+        // LOAD IT BACK
+        JsonProjectDataAccess dataAccess = new JsonProjectDataAccess();
+        loadedProject = dataAccess.load(tempPath);
+    }
 
-        // 4. VERIFY INTEGRITY (Assertions)
-        assertNotNull(loadedProject);
+    /**
+     * Verifies that the top-level metadata of the project is correctly saved and loaded.
+     * Checks if the Project ID and Project Name match the original values.
+     */
+    @Test
+    void testProjectMetadata() {
+        assertNotNull(loadedProject, "Loaded project should not be null");
         assertEquals(originalProject.getId(), loadedProject.getId());
         assertEquals(originalProject.getName(), loadedProject.getName());
+    }
 
-        // Check Global Environment
+    /**
+     * Tests the persistence of the Global Environment.
+     * Checks if global variables (e.g., "score") defined in the project are correctly restored with their values.
+     * @throws Exception if accessing variables from the environment fails.
+     */
+    @Test
+    void testGlobalEnvironment() throws Exception {
         Environment globalEnv = loadedProject.getGlobalEnvironment();
-        assertNotNull(globalEnv);
-        NumericVariable scoreVar = new NumericVariable("score", true);
-        assertEquals(100.0, globalEnv.get(scoreVar));
+        assertNotNull(globalEnv, "Global environment should exist");
 
-        // Check Scene
-        assertEquals(1, loadedProject.getScenes().size());
+        NumericVariable scoreVar = new NumericVariable("score", true);
+        assertEquals(100.0, globalEnv.get(scoreVar), "Global variable 'score' should be 100.0");
+    }
+
+    /**
+     * Verifies the structural integrity of Scenes and GameObjects.
+     * Checks:
+     * - The number of scenes.
+     * - The name of the scene.
+     * - The number of GameObjects within the scene.
+     * - The name and active state of the GameObject.
+     */
+    @Test
+    void testSceneAndGameObjectStructure() {
+        assertEquals(1, loadedProject.getScenes().size(), "Should have 1 scene");
         Scene scene = loadedProject.getScenes().get(0);
         assertEquals("Level 1", scene.getName());
 
-        // Check GameObject
-        assertEquals(1, scene.getGameObjects().size());
+        assertEquals(1, scene.getGameObjects().size(), "Scene should have 1 game object");
         GameObject obj = scene.getGameObjects().get(0);
         assertEquals("Hero", obj.getName());
         assertTrue(obj.isActive());
+    }
 
-        // Check Transform
+    /**
+     * Tests the persistence of the Transform component.
+     * Verifies that spatial data (X, Y, Rotation, Scale X, Scale Y) is correctly preserved
+     * after the save/load cycle.
+     */
+    @Test
+    void testGameObjectTransform() {
+        GameObject obj = loadedProject.getScenes().get(0).getGameObjects().get(0);
         Transform t = obj.getTransform();
+
+        assertNotNull(t, "Transform should not be null");
         assertEquals(10.0, t.getX());
         assertEquals(20.0, t.getY());
         assertEquals(45.0f, t.getRotation());
+        assertEquals(1.0, t.getScaleX());
+        assertEquals(1.0, t.getScaleY());
+    }
 
-        // Check Local Environment (Variables)
+    /**
+     * Tests the persistence of the Local Environment attached to a specific GameObject.
+     * Verifies that local variables (e.g., "health", "isDead") are correctly restored
+     * with their respective types and values.
+     * @throws Exception if accessing variables from the environment fails.
+     */
+    @Test
+    void testGameObjectLocalEnvironment() throws Exception {
+        GameObject obj = loadedProject.getScenes().get(0).getGameObjects().get(0);
+        Environment localEnv = obj.getEnvironment();
+
+        assertNotNull(localEnv, "Local environment should not be null");
+
         NumericVariable healthVar = new NumericVariable("health", false);
-        assertEquals(50.0, obj.getEnvironment().get(healthVar));
+        assertEquals(50.0, localEnv.get(healthVar), "Local variable 'health' should be 50.0");
 
-        // Check Triggers (The hardest part!)
+        BooleanVariable isDeadVar = new BooleanVariable("isDead", false);
+        assertFalse(localEnv.get(isDeadVar), "Local variable 'isDead' should be false");
+    }
+
+    /**
+     * Tests the persistence of the Scripting System (Triggers, Events, Conditions, Actions).
+     * This is a deep verification that checks:
+     * - The existence of the TriggerManager.
+     * - The count of triggers.
+     * - The type of Event (e.g., OnClickEvent).
+     * - The Conditions (type and count).
+     * - The Actions (type and count).
+     * - The internal state of an Action (e.g., evaluating a WaitAction's expression) to ensure deep serialization worked.
+     * @throws Exception if evaluation of expressions fails.
+     */
+    @Test
+    void testTriggersEventsAndActions() throws Exception {
+        GameObject obj = loadedProject.getScenes().get(0).getGameObjects().get(0);
         TriggerManager tm = obj.getTriggerManager();
-        assertNotNull(tm);
-        assertEquals(1, tm.getTriggers().size());
+
+        assertNotNull(tm, "TriggerManager should not be null");
+        assertEquals(1, tm.getTriggers().size(), "Should have 1 trigger");
+
         Trigger trigger = tm.getTrigger(0);
 
         // Verify Event
-        assertInstanceOf(OnClickEvent.class, trigger.getEvent());
+        assertInstanceOf(OnClickEvent.class, trigger.getEvent(), "Event should be OnClickEvent");
 
         // Verify Condition
         assertEquals(1, trigger.getConditions().size());
@@ -107,11 +171,16 @@ class JsonProjectDataAccessTest {
         // Verify Action
         assertEquals(1, trigger.getActions().size());
         assertInstanceOf(WaitAction.class, trigger.getActions().get(0));
+
         WaitAction wait = (WaitAction) trigger.getActions().get(0);
         // Evaluating the expression inside the action to ensure data persisted
-        assertEquals(1.5, wait.getSecondsExpression().evaluate(globalEnv, obj.getEnvironment()));
+        // We need the environments to evaluate
+        Environment globalEnv = loadedProject.getGlobalEnvironment();
+        Environment localEnv = obj.getEnvironment();
+        assertEquals(1.5, wait.getSecondsExpression().evaluate(globalEnv, localEnv));
     }
 
+    // --- Helper to build the project ---
     private Project createComplexProject() throws Exception {
         // --- Globals ---
         Environment globalEnv = new Environment();
