@@ -14,10 +14,19 @@ public class Trigger {
     private List<Action> actions;
     private boolean active;
 
+    // No-Argument Constructor for Jackson
+    public Trigger() {
+        this.event = new EmptyEvent(); // Default to avoid nulls
+        this.conditions = new ArrayList<>();
+        this.actions = new ArrayList<>();
+        this.active = true;
+    }
+
+    // Standard Constructor
     public Trigger(Event event, boolean active) {
         this.event = event;
-        conditions = new ArrayList<>();
-        actions = new ArrayList<>();
+        this.conditions = new ArrayList<>();
+        this.actions = new ArrayList<>();
         this.active = active;
     }
 
@@ -33,9 +42,21 @@ public class Trigger {
         return conditions;
     }
 
+    // Jackson uses this to set the list
+    public void setConditions(List<Condition> conditions) {
+        this.conditions = conditions;
+    }
+
     public List<Action> getActions() {
         return actions;
     }
+
+    // Jackson uses this to set the list
+    public void setActions(List<Action> actions) {
+        this.actions = actions;
+    }
+
+    // --- Helper Methods ---
 
     public void addCondition(Condition condition) {
         conditions.add(condition);

@@ -33,6 +33,14 @@ import java.awt.*;
 public class SaveDemo {
 
     public static void main(String[] args) {
+        // --- DEBUG CHECK START ---
+        if (entity.Asset.class.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonTypeInfo.class)) {
+            System.out.println("✅ DEBUG: Asset class HAS JsonTypeInfo annotation.");
+        } else {
+            System.err.println("❌ DEBUG: Asset class MISSING annotation. YOU MUST REBUILD!");
+        }
+        // --- DEBUG CHECK END ---
+
         System.out.println("--- Starting Save Demo ---");
 
         // CREATE DATA (The Sample Project)
@@ -103,20 +111,20 @@ public class SaveDemo {
         // properties (Sprite)
         ArrayList<Property> properties = new ArrayList<>();
 
-        try {
-            // pass the path to the image
-            java.nio.file.Path bearPath = java.nio.file.Path.of("src/main/resources/bear.png");
-            Image image = new Image(bearPath);
-
-            // add the image to the assetLib
-            assetLib.add(image);
-
-            properties.add(new SpriteRenderer(image, true));
-
-        } catch (java.io.IOException e) {
-            System.err.println("Could not load image for demo: " + e.getMessage());
-            // create a dummy property or exit if image fails
-        }
+//        try {
+//            // pass the path to the image
+//            java.nio.file.Path bearPath = java.nio.file.Path.of("src/main/resources/bear.png");
+//            Image image = new Image(bearPath);
+//
+//            // add the image to the assetLib
+//            assetLib.add(image);
+//
+//            properties.add(new SpriteRenderer(image, true));
+//
+//        } catch (java.io.IOException e) {
+//            System.err.println("Could not load image for demo: " + e.getMessage());
+//            // create a dummy property or exit if image fails
+//        }
 
         // --- TRIGGER SETUP ---
         TriggerManager triggerManager = new TriggerManager();

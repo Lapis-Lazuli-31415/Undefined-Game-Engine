@@ -11,7 +11,6 @@ import java.util.UUID;
 /**
  * An abstract class representing a generic asset.
  */
-// --- ADD THESE MISSING ANNOTATIONS ---
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -20,7 +19,6 @@ import java.util.UUID;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Image.class, name = "Image")
 })
-// -------------------------------------
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id"
@@ -31,7 +29,6 @@ public abstract class Asset {
     private String name;
     Path localpath;
 
-    // Jackson needs this no-arg constructor
     protected Asset() {
         this.id = UUID.randomUUID();
     }

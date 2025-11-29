@@ -1,27 +1,29 @@
 package entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+// annotation prevents crashes if the JSON contains fields (like "game_object_names")
+// that don't exist in the class anymore.
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Scene {
 
     private final UUID id;
     private final String name;
     private List<GameObject> gameObjects;
 
-    // The @JsonCreator annotation tells Jackson to use this constructor
-    // instead of looking for a no-arg constructor.
     @JsonCreator
     public Scene(@JsonProperty("id") UUID id,
                  @JsonProperty("name") String name,
                  @JsonProperty("game_objects") List<GameObject> gameObjects) {
         this.id = id;
         this.name = name;
-        // Handle null list just in case the JSON is missing the field
         this.gameObjects = gameObjects != null ? gameObjects : new ArrayList<>();
     }
 
@@ -41,6 +43,9 @@ public class Scene {
         return gameObjects;
     }
 
+    // ADD @JsonIgnore HERE
+    // This tells Jackson: "Do not save this to JSON, and do not try to load it."
+    @JsonIgnore
     public List<String> getGameObjectNames() {
         if (gameObjects == null) return List.of();
         return gameObjects.stream()
