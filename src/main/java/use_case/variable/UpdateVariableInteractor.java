@@ -3,8 +3,6 @@ package use_case.variable;
 import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;
 import entity.scripting.error.EnvironmentException;
-import entity.scripting.expression.variable.BooleanVariable;
-import entity.scripting.expression.variable.NumericVariable;
 import entity.scripting.expression.variable.Variable;
 import use_case.variable.factory.VariableFactory;
 import use_case.variable.factory.DefaultVariableFactoryRegistry;
@@ -123,8 +121,6 @@ public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
         );
         presenter.prepareSuccessView(output);
     }
-
-
     private static String safeTrim(String s) {
         return s == null ? "" : s.trim();
     }
