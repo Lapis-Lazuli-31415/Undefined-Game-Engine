@@ -1,11 +1,8 @@
 package interface_adapter.transform;
 
-import entity.Transform;
 import use_case.transform.UpdateTransformOutputBoundary;
+import use_case.transform.UpdateTransformOutputData;
 
-/**
- * Presenter converts entity Transform into a TransformViewModel.
- */
 public class TransformPresenter implements UpdateTransformOutputBoundary {
 
     private final TransformViewModel viewModel;
@@ -15,15 +12,14 @@ public class TransformPresenter implements UpdateTransformOutputBoundary {
     }
 
     @Override
-    public void presentTransform(Transform transform) {
+    public void presentTransform(UpdateTransformOutputData data) {
         TransformState state = viewModel.getState();
 
-        state.setX(transform.getX());
-        state.setY(transform.getY());
-        state.setScale(transform.getScaleX()); // assuming uniform scale
-        state.setRotation(transform.getRotation());
+        state.setX(data.getX());
+        state.setY(data.getY());
+        state.setScale(data.getScale());
+        state.setRotation(data.getRotation());
 
-        // Notify observers once after updating the entire state
         viewModel.firePropertyChange();
     }
 }
