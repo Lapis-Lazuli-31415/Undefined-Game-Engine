@@ -1,11 +1,5 @@
 package use_case.transform;
 
-/**
- * Output data for the UpdateTransform use case.
- *
- * This DTO is what crosses the boundary from the use case layer
- * into the interface adapter layer (Presenter).
- */
 public class UpdateTransformOutputData {
 
     private final double x;

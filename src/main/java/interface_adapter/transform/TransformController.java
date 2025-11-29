@@ -3,10 +3,6 @@ package interface_adapter.transform;
 import use_case.transform.UpdateTransformInputBoundary;
 import use_case.transform.UpdateTransformInputData;
 
-/**
- * Controller for the Transform use case.
- * Called by the view; calls the use case.
- */
 public class TransformController {
 
     private final UpdateTransformInputBoundary interactor;

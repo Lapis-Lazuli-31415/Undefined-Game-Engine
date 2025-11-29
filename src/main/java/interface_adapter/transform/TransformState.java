@@ -1,8 +1,5 @@
 package interface_adapter.transform;
 
-/**
- * POJO holding the transform data used by the UI.
- */
 public class TransformState {
 
     private double x;
