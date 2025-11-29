@@ -3,6 +3,7 @@ package view.property.trigger;
 import app.use_case_factory.TriggerUseCaseFactory;
 import interface_adapter.trigger.TriggerManagerState;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.action.ActionEditorViewModel;
 import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.create.TriggerCreateController;
 import view.util.PropertyPanelUtility;
@@ -16,6 +17,7 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
 
     private final TriggerManagerViewModel triggerManagerViewModel;
     private final ConditionEditorViewModel conditionEditorViewModel;
+    private final ActionEditorViewModel actionEditorViewModel;
     private final TriggerUseCaseFactory triggerUseCaseFactory;
     private final TriggerCreateController triggerCreateController;
 
@@ -25,7 +27,9 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
 
         triggerManagerViewModel = new TriggerManagerViewModel();
         conditionEditorViewModel = new ConditionEditorViewModel();
-        triggerUseCaseFactory = new TriggerUseCaseFactory(triggerManagerViewModel, conditionEditorViewModel);
+        actionEditorViewModel = new ActionEditorViewModel();
+        triggerUseCaseFactory = new TriggerUseCaseFactory(triggerManagerViewModel,
+                conditionEditorViewModel, actionEditorViewModel);
         triggerCreateController = triggerUseCaseFactory.createTriggerCreateController();
 
         setLayout(new BorderLayout());
@@ -79,7 +83,7 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         for (int i = 0; i < state.getTriggerCount(); i++) {
             // Direct constructor call as requested
             TriggerPanel panel = new TriggerPanel(i, triggerManagerViewModel,
-                    conditionEditorViewModel, triggerUseCaseFactory);
+                    conditionEditorViewModel, actionEditorViewModel, triggerUseCaseFactory);
 
             // Prevent horizontal stretching issues in BoxLayout
             panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));

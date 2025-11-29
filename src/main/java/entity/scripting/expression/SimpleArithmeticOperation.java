@@ -79,12 +79,12 @@ public class SimpleArithmeticOperation implements NumericExpression{
         Expression<?> rightResult = ExpressionFactory.parse(right);
 
         if (!(leftResult instanceof NumericExpression)) {
-            throw new ParseSyntaxException("Invalid Syntax: " + left + " does not evaluate to a BooleanExpression");
+            throw new ParseSyntaxException("Invalid Syntax: " + left + " does not evaluate to a NumericExpression");
         } else if (!isValidOperator(operator)) {
             throw new ParseSyntaxException("Invalid Syntax: " +
                     operator + " does not belong to \"+\", \"-\", \"*\", \"/\"");
         } else if (!(rightResult instanceof NumericExpression)) {
-            throw new ParseSyntaxException("Invalid Syntax: " + right + " does not evaluate to a BooleanExpression");
+            throw new ParseSyntaxException("Invalid Syntax: " + right + " does not evaluate to a NumericExpression");
         } else {
             return new SimpleArithmeticOperation((NumericExpression) leftResult,
                     operator, (NumericExpression) rightResult);

@@ -48,7 +48,7 @@ public class BooleanComparisonCondition extends Condition {
         final int requiredLength = 2;
 
         if (parts.length != requiredLength) {
-            throw new ParseSyntaxException("Invalid Syntax: expected " + requiredLength +
+            throw new ParseSyntaxException("Invalid Syntax (BooleanComparison): expected " + requiredLength +
                     " parameters but got " + parts.length);
         }
 

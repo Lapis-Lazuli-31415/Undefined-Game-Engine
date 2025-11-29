@@ -7,12 +7,17 @@ import entity.scripting.condition.DefaultConditionFactory;
 import entity.scripting.event.DefaultEventFactory;
 import entity.scripting.event.EventFactory;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.action.ActionEditorViewModel;
 import interface_adapter.trigger.action.change.ActionChangeController;
 import interface_adapter.trigger.action.change.ActionChangePresenter;
 import interface_adapter.trigger.action.create.ActionCreateController;
 import interface_adapter.trigger.action.create.ActionCreatePresenter;
 import interface_adapter.trigger.action.delete.ActionDeleteController;
 import interface_adapter.trigger.action.delete.ActionDeletePresenter;
+import interface_adapter.trigger.action.edit.ActionEditController;
+import interface_adapter.trigger.action.edit.ActionEditPresenter;
+import interface_adapter.trigger.action.edit.ActionEditSaveController;
+import interface_adapter.trigger.action.edit.ActionEditSavePresenter;
 import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.condition.change.ConditionChangeController;
 import interface_adapter.trigger.condition.change.ConditionChangePresenter;
@@ -35,6 +40,8 @@ import interface_adapter.trigger.event.parameter_change.EventParameterChangePres
 import use_case.trigger.action.change.ActionChangeInteractor;
 import use_case.trigger.action.create.ActionCreateInteractor;
 import use_case.trigger.action.delete.ActionDeleteInteractor;
+import use_case.trigger.action.edit.ActionEditInteractor;
+import use_case.trigger.action.edit.ActionEditSaveInteractor;
 import use_case.trigger.condition.change.ConditionChangeInteractor;
 import use_case.trigger.condition.create.ConditionCreateInteractor;
 import use_case.trigger.condition.delete.ConditionDeleteInteractor;
@@ -50,6 +57,7 @@ public class TriggerUseCaseFactory {
     // Shared ViewModels
     private final TriggerManagerViewModel triggerManagerViewModel;
     private final ConditionEditorViewModel conditionEditorViewModel;
+    private final ActionEditorViewModel actionEditorViewModel;
 
     // Shared Factories
     private final EventFactory eventFactory;
@@ -57,9 +65,11 @@ public class TriggerUseCaseFactory {
     private final ActionFactory actionFactory;
 
     public TriggerUseCaseFactory(TriggerManagerViewModel triggerManagerViewModel,
-                                 ConditionEditorViewModel conditionEditorViewModel) {
+                                 ConditionEditorViewModel conditionEditorViewModel,
+                                 ActionEditorViewModel actionEditorViewModel) {
         this.triggerManagerViewModel = triggerManagerViewModel;
         this.conditionEditorViewModel = conditionEditorViewModel;
+        this.actionEditorViewModel = actionEditorViewModel;
 
         this.eventFactory = new DefaultEventFactory();
         this.conditionFactory = new DefaultConditionFactory();
@@ -205,5 +215,18 @@ public class TriggerUseCaseFactory {
         ConditionEditSaveInteractor interactor = new ConditionEditSaveInteractor(presenter);
 
         return new ConditionEditSaveController(interactor);
+    }
+
+    public ActionEditController createActionEditController() {
+        ActionEditPresenter presenter =
+                new ActionEditPresenter(actionEditorViewModel);
+        ActionEditInteractor interactor = new ActionEditInteractor(presenter);
+        return new ActionEditController(interactor);
+    }
+
+    public ActionEditSaveController createActionEditSaveController() {
+        ActionEditSavePresenter presenter = new ActionEditSavePresenter(actionEditorViewModel);
+        ActionEditSaveInteractor interactor = new ActionEditSaveInteractor(presenter);
+        return new ActionEditSaveController(interactor);
     }
 }

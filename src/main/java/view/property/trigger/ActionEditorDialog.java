@@ -1,9 +1,9 @@
 package view.property.trigger;
 
 import app.use_case_factory.TriggerUseCaseFactory;
-import interface_adapter.trigger.condition.ConditionEditorState;
-import interface_adapter.trigger.condition.ConditionEditorViewModel;
-import interface_adapter.trigger.condition.edit.ConditionEditSaveController;
+import interface_adapter.trigger.action.ActionEditorState;
+import interface_adapter.trigger.action.ActionEditorViewModel;
+import interface_adapter.trigger.action.edit.ActionEditSaveController;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,30 +14,31 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class ConditionEditorDialog extends JDialog implements PropertyChangeListener {
+public class ActionEditorDialog extends JDialog implements PropertyChangeListener {
 
     private final JTextArea scriptArea;
-
-    // Callback for when 'Save' is clicked
-    private final ConditionEditorViewModel conditionEditorViewModel;
-    private final ConditionEditSaveController conditionEditSaveController;
+    private final ActionEditorViewModel actionEditorViewModel;
+    private final ActionEditSaveController actionEditSaveController;
     private final int triggerIndex;
-    private final int conditionIndex;
+    private final int actionIndex;
 
-    public ConditionEditorDialog(Window owner,
-                                 int triggerIndex,
-                                 int conditionIndex,
-                                 String initialScript,
-                                 ConditionEditorViewModel conditionEditorViewModel,
-                                 TriggerUseCaseFactory triggerUseCaseFactory) {
-        super(owner, "Condition Editor", ModalityType.APPLICATION_MODAL);
+    // Flag to prevent reacting to events before Save is clicked (fixes the "Ghost Popup" issue)
+    private boolean isSaveClicked = false;
+
+    public ActionEditorDialog(Window owner,
+                              int triggerIndex,
+                              int actionIndex,
+                              String initialScript,
+                              ActionEditorViewModel actionEditorViewModel,
+                              TriggerUseCaseFactory triggerUseCaseFactory) {
+        super(owner, "Action Editor", ModalityType.APPLICATION_MODAL);
         this.triggerIndex = triggerIndex;
-        this.conditionIndex = conditionIndex;
-        this.conditionEditSaveController =
-                triggerUseCaseFactory.createConditionEditSaveController();
-        this.conditionEditorViewModel = conditionEditorViewModel;
+        this.actionIndex = actionIndex;
+        this.actionEditorViewModel = actionEditorViewModel;
+        this.actionEditSaveController = triggerUseCaseFactory.createActionEditSaveController();
 
-        this.conditionEditorViewModel.addPropertyChangeListener(this);
+        // Register Listener
+        this.actionEditorViewModel.addPropertyChangeListener(this);
 
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(45, 45, 45));
@@ -47,7 +48,7 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
         headerPanel.setOpaque(false);
         headerPanel.setBorder(new EmptyBorder(10, 10, 0, 10));
 
-        JLabel titleLabel = new JLabel("Condition");
+        JLabel titleLabel = new JLabel("Action Script");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
         titleLabel.setForeground(Color.WHITE);
         headerPanel.add(titleLabel);
@@ -66,7 +67,7 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
 
         JScrollPane scrollPane = new JScrollPane(scriptArea);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
-        // Add padding around the scroll pane
+
         JPanel scrollWrapper = new JPanel(new BorderLayout());
         scrollWrapper.setOpaque(false);
         scrollWrapper.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -90,11 +91,12 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
 
         JButton saveBtn = new JButton("Save");
         styleButton(saveBtn);
-        // Save Action: Execute Controller
+
+        // Save Action
         saveBtn.addActionListener(e -> {
             String script = scriptArea.getText();
-            // Execute logic. DO NOT dispose here. Wait for propertyChange.
-            conditionEditSaveController.execute(triggerIndex, conditionIndex, script);
+            isSaveClicked = true; // Mark intent to save
+            actionEditSaveController.execute(triggerIndex, actionIndex, script);
         });
 
         JButton cancelBtn = new JButton("Cancel");
@@ -116,27 +118,26 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                conditionEditorViewModel.removePropertyChangeListener(ConditionEditorDialog.this);
+                actionEditorViewModel.removePropertyChangeListener(ActionEditorDialog.this);
             }
         });
     }
 
     private void showDocumentation() {
-        // Simple popup for docs, or open a URL
         JTextArea docText = new JTextArea(
-                "Available Variables:\n" +
-                        "- hp: Player Health (Integer)\n" +
-                        "- x: Player X Position (Double)\n" +
-                        "- isAngry: Boolean Flag\n\n" +
+                "Available Actions:\n" +
+                        "- setX(value): Set X position\n" +
+                        "- setY(value): Set Y position\n" +
+                        "- changeSprite(imageName): Change appearance\n\n" +
                         "Examples:\n" +
-                        "hp > 0 && x < 100\n" +
-                        "isAngry == true"
+                        "setX(100.5)\n" +
+                        "changeSprite(\"angry_bear.png\")"
         );
         docText.setEditable(false);
         docText.setBackground(new Color(60, 60, 60));
         docText.setForeground(Color.WHITE);
 
-        JOptionPane.showMessageDialog(this, new JScrollPane(docText), "Script Documentation", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(docText), "Action Script Documentation", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void styleButton(JButton btn) {
@@ -154,24 +155,27 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        ConditionEditorState state = (ConditionEditorState) evt.getNewValue();
+        // Only react if we actually clicked save (ignores load events)
+        if (!isSaveClicked) return;
+
+        ActionEditorState state = (ActionEditorState) evt.getNewValue();
 
         if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
-            // FAILURE: Show Error Panel
+            // FAILURE
             JOptionPane.showMessageDialog(this,
                     state.getErrorMessage(),
                     "Save Failed",
                     JOptionPane.ERROR_MESSAGE);
-            // Dialog stays open so user can fix the script
+            isSaveClicked = false; // Reset to allow retry
         } else {
-            // SUCCESS: Show Notification and Close
+            // SUCCESS
             JOptionPane.showMessageDialog(this,
-                    "Condition saved successfully.",
+                    "Action saved successfully.",
                     "Success",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            conditionEditorViewModel.removePropertyChangeListener(this);
-            dispose(); // Close window only on success
+            actionEditorViewModel.removePropertyChangeListener(this);
+            dispose();
         }
     }
 }

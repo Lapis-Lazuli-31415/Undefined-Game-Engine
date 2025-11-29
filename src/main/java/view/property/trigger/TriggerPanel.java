@@ -2,6 +2,7 @@ package view.property.trigger;
 
 import app.use_case_factory.TriggerUseCaseFactory;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.action.ActionEditorViewModel;
 import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.delete.TriggerDeleteController;
 import view.util.PropertyPanelUtility;
@@ -17,6 +18,7 @@ public class TriggerPanel extends JPanel {
             int triggerIndex,
             TriggerManagerViewModel triggerManagerViewModel,
             ConditionEditorViewModel conditionEditorViewModel,
+            ActionEditorViewModel actionEditorViewModel,
             TriggerUseCaseFactory factory) {
 
         triggerDeleteController = factory.createTriggerDeleteController();
@@ -57,6 +59,6 @@ public class TriggerPanel extends JPanel {
         // Row 3
         contentGbc.gridy = 3;
         // Use weightY if you want this to expand, otherwise default is fine
-        add(new ActionListPanel(triggerIndex, triggerManagerViewModel, factory), contentGbc);
+        add(new ActionListPanel(triggerIndex, triggerManagerViewModel, actionEditorViewModel, factory), contentGbc);
     }
 }

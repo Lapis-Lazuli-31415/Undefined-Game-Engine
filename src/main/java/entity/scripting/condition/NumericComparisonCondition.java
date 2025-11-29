@@ -68,7 +68,7 @@ public class NumericComparisonCondition extends Condition{
         final int requiredLength = 3;
 
         if (parts.length != requiredLength) {
-            throw new ParseSyntaxException("Invalid Syntax: expected " + requiredLength +
+            throw new ParseSyntaxException("Invalid Syntax (NumericComparison): expected " + requiredLength +
                     " parameters but got " + parts.length);
         }
 
@@ -80,12 +80,12 @@ public class NumericComparisonCondition extends Condition{
         Expression<?> rightResult = ExpressionFactory.parse(right);
 
         if (!(leftResult instanceof NumericExpression)) {
-            throw new ParseSyntaxException("Invalid Syntax: " + left + " does not evaluate to a BooleanExpression");
+            throw new ParseSyntaxException("Invalid Syntax: " + left + " does not evaluate to a NumericExpression");
         } else if (!isValidComparator(comparator)) {
             throw new ParseSyntaxException("Invalid Syntax: " +
                     comparator + " does not belong to \">\", \"=\", \"<\", \">=\", \"<=\", \"!=\"");
         } else if (!(rightResult instanceof NumericExpression)) {
-            throw new ParseSyntaxException("Invalid Syntax: " + right + " does not evaluate to a BooleanExpression");
+            throw new ParseSyntaxException("Invalid Syntax: " + right + " does not evaluate to a NumericExpression");
         } else {
             this.left = (NumericExpression) leftResult;
             this.comparator = comparator;

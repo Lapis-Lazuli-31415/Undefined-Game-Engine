@@ -2,8 +2,13 @@ package entity.scripting.action;
 
 import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;
+import entity.scripting.error.ParseSyntaxException;
+import entity.scripting.expression.BooleanExpression;
+import entity.scripting.expression.Expression;
+import entity.scripting.expression.ExpressionFactory;
 import entity.scripting.expression.NumericExpression;
 import entity.scripting.expression.value.NumericValue;
+import entity.scripting.expression.variable.BooleanVariable;
 import entity.scripting.expression.variable.NumericVariable;
 
 public class NumericVariableAssignmentAction extends Action{
@@ -17,13 +22,8 @@ public class NumericVariableAssignmentAction extends Action{
         this.expression = expression;
     }
 
-    public NumericVariableAssignmentAction(NumericExpression expression) {
-        this.expression = expression;
-    }
-
     public NumericVariableAssignmentAction() {
-        final NumericExpression DEFAULT_EXPRESSION = new NumericValue(0);
-        new NumericVariableAssignmentAction(DEFAULT_EXPRESSION);
+        this(new NumericVariable("_", false), new NumericValue(0));
     }
 
     public static String getEventType() {
@@ -59,6 +59,37 @@ public class NumericVariableAssignmentAction extends Action{
         } else {
             Assign.assign(localEnvironment, variable, value);
         }
+    }
+
+    @Override
+    public void parse(String string) throws ParseSyntaxException {
+        String[] parts = string.split(";");
+        final int requiredLength = 2;
+
+        if (parts.length != requiredLength) {
+            throw new ParseSyntaxException("Invalid Syntax (NumericVariableAssignment): expected " + requiredLength +
+                    " parameters but got " + parts.length);
+        }
+
+        String variable = parts[0].trim();
+        String expression = parts[1].trim();
+
+        Expression<?> variableResult = ExpressionFactory.parse(variable);
+        Expression<?> expressionResult = ExpressionFactory.parse(expression);
+
+        if (!(variableResult instanceof NumericVariable)) {
+            throw new ParseSyntaxException("Invalid Syntax: " + variable + " does not evaluate to a NumericVariable");
+        } else if (!(expressionResult instanceof NumericExpression)) {
+            throw new ParseSyntaxException("Invalid Syntax: " + expression + " does not evaluate to a NumericExpression");
+        } else {
+            this.variable = (NumericVariable) variableResult;
+            this.expression = (NumericExpression) expressionResult;
+        }
+    }
+
+    @Override
+    public String format() {
+        return variable.format() + "; " + expression.format();
     }
 
 }

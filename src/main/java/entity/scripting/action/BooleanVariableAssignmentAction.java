@@ -2,7 +2,11 @@ package entity.scripting.action;
 
 import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;
+import entity.scripting.error.ParseSyntaxException;
 import entity.scripting.expression.BooleanExpression;
+import entity.scripting.expression.Expression;
+import entity.scripting.expression.ExpressionFactory;
+import entity.scripting.expression.NumericExpression;
 import entity.scripting.expression.value.BooleanValue;
 import entity.scripting.expression.variable.BooleanVariable;
 
@@ -17,13 +21,8 @@ public class BooleanVariableAssignmentAction extends Action {
         this.expression = expression;
     }
 
-    public BooleanVariableAssignmentAction(BooleanExpression expression) {
-        this.expression = expression;
-    }
-
     public BooleanVariableAssignmentAction() {
-        final BooleanExpression DEFAULT_EXPRESSION = new BooleanValue(false);
-        this.expression = DEFAULT_EXPRESSION;
+        this(new BooleanVariable("_", false), new BooleanValue(false));
     }
 
     public static String getEventType() {
@@ -59,5 +58,36 @@ public class BooleanVariableAssignmentAction extends Action {
         } else {
             Assign.assign(localEnvironment, variable, value);
         }
+    }
+
+    @Override
+    public void parse(String string) throws ParseSyntaxException {
+        String[] parts = string.split(";");
+        final int requiredLength = 2;
+
+        if (parts.length != requiredLength) {
+            throw new ParseSyntaxException("Invalid Syntax (BooleanVariableAssignment): expected " + requiredLength +
+                    " parameters but got " + parts.length);
+        }
+
+        String variable = parts[0].trim();
+        String expression = parts[1].trim();
+
+        Expression<?> variableResult = ExpressionFactory.parse(variable);
+        Expression<?> expressionResult = ExpressionFactory.parse(expression);
+
+        if (!(variableResult instanceof BooleanVariable)) {
+            throw new ParseSyntaxException("Invalid Syntax: " + variable + " does not evaluate to a BooleanVariable");
+        } else if (!(expressionResult instanceof BooleanExpression)) {
+            throw new ParseSyntaxException("Invalid Syntax: " + expression + " does not evaluate to a BooleanExpression");
+        } else {
+            this.variable = (BooleanVariable) variableResult;
+            this.expression = (BooleanExpression) expressionResult;
+        }
+    }
+
+    @Override
+    public String format() {
+        return variable.format() + "; " + expression.format();
     }
 }
