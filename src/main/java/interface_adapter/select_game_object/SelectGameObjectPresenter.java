@@ -7,10 +7,14 @@ import use_case.component_management.select_game_object.SelectGameObjectOutputBo
 
 public class SelectGameObjectPresenter implements SelectGameObjectOutputBoundary {
 
-    private final GameObjectSelectionListener listener;
+    private GameObjectSelectionListener listener;
 
     public SelectGameObjectPresenter(
                                          GameObjectSelectionListener listener) {
+        this.listener = listener;
+    }
+
+    public void setListener(GameObjectSelectionListener listener) {
         this.listener = listener;
     }
 

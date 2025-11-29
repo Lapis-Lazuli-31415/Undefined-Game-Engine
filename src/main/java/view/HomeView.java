@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
 
 import entity.GameController;
 import entity.GameObject;
 import entity.Transform;
+import interface_adapter.list_scenes.ListScenesPresenter;
 import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
 import interface_adapter.transform.TransformViewModel;
@@ -22,12 +24,24 @@ import interface_adapter.variable.LocalVariableViewModel;
 import use_case.Sprites.Import.ImportSpriteInteractor;
 import view.property.PropertiesPanel;
 
+import view.GameComponentsPanel;
+import data_access.InMemorySceneRepository;
+
+import use_case.component_management.list_scenes.ListScenesInteractor;
+import use_case.component_management.select_scene.SelectSceneInteractor;
+import use_case.component_management.select_game_object.SelectGameObjectInteractor;
+
+import interface_adapter.select_scene.SelectScenePresenter;
+import interface_adapter.select_game_object.SelectGameObjectPresenter;
+
+
 public class HomeView extends javax.swing.JFrame {
 
     // ====== FIELDS ======
     private JPanel leftSidebar;
     private JPanel assetsPanel;
     private JPanel gameComponentsPanel;
+    private GameComponentsPanel gameComponents;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
@@ -230,6 +244,45 @@ public class HomeView extends javax.swing.JFrame {
         gameComponentsPanel.setLayout(new BorderLayout());
         gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
         gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
+
+        // Repository
+        var sceneRepo = new InMemorySceneRepository();
+
+        // 1. Create the GameComponentsPanel FIRST so the JTree + TreeModel exist
+        gameComponents = new GameComponentsPanel(null, null, null);  // no interactors yet
+
+        // 2. Now retrieve the tree model needed by the ListScenesPresenter
+        DefaultTreeModel treeModel = gameComponents.getTreeModel();
+
+        // 3. Create presenters with the REAL model
+        var listScenesPresenter = new ListScenesPresenter(treeModel);
+        var selectScenePresenter = new SelectScenePresenter(null);
+        var selectGameObjectPresenter = new SelectGameObjectPresenter(null);
+
+        // 4. Create interactors
+        var listScenesInteractor =
+                new ListScenesInteractor(sceneRepo, listScenesPresenter);
+
+        var selectSceneInteractor =
+                new SelectSceneInteractor(sceneRepo, selectScenePresenter);
+
+        var selectGameObjectInteractor =
+                new SelectGameObjectInteractor(sceneRepo, selectGameObjectPresenter);
+
+        // 5. Now pass the interactors into the panel
+        gameComponents.setInteractors(
+                listScenesInteractor,
+                selectSceneInteractor,
+                selectGameObjectInteractor
+        );
+
+        // 6. Connect presenter listeners (for selection feedback)
+        selectScenePresenter.setListener(gameComponents);
+        selectGameObjectPresenter.setListener(gameComponents);
+
+        // 7. Add panel to UI
+        gameComponentsPanel.add(gameComponents, BorderLayout.CENTER);
+
 
         // ====== Assemble Sidebar ======
         leftSidebar.add(assetsPanel);
