@@ -7,10 +7,13 @@ import entity.scripting.Trigger;
 import entity.scripting.TriggerManager;
 import entity.scripting.action.WaitAction;
 import entity.scripting.condition.NumericComparisonCondition;
+import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;
 import entity.scripting.event.Event;
 import entity.scripting.event.OnClickEvent;
 import entity.scripting.expression.value.NumericValue;
+import entity.scripting.expression.variable.BooleanVariable;
+import entity.scripting.expression.variable.NumericVariable;
 import interface_adapter.saving.SaveProjectController;
 import interface_adapter.saving.SaveProjectPresenter;
 import interface_adapter.saving.SaveProjectViewModel;
@@ -71,8 +74,17 @@ public class SaveDemo {
 
     // HELPER TO BUILD PROJECT
     private static Project createSampleProject() {
-        // global environment
+        // --- 1. GLOBAL ENVIRONMENT ---
         Environment globalEnv = new Environment();
+        try {
+            // Add some global game state variables
+            Assign.assign(globalEnv, new NumericVariable("wins", true), 0.0);
+            Assign.assign(globalEnv, new NumericVariable("losses", true), 0.0);
+            Assign.assign(globalEnv, new BooleanVariable("win:", true), false);
+        } catch (Exception e) {
+            System.err.println("Error initializing global environment: " + e.getMessage());
+        }
+
         GameController gameController = new GameController(globalEnv);
 
         // transform for the Bear
@@ -107,7 +119,9 @@ public class SaveDemo {
         // 1. Event: OnClick
         Event clickEvent = new OnClickEvent();
 
-        // 2. Condition: 100 > 50 (Example numeric comparison)
+        // 2. Condition: health > 50
+        // Note: In a real scenario, the left side would likely be a Variable expression,
+        // but for this demo we'll compare static values or variables if we built the expression tree.
         NumericValue left = new NumericValue(100.0);
         NumericValue right = new NumericValue(50.0);
         NumericComparisonCondition condition = new NumericComparisonCondition(left, ">", right);
@@ -124,12 +138,22 @@ public class SaveDemo {
         triggerManager.addTrigger(trigger);
         // ---------------------
 
+        // --- 2. LOCAL ENVIRONMENT (Object Specific) ---
+        Environment localEnv = new Environment();
+        try {
+            // Add variables specific to this object
+            Assign.assign(localEnv, new NumericVariable("health", false), 100.0);
+            Assign.assign(localEnv, new BooleanVariable("alive:", false), true);
+        } catch (Exception e) {
+            System.err.println("Error initializing local environment: " + e.getMessage());
+        }
+
         // gameObject
         GameObject bear = new GameObject(
-                "obj-bear", "Bear", true, properties, new Environment()
+                "obj-bear", "Bear", true, properties, localEnv
         );
         bear.setTransform(transform);
-        bear.setTriggerManager(triggerManager); // Attach the trigger manager
+        bear.setTriggerManager(triggerManager);
 
         // scene
         ArrayList<GameObject> objects = new ArrayList<>();

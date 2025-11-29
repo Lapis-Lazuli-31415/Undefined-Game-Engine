@@ -2,27 +2,39 @@
   "id" : "proj-001",
   "name" : "project_name",
   "global_environment" : {
-    "variables" : { }
+    "variables" : {
+      "Boolean" : {
+        "variables" : {
+          "win:" : false
+        }
+      },
+      "Numeric" : {
+        "variables" : {
+          "wins" : 0.0,
+          "losses" : 0.0
+        }
+      }
+    }
   },
   "assets" : [ {
-    "id" : "21fd4dbe-9220-4ecb-8758-a3d561d5e1a6",
+    "id" : "3f7a5dcf-58d4-4637-a62f-cbb0b7622150",
     "name" : "bear.png",
     "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png"
   } ],
   "scenes" : [ {
-    "id" : "90231b93-1267-4527-8ca4-b426f54f51a2",
+    "id" : "7b988e36-9f92-4753-906e-caf0486f99d4",
     "name" : "Forest Level",
     "game_objects" : [ {
       "id" : "obj-bear",
       "name" : "Bear",
       "active" : true,
       "properties" : [ {
+        "sprite" : "3f7a5dcf-58d4-4637-a62f-cbb0b7622150",
         "visible" : true,
         "opacity" : 100,
         "width" : 2670,
         "height" : 2028,
-        "zindex" : 0,
-        "image" : "21fd4dbe-9220-4ecb-8758-a3d561d5e1a6"
+        "zindex" : 0
       } ],
       "transform" : {
         "rotation" : 45.0,
@@ -56,7 +68,18 @@
         } ]
       },
       "environment" : {
-        "variables" : { }
+        "variables" : {
+          "Boolean" : {
+            "variables" : {
+              "alive:" : true
+            }
+          },
+          "Numeric" : {
+            "variables" : {
+              "health" : 100.0
+            }
+          }
+        }
       }
     } ],
     "game_object_names" : [ "Bear" ]

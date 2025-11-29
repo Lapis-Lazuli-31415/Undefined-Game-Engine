@@ -15,7 +15,7 @@ public class SpriteRenderer extends Property {
         this.opacity = 100;
     }
 
-    @JsonIgnore // #TODO: IGNORE FOR NOW!! wait till misa does image
+
     public Image getSprite() {
         return sprite;
     }
@@ -34,11 +34,6 @@ public class SpriteRenderer extends Property {
 
     public void setVisible(boolean visiblity) {
         this.visible = visiblity;
-    }
-
-    // for Jackson saving part
-    public Image getImage() {
-        return sprite;
     }
 
     public int getZIndex() {
