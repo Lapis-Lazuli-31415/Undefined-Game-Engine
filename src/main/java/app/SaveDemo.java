@@ -33,14 +33,6 @@ import java.awt.*;
 public class SaveDemo {
 
     public static void main(String[] args) {
-        // --- DEBUG CHECK START ---
-        if (entity.Asset.class.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonTypeInfo.class)) {
-            System.out.println("✅ DEBUG: Asset class HAS JsonTypeInfo annotation.");
-        } else {
-            System.err.println("❌ DEBUG: Asset class MISSING annotation. YOU MUST REBUILD!");
-        }
-        // --- DEBUG CHECK END ---
-
         System.out.println("--- Starting Save Demo ---");
 
         // CREATE DATA (The Sample Project)
@@ -168,9 +160,17 @@ public class SaveDemo {
         bear.setTransform(transform);
         bear.setTriggerManager(triggerManager);
 
+        // gameObject
+        GameObject bearx2 = new GameObject(
+                "obj-bearx2", "Bearx2", true, properties, localEnv
+        );
+        bearx2.setTransform(transform);
+        bearx2.setTriggerManager(triggerManager);
+
         // scene
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(bear);
+        objects.add(bearx2);
         Scene scene = new Scene(UUID.randomUUID(), "Forest Level", objects);
 
         // project
