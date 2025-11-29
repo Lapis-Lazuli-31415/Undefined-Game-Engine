@@ -4,21 +4,28 @@ import data_access.saving.JsonProjectDataAccess;
 import entity.*;
 import entity.Image;
 import entity.scripting.Trigger;
+import entity.scripting.TriggerManager;
+import entity.scripting.action.WaitAction;
+import entity.scripting.condition.NumericComparisonCondition;
 import entity.scripting.environment.Environment;
-import entity.scripting.event.EmptyEvent;
+import entity.scripting.event.Event;
+import entity.scripting.event.OnClickEvent;
+import entity.scripting.expression.value.NumericValue;
 import interface_adapter.saving.SaveProjectController;
 import interface_adapter.saving.SaveProjectPresenter;
 import interface_adapter.saving.SaveProjectViewModel;
 import use_case.saving.SaveProjectInteractor;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.Vector;
 
 
 import java.awt.*;
-
+/**
+ * A standalone runner to test the Saving Feature.
+ * Right-click this file and select "Run 'SaveDemo.main()'"
+ */
 public class SaveDemo {
 
     public static void main(String[] args) {
@@ -60,35 +67,6 @@ public class SaveDemo {
         } else {
             System.out.println("SUCCESS: " + resultMessage);
         }
-
-        System.out.println("\n--- Starting Load Verification ---");
-
-        try {
-            // 1. We use the same DataAccessObject to load the file we just made
-            // Note: In a real app, this would be done via a LoadProjectController/Interactor
-            File fileToLoad = new File("test.json");
-
-            // 2. Call the load method
-            Project loadedProject = dataAccess.load(fileToLoad);
-
-            // 3. Verify the data
-            System.out.println("Loaded Project Name: " + loadedProject.getName());
-
-            // Dig deep to ensure the structure survived (Project -> Scene -> GameObject)
-            if (!loadedProject.getScenes().isEmpty()) {
-                Scene loadedScene = loadedProject.getScenes().get(0);
-                GameObject loadedObj = loadedScene.getGameObjects().get(0);
-
-                System.out.println("Loaded Object Name: " + loadedObj.getName()); // Should be "obj-bear"
-            }
-
-            System.out.println("VERIFICATION PASSED: Data matches!");
-
-        } catch (IOException e) {
-            System.err.println("LOAD FAILED: Could not read the file back.");
-            e.printStackTrace();
-        }
-
     }
 
     // HELPER TO BUILD PROJECT
@@ -108,8 +86,6 @@ public class SaveDemo {
         // properties (Sprite)
         ArrayList<Property> properties = new ArrayList<>();
 
-
-
         try {
             // pass the path to the image
             java.nio.file.Path bearPath = java.nio.file.Path.of("src/main/resources/bear.png");
@@ -125,16 +101,40 @@ public class SaveDemo {
             // create a dummy property or exit if image fails
         }
 
+        // --- TRIGGER SETUP ---
+        TriggerManager triggerManager = new TriggerManager();
+
+        // 1. Event: OnClick
+        Event clickEvent = new OnClickEvent();
+
+        // 2. Condition: 100 > 50 (Example numeric comparison)
+        NumericValue left = new NumericValue(100.0);
+        NumericValue right = new NumericValue(50.0);
+        NumericComparisonCondition condition = new NumericComparisonCondition(left, ">", right);
+
+        // 3. Action: Wait 0.5 seconds
+        WaitAction waitAction = new WaitAction(new NumericValue(0.5));
+
+        // Assemble Trigger
+        Trigger trigger = new Trigger(clickEvent, true);
+        trigger.addCondition(condition);
+        trigger.addAction(waitAction);
+
+        // Add to Manager
+        triggerManager.addTrigger(trigger);
+        // ---------------------
+
         // gameObject
         GameObject bear = new GameObject(
                 "obj-bear", "Bear", true, properties, new Environment()
         );
         bear.setTransform(transform);
+        bear.setTriggerManager(triggerManager); // Attach the trigger manager
 
         // scene
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(bear);
-        Scene scene = new Scene("scene-01", "Forest Level", objects, new Music());
+        Scene scene = new Scene(UUID.randomUUID(), "Forest Level", objects);
 
         // project
         ArrayList<Scene> scenes = new ArrayList<>();

@@ -10,6 +10,10 @@ public class NumericValue implements NumericExpression {
         this.value = value;
     }
 
+    public double getValue() {
+        return value;
+    }
+
     @Override
     public Double evaluate(Environment globalEnvironment, Environment localEnvironment) {
         return value;

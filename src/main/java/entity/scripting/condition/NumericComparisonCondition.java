@@ -25,6 +25,18 @@ public class NumericComparisonCondition extends Condition{
         new NumericComparisonCondition(DEFAULT_LEFT, DEFAULT_COMPARATOR, DEFAULT_RIGHT);
     }
 
+    public NumericExpression getLeft() {
+        return left;
+    }
+
+    public String getComparator() {
+        return comparator;
+    }
+
+    public NumericExpression getRight() {
+        return right;
+    }
+
     public void setLeft(NumericExpression left) {
         this.left = left;
     }

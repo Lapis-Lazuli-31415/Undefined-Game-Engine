@@ -5,12 +5,12 @@
     "variables" : { }
   },
   "assets" : [ {
-    "id" : "a6aa8971-8585-4511-a70f-6bb83d74dd01",
+    "id" : "21fd4dbe-9220-4ecb-8758-a3d561d5e1a6",
     "name" : "bear.png",
     "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png"
   } ],
   "scenes" : [ {
-    "id" : "scene-01",
+    "id" : "90231b93-1267-4527-8ca4-b426f54f51a2",
     "name" : "Forest Level",
     "game_objects" : [ {
       "id" : "obj-bear",
@@ -22,7 +22,7 @@
         "width" : 2670,
         "height" : 2028,
         "zindex" : 0,
-        "image" : "a6aa8971-8585-4511-a70f-6bb83d74dd01"
+        "image" : "21fd4dbe-9220-4ecb-8758-a3d561d5e1a6"
       } ],
       "transform" : {
         "rotation" : 45.0,
@@ -31,9 +31,34 @@
         "scale_x" : 1.0,
         "scale_y" : 1.0
       },
+      "trigger_manager" : {
+        "triggers" : [ {
+          "event" : {
+            "event_label" : "On Click",
+            "event_parameters" : { },
+            "required_parameters" : [ ]
+          },
+          "conditions" : [ {
+            "left" : {
+              "value" : 100.0
+            },
+            "comparator" : ">",
+            "right" : {
+              "value" : 50.0
+            }
+          } ],
+          "actions" : [ {
+            "seconds_expression" : {
+              "value" : 0.5
+            }
+          } ],
+          "active" : true
+        } ]
+      },
       "environment" : {
         "variables" : { }
       }
-    } ]
+    } ],
+    "game_object_names" : [ "Bear" ]
   } ]
 }
