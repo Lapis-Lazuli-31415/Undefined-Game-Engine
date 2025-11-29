@@ -124,20 +124,39 @@ public class ActionEditorDialog extends JDialog implements PropertyChangeListene
     }
 
     private void showDocumentation() {
-        JTextArea docText = new JTextArea(
-                "Available Actions:\n" +
-                        "- setX(value): Set X position\n" +
-                        "- setY(value): Set Y position\n" +
-                        "- changeSprite(imageName): Change appearance\n\n" +
-                        "Examples:\n" +
-                        "setX(100.5)\n" +
-                        "changeSprite(\"angry_bear.png\")"
-        );
-        docText.setEditable(false);
-        docText.setBackground(new Color(60, 60, 60));
-        docText.setForeground(Color.WHITE);
+        JEditorPane docPane = new JEditorPane();
+        docPane.setEditable(false);
+        docPane.setContentType("text/html");
 
-        JOptionPane.showMessageDialog(this, new JScrollPane(docText), "Action Script Documentation", JOptionPane.INFORMATION_MESSAGE);
+        // 1. Load the file from the classpath resources
+        java.net.URL helpUrl = getClass().getResource("/undefined_language_documentation.html");
+
+        if (helpUrl != null) {
+            try {
+                // This loads the HTML file directly
+                docPane.setPage(helpUrl);
+            } catch (java.io.IOException e) {
+                docPane.setText("<html><body style='color:white'>Error loading documentation: " + e.getMessage()
+                        + "</body></html>");
+            }
+        } else {
+            docPane.setText("<html><body style='color:white'>Documentation file " +
+                    "'undefined_language_documentation.html' not found.</body></html>");
+        }
+
+        // 2. Set Caret to top
+        docPane.setCaretPosition(0);
+
+        // 3. Wrap in ScrollPane
+        JScrollPane scrollPane = new JScrollPane(docPane);
+        scrollPane.setPreferredSize(new Dimension(800, 600));
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
+
+        // 4. Show Dialog
+        JOptionPane.showMessageDialog(this,
+                scrollPane,
+                "Undefined Language Specification",
+                JOptionPane.PLAIN_MESSAGE);
     }
 
     private void styleButton(JButton btn) {

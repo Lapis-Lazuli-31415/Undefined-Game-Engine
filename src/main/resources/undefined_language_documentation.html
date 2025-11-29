@@ -1,0 +1,148 @@
+<html>
+<head>
+    <style>
+        body {
+            font-family: Verdana, Tahoma, sans-serif;
+            color: #e0e0e0;
+            background-color: #3c3c3c;
+            padding: 15px;
+        }
+        h2 {
+            border-bottom: 2px solid #5da5e8;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #8ec3eb;
+            margin-top: 25px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        h4 {
+            color: #c4d7e6;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+        ul {
+            margin-top: 10px;
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        code {
+            background-color: #2b2b2b;
+            color: #cc7832;
+            font-family: monospace;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 85%;
+        }
+        .param {
+            color: #9876aa;
+            font-style: italic;
+        }
+        .desc {
+            font-size: 1.0em;
+            color: #bbbbbb;
+        }
+    </style>
+</head>
+<body>
+<h2>Undefined Language Specification</h2>
+<p class="desc">This document defines the syntax and semantics for conditions and actions.</p>
+
+<h3>1. Expressions</h3>
+
+<h4>1.1 Numeric Expressions</h4>
+<ul>
+    <li><b>1.1.1 NumericValue</b><br>
+        <span class="desc">Represents a literal numeric value.</span><br>
+        Syntax: <code>number:(<span class="param">value</span>)</code><br>
+        <span class="desc">Param: <i>value</i> — A floating-point or integer literal.</span>
+    </li>
+
+    <li><b>1.1.2 NumericVariable</b><br>
+        <span class="desc">Represents a reference to a numeric variable.</span><br>
+        Syntax: <code>number_var:(<span class="param">name</span>, <span class="param">scope</span>)</code><br>
+        <span class="desc">Params: <i>name</i> (Identifier), <i>scope</i> (global or local).</span>
+    </li>
+
+    <li><b>1.1.3 SimpleArithmeticOperation</b><br>
+        <span class="desc">Binary arithmetic operation between two numeric expressions.</span><br>
+        Syntax: <code>arithmetic:(<span class="param">LeftExpr</span>, <span class="param">operator</span>, <span class="param">RightExpr</span>)</code><br>
+        Valid Operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>.
+    </li>
+</ul>
+
+<h4>1.2 Boolean Expressions</h4>
+<ul>
+    <li><b>1.2.1 BooleanValue</b><br>
+        <span class="desc">Represents a literal boolean value.</span><br>
+        Syntax: <code>boolean:(<span class="param">value</span>)</code><br>
+        Valid Values: <code>true</code>, <code>false</code>
+    </li>
+
+    <li><b>1.2.2 BooleanVariable</b><br>
+        <span class="desc">Represents a reference to a boolean variable.</span><br>
+        Syntax: <code>boolean_var:(<span class="param">name</span>, <span class="param">scope</span>)</code><br>
+        <span class="desc">Params: <i>name</i> (Identifier), <i>scope</i> (global or local).</span>
+    </li>
+
+    <li><b>1.2.3 AndOperation</b><br>
+        <span class="desc">Logical AND between two boolean expressions.</span><br>
+        Syntax: <code>and:(<span class="param">BoolExpr</span>, <span class="param">BoolExpr</span>)</code>
+    </li>
+
+    <li><b>1.2.4 OrOperation</b><br>
+        <span class="desc">Logical OR between two boolean expressions.</span><br>
+        Syntax: <code>or:(<span class="param">BoolExpr</span>, <span class="param">BoolExpr</span>)</code>
+    </li>
+
+    <li><b>1.2.5 NotOperation</b><br>
+        <span class="desc">Logical negation of a boolean expression.</span><br>
+        Syntax: <code>not:(<span class="param">BoolExpr</span>)</code>
+    </li>
+</ul>
+
+<h3>2. Conditions</h3>
+<p class="desc">Evaluated to determine whether a trigger fires.</p>
+
+<ul>
+    <li><b>2.1 NumericComparison</b><br>
+        <span class="desc">Compares two numeric expressions using a comparator.</span><br>
+        Syntax: <code>NumericExpr ; <span class="param">comparator</span> ; NumericExpr</code><br>
+        Valid Comparators: <code>&lt;</code> <code>=</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code> <code>!=</code>
+    </li>
+
+    <li><b>2.2 BooleanComparison</b><br>
+        <span class="desc">Checks whether two boolean expressions evaluate to the same value.</span><br>
+        Syntax: <code>BooleanExpr ; BooleanExpr</code><br>
+        <span class="desc">Evaluates to true if (Left == Right).</span>
+    </li>
+</ul>
+
+<h3>3. Actions</h3>
+<p class="desc">Modifications or side-effects executed when a trigger activates.</p>
+
+<ul>
+    <li><b>3.1 BooleanVariableAssignment</b><br>
+        <span class="desc">Assigns a boolean expression’s value to a boolean variable.</span><br>
+        Syntax: <code>BooleanVariable ; BooleanExpr</code>
+    </li>
+
+    <li><b>3.2 NumericVariableAssignment</b><br>
+        <span class="desc">Assigns a numeric expression’s value to a numeric variable.</span><br>
+        Syntax: <code>NumericVariable ; NumericExpr</code>
+    </li>
+
+    <li><b>3.3 Wait</b><br>
+        <span class="desc">Pauses execution for the specified number of seconds.</span><br>
+        Syntax: <code>NumericExpr</code><br>
+        <span class="desc">Note: Evaluates expression as duration in seconds.</span>
+    </li>
+</ul>
+</body>
+</html>

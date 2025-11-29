@@ -184,6 +184,7 @@ public class HomeView extends javax.swing.JFrame {
         spritesScroll.setPreferredSize(new Dimension(180, 140));
 
         assetsPanel.add(spritesHeader);
+        assetsPanel.add(Box.createVerticalStrut(8));
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
 
