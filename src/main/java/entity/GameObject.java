@@ -10,9 +10,7 @@ import java.util.List;
 
 /**
  * GameObject is the basic entity in the scene.
- * It has an id, name, active flag, properties, and belongs to an Environment.
- *
- * No UI / JavaFX imports here.
+ * It has an id, name, active flag, properties, spriterenderer, and belongs to an Environment.
  */
 
 public class GameObject {
@@ -24,15 +22,18 @@ public class GameObject {
     private Environment environments;
     private Transform transform;
     private TriggerManager triggerManager;
+    private SpriteRenderer spriteRenderer;
 
     public GameObject(String id,
                       String name,
                       boolean active,
                       ArrayList<Property> properties,
-                      Environment environments) {
+                      Environment environments,
+                      SpriteRenderer spriteRenderer) {
         this.id =id;
         this.name=name;
         this.active=active;
+        this.spriteRenderer=spriteRenderer;
 
         // keep signature, but handle null safely
         if (properties != null) {
@@ -113,6 +114,15 @@ public class GameObject {
     public void setTriggerManager(TriggerManager triggerManager) {
         this.triggerManager = triggerManager;
     }
+
+    public SpriteRenderer getSpriteRenderer() {
+        return spriteRenderer;
+    }
+
+    public void setSpriteRenderer(SpriteRenderer spriteRenderer) {
+        this.spriteRenderer = spriteRenderer;
+    }
+
 
     // --- Property helpers ---
 

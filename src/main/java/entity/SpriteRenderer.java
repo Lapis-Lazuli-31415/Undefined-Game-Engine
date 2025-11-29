@@ -2,7 +2,7 @@ package entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class SpriteRenderer extends Property {
+public class SpriteRenderer {
 
     private Image sprite;
     private boolean visible;
@@ -15,7 +15,6 @@ public class SpriteRenderer extends Property {
         this.opacity = 100;
     }
 
-    @JsonIgnore // #TODO: IGNORE FOR NOW!! wait till misa does image
     public Image getSprite() {
         return sprite;
     }
