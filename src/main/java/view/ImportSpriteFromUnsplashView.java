@@ -192,9 +192,5 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
             }
         }
     }
-
-    public String getViewName() {       // TODO: remove i think
-        return "importSpriteFromUnsplash";
-    }
 }
 
