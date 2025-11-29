@@ -1,4 +1,4 @@
-package view;
+package view.property;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.List;
 
 import view.util.PropertyPanelUtility;
-import interface_adapter.variable.VariableViewModel;
+import interface_adapter.variable.LocalVariableViewModel;
+import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.VariableState;
 import interface_adapter.variable.UpdateVariableController;
 import interface_adapter.variable.DeleteVariableController;
@@ -21,10 +22,14 @@ import use_case.variable.factory.ValuePromptKind;
 
 public class VariableSectionPanel extends JPanel implements PropertyChangeListener {
 
-    // One panel per type, created dynamically from the registry
-    private final Map<String, JPanel> typePanels = new HashMap<>();
+    // Separate panel maps for local and global variables
+    private final Map<String, JPanel> localTypePanels = new HashMap<>();
+    private final Map<String, JPanel> globalTypePanels = new HashMap<>();
 
-    private VariableViewModel variableViewModel;
+    // Separate ViewModels for local and global
+    private LocalVariableViewModel localVariableViewModel;
+    private GlobalVariableViewModel globalVariableViewModel;
+
     private UpdateVariableController updateVariableController;
     private DeleteVariableController deleteVariableController;
 
@@ -40,13 +45,24 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        JPanel contentPanel = createVariableSection();
-        add(contentPanel, BorderLayout.CENTER);
+        JPanel container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container.setOpaque(false);
+
+        JPanel globalContentPanel = createGlobalVariableSection();
+        container.add(globalContentPanel);
+
+        container.add(Box.createVerticalStrut(20));
+
+        JPanel localContentPanel = createLocalVariableSection();
+        container.add(localContentPanel);
+
+        add(container, BorderLayout.CENTER);
     }
 
 
-    private JPanel createVariableSection() {
-        JPanel panel = PropertyPanelUtility.createSectionPanel("Variable");
+    private JPanel createLocalVariableSection() {
+        JPanel panel = PropertyPanelUtility.createSectionPanel("Local Variables");
         GridBagConstraints gbc = PropertyPanelUtility.baseGbc();
 
         gbc.gridx = 0;
@@ -64,9 +80,9 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
             JLabel header = PropertyPanelUtility.createSubHeaderLabel(headerText);
             headerPanel.add(header, BorderLayout.WEST);
 
-            // Add button for this type
+            // Add button for LOCAL variables
             JButton addBtn = PropertyPanelUtility.createAddButton();
-            addBtn.addActionListener(e -> addVariableOfType(typeName));
+            addBtn.addActionListener(e -> addVariableOfType(typeName, false)); // false = local
             headerPanel.add(addBtn, BorderLayout.EAST);
 
             panel.add(headerPanel, gbc);
@@ -78,8 +94,50 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
             varsPanel.setLayout(new BoxLayout(varsPanel, BoxLayout.Y_AXIS));
             panel.add(varsPanel, gbc);
 
-            // remember which panel corresponds to which type
-            typePanels.put(typeName, varsPanel);
+            // Store in LOCAL panel map
+            localTypePanels.put(typeName, varsPanel);
+
+            gbc.gridy++;
+            panel.add(Box.createVerticalStrut(12), gbc);
+            gbc.gridy++;
+        }
+
+        return panel;
+    }
+
+    private JPanel createGlobalVariableSection() {
+        JPanel panel = PropertyPanelUtility.createSectionPanel("Global Variables");
+        GridBagConstraints gbc = PropertyPanelUtility.baseGbc();
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+
+        List<String> registeredTypes = factoryRegistry.getRegisteredTypes();
+
+        for (String typeName : registeredTypes) {
+            // ----- header -----
+            JPanel headerPanel = new JPanel(new BorderLayout());
+            headerPanel.setOpaque(false);
+
+            String headerText = typeName + " variables:";
+            JLabel header = PropertyPanelUtility.createSubHeaderLabel(headerText);
+            headerPanel.add(header, BorderLayout.WEST);
+
+            JButton addBtn = PropertyPanelUtility.createAddButton();
+            addBtn.addActionListener(e -> addVariableOfType(typeName, true)); // true = global
+            headerPanel.add(addBtn, BorderLayout.EAST);
+
+            panel.add(headerPanel, gbc);
+            gbc.gridy++;
+
+            // ----- list panel for this type -----
+            JPanel varsPanel = new JPanel();
+            varsPanel.setOpaque(false);
+            varsPanel.setLayout(new BoxLayout(varsPanel, BoxLayout.Y_AXIS));
+            panel.add(varsPanel, gbc);
+
+            globalTypePanels.put(typeName, varsPanel);
 
             gbc.gridy++;
             panel.add(Box.createVerticalStrut(12), gbc);
@@ -90,11 +148,13 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
     }
 
 
-    private void addVariableOfType(String typeName) {
+    private void addVariableOfType(String typeName, boolean isGlobal) {
+        String scopeLabel = isGlobal ? "Global" : "Local";
+
         String name = JOptionPane.showInputDialog(
                 this,
                 typeName + " variable name:",
-                "Add " + typeName + " Variable",
+                "Add " + scopeLabel + " " + typeName + " Variable",
                 JOptionPane.PLAIN_MESSAGE
         );
         if (name == null || name.isBlank()) return;
@@ -147,13 +207,16 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
         }
 
         if (updateVariableController != null) {
-            updateVariableController.updateVariable(name, typeName, false, valueStr);
+            updateVariableController.updateVariable(name, typeName, isGlobal, valueStr);
         }
     }
 
 
     private void addVariableRow(String name, String valueStr, String type, boolean isGlobal) {
-        JPanel varsPanel = typePanels.get(type);
+        // Choose the correct panel map based on scope
+        Map<String, JPanel> targetPanelMap = isGlobal ? globalTypePanels : localTypePanels;
+
+        JPanel varsPanel = targetPanelMap.get(type);
         if (varsPanel == null) {
             // type unknown in UI; nothing to render
             return;
@@ -164,7 +227,8 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
         row.setBackground(new Color(45, 45, 45));
         row.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
-        String displayText = (isGlobal ? "[G] " : "") + name + " = " + valueStr;
+        String scopePrefix = isGlobal ? "[G] " : "[L] ";
+        String displayText = scopePrefix + name + " = " + valueStr;
         JTextField display = new JTextField(displayText);
         display.setEditable(false);
         display.setBackground(new Color(60, 60, 60));
@@ -255,10 +319,10 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
     }
 
 
-    private void syncFromViewModel() {
-        if (variableViewModel == null) return;
+    private void syncLocalFromViewModel() {
+        if (localVariableViewModel == null) return;
 
-        VariableState state = variableViewModel.getState();
+        VariableState state = localVariableViewModel.getState();
 
         // Show error message if present
         if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
@@ -270,19 +334,60 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
             );
         }
 
-        // Clear existing UI for all types
-        for (JPanel panel : typePanels.values()) {
+        // Clear existing UI for local only
+        for (JPanel panel : localTypePanels.values()) {
             panel.removeAll();
         }
-        variableRowMap.clear();
 
-        // Rebuild UI from state
+        // Remove local variable rows from map
+        variableRowMap.entrySet().removeIf(entry -> entry.getKey().endsWith("|false"));
+
+        // Rebuild local UI from state
         for (VariableState.VariableRow row : state.getVariables()) {
-            addVariableRow(row.getName(), row.getValue(), row.getType(), row.isGlobal());
+            if (!row.isGlobal()) {  // Only add local variables
+                addVariableRow(row.getName(), row.getValue(), row.getType(), row.isGlobal());
+            }
         }
 
-        // Revalidate all type panels
-        for (JPanel panel : typePanels.values()) {
+        // Revalidate local panels
+        for (JPanel panel : localTypePanels.values()) {
+            panel.revalidate();
+            panel.repaint();
+        }
+    }
+
+    private void syncGlobalFromViewModel() {
+        if (globalVariableViewModel == null) return;
+
+        VariableState state = globalVariableViewModel.getState();
+
+        // Show error message if present
+        if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    state.getErrorMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+
+        // Clear existing UI for global only
+        for (JPanel panel : globalTypePanels.values()) {
+            panel.removeAll();
+        }
+
+        // Remove global variable rows from map
+        variableRowMap.entrySet().removeIf(entry -> entry.getKey().endsWith("|true"));
+
+        // Rebuild global UI from state
+        for (VariableState.VariableRow row : state.getVariables()) {
+            if (row.isGlobal()) {  // Only add global variables
+                addVariableRow(row.getName(), row.getValue(), row.getType(), row.isGlobal());
+            }
+        }
+
+        // Revalidate global panels
+        for (JPanel panel : globalTypePanels.values()) {
             panel.revalidate();
             panel.repaint();
         }
@@ -292,19 +397,35 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
         return name + "|" + type + "|" + isGlobal;
     }
 
-    public void setVariableViewModel(VariableViewModel viewModel) {
+    public void setLocalVariableViewModel(LocalVariableViewModel viewModel) {
         // Remove old listener if any
-        if (this.variableViewModel != null) {
-            this.variableViewModel.removePropertyChangeListener(this);
+        if (this.localVariableViewModel != null) {
+            this.localVariableViewModel.removePropertyChangeListener(this);
         }
 
-        this.variableViewModel = viewModel;
+        this.localVariableViewModel = viewModel;
 
         // Add new listener
         if (viewModel != null) {
             viewModel.addPropertyChangeListener(this);
             // Initial sync
-            syncFromViewModel();
+            syncLocalFromViewModel();
+        }
+    }
+
+    public void setGlobalVariableViewModel(GlobalVariableViewModel viewModel) {
+        // Remove old listener if any
+        if (this.globalVariableViewModel != null) {
+            this.globalVariableViewModel.removePropertyChangeListener(this);
+        }
+
+        this.globalVariableViewModel = viewModel;
+
+        // Add new listener
+        if (viewModel != null) {
+            viewModel.addPropertyChangeListener(this);
+            // Initial sync
+            syncGlobalFromViewModel();
         }
     }
 
@@ -324,7 +445,14 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
     public void propertyChange(PropertyChangeEvent evt) {
         // When ViewModel state changes, sync UI
         if ("state".equals(evt.getPropertyName())) {
-            SwingUtilities.invokeLater(this::syncFromViewModel);
+            Object source = evt.getSource();
+
+            // Determine which ViewModel triggered the change
+            if (source == localVariableViewModel) {
+                SwingUtilities.invokeLater(this::syncLocalFromViewModel);
+            } else if (source == globalVariableViewModel) {
+                SwingUtilities.invokeLater(this::syncGlobalFromViewModel);
+            }
         }
     }
 }

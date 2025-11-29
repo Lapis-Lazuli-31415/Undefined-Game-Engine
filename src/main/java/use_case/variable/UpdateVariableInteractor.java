@@ -2,10 +2,13 @@ package use_case.variable;
 
 import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;
+import entity.scripting.environment.VariableMap;
 import entity.scripting.error.EnvironmentException;
 import entity.scripting.expression.variable.Variable;
 import use_case.variable.factory.VariableFactory;
 import use_case.variable.factory.DefaultVariableFactoryRegistry;
+
+import java.util.Map;
 
 public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
 
@@ -18,7 +21,6 @@ public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
                                     Environment localEnv,
                                     UpdateVariableOutputBoundary presenter){
         this(globalEnv,localEnv,presenter,new DefaultVariableFactoryRegistry());
-
     }
 
     public UpdateVariableInteractor(Environment globalEnv,
@@ -59,14 +61,23 @@ public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
         if (existing != null) {
             String existingType = existing.getVariableType();
             if (!existingType.equals(type)) {
-                presenter.prepareFailureView("Invalid update: existing" + existingType +
-                        " variable" + name + "cannot be updated as " + type + ".");
+                presenter.prepareFailureView("Invalid update: existing " + existingType +
+                        " variable " + name + " cannot be updated as " + type + ".");
                 return;
             }
         }
 
         try{
             handleWithFactory(targetEnv, inputData, name, type, rawValue);
+
+            // for debug
+            System.out.println("\n========================================");
+            System.out.println("AFTER UPDATE - " + (inputData.isGlobal() ? "GLOBAL" : "LOCAL") + " variable: " + name);
+            System.out.println("========================================");
+            printEnvironment("GLOBAL", globalEnv);
+            printEnvironment("LOCAL", localEnv);
+            System.out.println("========================================\n");
+
         } catch (EnvironmentException e){
             presenter.prepareFailureView(e.getMessage());
         } catch (NumberFormatException e){
@@ -121,6 +132,36 @@ public class UpdateVariableInteractor implements UpdateVariableInputBoundary {
         );
         presenter.prepareSuccessView(output);
     }
+
+    //for debug
+    private void printEnvironment(String label, Environment env) {
+        System.out.println("\n" + label + " Environment:");
+        Map<String, VariableMap<?>> vars = env.getVariables();
+
+        if (vars.isEmpty()) {
+            System.out.println("  (empty)");
+            return;
+        }
+
+        int count = 0;
+        for (Map.Entry<String, VariableMap<?>> entry : vars.entrySet()) {
+            String typeName = entry.getKey();
+            VariableMap<?> varMap = entry.getValue();
+            Map<String, ?> variables = varMap.getVariables();
+
+            for (Map.Entry<String, ?> varEntry : variables.entrySet()) {
+                System.out.println("  [" + typeName + "] " + varEntry.getKey() + " = " + varEntry.getValue());
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            System.out.println("  (no variables)");
+        } else {
+            System.out.println("  Total: " + count + " variable(s)");
+        }
+    }
+
     private static String safeTrim(String s) {
         return s == null ? "" : s.trim();
     }
