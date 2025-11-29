@@ -314,47 +314,94 @@ public class GameCanvas extends JPanel {
 
     /**
      * Render a single game object (SPRITE MODE).
+     * Uses the SAME coordinate system as ScenePanel (center-based).
      *
      * @param g2d Graphics2D context
      * @param obj The game object
      */
     private void renderGameObject(Graphics2D g2d, GameObject obj) {
+        if (!obj.isActive()) {
+            return;
+        }
+
         Transform transform = obj.getTransform();
         if (transform == null) return;
 
         SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
 
-        // Get position and size
-        double centerX = transform.getX();
-        double centerY = transform.getY();
-        double width = spriteRenderer != null ? spriteRenderer.getWidth() : 50;
-        double height = spriteRenderer != null ? spriteRenderer.getHeight() : 50;
-
-        // Calculate top-left corner
-        int x = (int) (centerX - width / 2);
-        int y = (int) (centerY - height / 2);
-
-        // Draw sprite or placeholder
-        if (spriteRenderer != null && spriteRenderer.getSprite() != null && spriteRenderer.getVisible()) {
-            // Draw actual sprite image
-            g2d.drawImage(spriteRenderer.getSprite().getBufferedImage(), x, y, (int) width, (int) height, null);
-        } else {
-            // Draw placeholder
-            g2d.setColor(Color.GRAY);
-            g2d.fillRect(x, y, (int) width, (int) height);
+        if (spriteRenderer != null && !spriteRenderer.getVisible()) {
+            return;
         }
 
-        // Draw bounding box (debug mode)
-        if (showBoundingBoxes) {
-            g2d.setColor(Color.GREEN);
-            g2d.setStroke(new BasicStroke(2));
-            g2d.drawRect(x, y, (int) width, (int) height);
-        }
+        // Get sprite dimensions
+        int spriteW = spriteRenderer != null ? spriteRenderer.getWidth() : 50;
+        int spriteH = spriteRenderer != null ? spriteRenderer.getHeight() : 50;
 
-        // Draw object name
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-        g2d.drawString(obj.getName(), x, y - 5);
+        // Apply scale (uniform scale like ScenePanel)
+        int drawW = (int) (spriteW * transform.getScaleX());
+        int drawH = (int) (spriteH * transform.getScaleY());
+
+        // Use CENTER-BASED coordinate system (same as ScenePanel)
+        int panelW = getWidth();
+        int panelH = getHeight();
+
+        int centerX = (panelW - drawW) / 2;
+        int centerY = (panelH - drawH) / 2;
+
+        int drawX = centerX + (int) transform.getX();
+        int drawY = centerY + (int) transform.getY();
+
+        // Support rotation (same as ScenePanel)
+        Graphics2D g2Copy = (Graphics2D) g2d.create();
+        try {
+            float rotationDeg = transform.getRotation();
+            double theta = Math.toRadians(rotationDeg);
+            double pivotX = drawX + drawW / 2.0;
+            double pivotY = drawY + drawH / 2.0;
+
+            g2Copy.rotate(theta, pivotX, pivotY);
+
+            // Draw sprite or placeholder
+            if (spriteRenderer != null && spriteRenderer.getSprite() != null) {
+                // Has actual sprite image
+                try {
+                    entity.Image spriteImage = spriteRenderer.getSprite();
+                    String filePath = spriteImage.getLocalpath().toString();
+                    Image image = new ImageIcon(filePath).getImage();
+
+                    if (image != null) {
+                        // Apply opacity
+                        float opacity = spriteRenderer.getOpacity() / 100.0f;
+                        g2Copy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+
+                        g2Copy.drawImage(image, drawX, drawY, drawW, drawH, this);
+                    }
+                } catch (Exception ex) {
+                    // Fallback to gray rectangle if image fails
+                    g2Copy.setColor(Color.GRAY);
+                    g2Copy.fillRect(drawX, drawY, drawW, drawH);
+                }
+            } else {
+                // No sprite - draw gray placeholder (for testing)
+                g2Copy.setColor(Color.GRAY);
+                g2Copy.fillRect(drawX, drawY, drawW, drawH);
+            }
+
+            // Draw bounding box (debug mode)
+            if (showBoundingBoxes) {
+                g2Copy.setColor(Color.GREEN);
+                g2Copy.setStroke(new BasicStroke(2));
+                g2Copy.drawRect(drawX, drawY, drawW, drawH);
+            }
+
+            // Draw object name
+            g2Copy.setColor(Color.WHITE);
+            g2Copy.setFont(new Font("Arial", Font.PLAIN, 12));
+            g2Copy.drawString(obj.getName(), drawX, drawY - 5);
+
+        } finally {
+            g2Copy.dispose();
+        }
     }
 
     /**
