@@ -1,4 +1,4 @@
-package view;
+package view.property;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -7,7 +7,8 @@ import java.awt.*;
 
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
-import interface_adapter.variable.VariableViewModel;
+import interface_adapter.variable.LocalVariableViewModel;
+import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.UpdateVariableController;
 import interface_adapter.variable.DeleteVariableController;
 import view.property.trigger.TriggerManagerPanel;
@@ -126,8 +127,13 @@ public class PropertiesPanel extends JPanel {
         transformSection.bind(viewModel, controller, onChangeCallback);
     }
 
-    public void setVariableViewModel(VariableViewModel viewModel) {
-        variableSection.setVariableViewModel(viewModel);
+    // NEW: Separate setters for local and global ViewModels
+    public void setLocalVariableViewModel(LocalVariableViewModel viewModel) {
+        variableSection.setLocalVariableViewModel(viewModel);
+    }
+
+    public void setGlobalVariableViewModel(GlobalVariableViewModel viewModel) {
+        variableSection.setGlobalVariableViewModel(viewModel);
     }
 
     public void setVariableController(UpdateVariableController controller) {

@@ -3,16 +3,16 @@ package interface_adapter.variable;
 import use_case.variable.UpdateVariableInputBoundary;
 import use_case.variable.UpdateVariableInputData;
 
-
 public class UpdateVariableController {
 
-    private final UpdateVariableInputBoundary updateInteractor;
-    private boolean editingGameController = false;
+    private final UpdateVariableInputBoundary localInteractor;
+    private final UpdateVariableInputBoundary globalInteractor;
 
-    public UpdateVariableController(UpdateVariableInputBoundary updateInteractor) {
-        this.updateInteractor = updateInteractor;
+    public UpdateVariableController(UpdateVariableInputBoundary localInteractor,
+                                    UpdateVariableInputBoundary globalInteractor) {
+        this.localInteractor = localInteractor;
+        this.globalInteractor = globalInteractor;
     }
-
 
     public void updateVariable(String name,
                                String type,
@@ -26,7 +26,10 @@ public class UpdateVariableController {
                 type
         );
 
-        updateInteractor.execute(input);
+        if (isGlobal) {
+            globalInteractor.execute(input);
+        } else {
+            localInteractor.execute(input);
+        }
     }
-
 }
