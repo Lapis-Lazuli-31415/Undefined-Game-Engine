@@ -24,9 +24,7 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
      */
     public JsonProjectDataAccess() {
         this.mapper = new ObjectMapper();
-
         mapper.enable(SerializationFeature.INDENT_OUTPUT);// enable pretty printing (for indentation)
-
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);// force snake_case
     }
 
@@ -38,21 +36,20 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
      */
     @Override
     public void save(Project project) throws IOException {
-
+        // Root key is the project name
         File file = new File("test.json");
         mapper.writeValue(file, project);
     }
 
-    /**
-     * Loads the single project contained in the JSON file.
-     *
-     * @param jsonFile The file to read (e.g., new File("test.json"))
-     * @return The Project object found in the file.
-     * @throws IOException If the file is missing or the format is wrong.
-     */
-    public Project load(File jsonFile) throws IOException {
-        return mapper.readValue(jsonFile, Project.class);
-    }
+    // Load the Project object directly
+    public Project load(String fileName) throws IOException {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            throw new IOException("File not found: " + fileName);
+        }
 
+        // Read directly into Project class
+        return mapper.readValue(file, Project.class);
+    }
 
 }

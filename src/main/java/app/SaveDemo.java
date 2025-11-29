@@ -25,6 +25,7 @@ import java.util.Vector;
 
 
 import java.awt.*;
+
 /**
  * A standalone runner to test the Saving Feature.
  * Right-click this file and select "Run 'SaveDemo.main()'"
@@ -57,7 +58,7 @@ public class SaveDemo {
         SaveProjectController controller = new SaveProjectController(interactor);
 
         // execute
-        System.out.println("Saving to 'database.json'...");
+        System.out.println("Saving to 'test.json'...");
         controller.execute(null); // null means "use existing project name"
 
         // RESULTS
@@ -88,8 +89,12 @@ public class SaveDemo {
         GameController gameController = new GameController(globalEnv);
 
         // transform for the Bear
-        Vector<Double> pos = new Vector<>(); pos.add(100.0); pos.add(200.0);
-        Vector<Double> scale = new Vector<>(); scale.add(1.0); scale.add(1.0);
+        Vector<Double> pos = new Vector<>();
+        pos.add(100.0);
+        pos.add(200.0);
+        Vector<Double> scale = new Vector<>();
+        scale.add(1.0);
+        scale.add(1.0);
         Transform transform = new Transform(pos, 45.0f, scale);
 
         // asset library list

@@ -1,5 +1,6 @@
 package entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import entity.scripting.environment.Environment;
 import java.util.ArrayList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,21 +19,29 @@ public class Project {
     private AssetLib assets;
     private GameController gameController;
 
+    // JSON Constructor (Used by Jackson when loading)
+    // Takes 'global_environment' and wraps it in a new GameController
+    @JsonCreator
+    public Project(@JsonProperty("id") String id,
+                   @JsonProperty("name") String name,
+                   @JsonProperty("scenes") ArrayList<Scene> scenes,
+                   @JsonProperty("assets") AssetLib assets,
+                   @JsonProperty("global_environment") Environment globalEnv) {
+        this.id = id;
+        this.name = name;
+        this.scenes = scenes;
+        this.assets = assets;
+        this.gameController = new GameController(globalEnv != null ? globalEnv : new Environment());
+    }
+
+    // Manual Constructor
+    // Takes an existing GameController directly
     public Project(String id, String name, ArrayList<Scene> scenes, AssetLib assets, GameController gameController) {
         this.id = id;
         this.name = name;
         this.scenes = scenes;
         this.assets = assets;
         this.gameController = gameController;
-    }
-
-    public Project() {
-        this.id = "TEMP_ID";
-        this.name = "Unknown";
-        this.scenes = new ArrayList<>();
-        this.assets = new AssetLib();
-
-        this.gameController = new GameController(new Environment());
     }
 
     public String getId() { return id; }

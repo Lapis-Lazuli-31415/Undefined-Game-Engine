@@ -17,25 +17,40 @@
     }
   },
   "assets" : [ {
-    "id" : "3f7a5dcf-58d4-4637-a62f-cbb0b7622150",
+    "id" : "ac41611f-64e1-464d-9079-9497af9d250f",
     "name" : "bear.png",
     "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/src/main/resources/bear.png"
   } ],
   "scenes" : [ {
-    "id" : "7b988e36-9f92-4753-906e-caf0486f99d4",
+    "id" : "8d49ec81-1e78-4048-9c63-1627ad75bffe",
     "name" : "Forest Level",
     "game_objects" : [ {
       "id" : "obj-bear",
       "name" : "Bear",
       "active" : true,
       "properties" : [ {
-        "sprite" : "3f7a5dcf-58d4-4637-a62f-cbb0b7622150",
+        "type" : "SpriteRenderer",
+        "sprite" : "ac41611f-64e1-464d-9079-9497af9d250f",
         "visible" : true,
         "opacity" : 100,
         "width" : 2670,
         "height" : 2028,
         "zindex" : 0
       } ],
+      "environment" : {
+        "variables" : {
+          "Boolean" : {
+            "variables" : {
+              "alive:" : true
+            }
+          },
+          "Numeric" : {
+            "variables" : {
+              "health" : 100.0
+            }
+          }
+        }
+      },
       "transform" : {
         "rotation" : 45.0,
         "x" : 100.0,
@@ -51,6 +66,7 @@
             "required_parameters" : [ ]
           },
           "conditions" : [ {
+            "type" : "NumericComparison",
             "left" : {
               "value" : 100.0
             },
@@ -60,26 +76,13 @@
             }
           } ],
           "actions" : [ {
+            "type" : "WaitAction",
             "seconds_expression" : {
               "value" : 0.5
             }
           } ],
           "active" : true
         } ]
-      },
-      "environment" : {
-        "variables" : {
-          "Boolean" : {
-            "variables" : {
-              "alive:" : true
-            }
-          },
-          "Numeric" : {
-            "variables" : {
-              "health" : 100.0
-            }
-          }
-        }
       }
     } ],
     "game_object_names" : [ "Bear" ]
