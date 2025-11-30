@@ -29,6 +29,14 @@ public class BooleanComparisonCondition extends Condition {
         this.right = right;
     }
 
+    public BooleanExpression getLeft() {
+        return left;
+    }
+
+    public BooleanExpression getRight() {
+        return right;
+    }
+
     public static String getEventType() {
         return EVENT_TYPE;
     }

@@ -15,4 +15,6 @@ public class GameController {
         return environment;
     }
 
+    public void setEnvironment(Environment env) {
+    }
 }

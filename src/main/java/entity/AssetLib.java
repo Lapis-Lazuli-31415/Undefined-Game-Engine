@@ -15,7 +15,7 @@ public class AssetLib {
 
     public AssetLib() {}
 
-    // 2. Jackson Constructor: Loads the JSON list back into the Map
+    // Jackson Constructor: Loads the JSON list back into the Map
     @JsonCreator
     public AssetLib(Collection<Asset> assetList) {
         if (assetList != null) {
