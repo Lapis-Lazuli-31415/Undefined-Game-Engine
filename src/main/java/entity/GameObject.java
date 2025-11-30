@@ -62,7 +62,11 @@ public class GameObject {
             this.properties = new ArrayList<>();
         }
 
-        this.environments = environments;
+        if (environments != null) {
+            this.environments = environments;
+        } else {
+            this.environments = new Environment();
+        }
         this.transform = transform;
         this.triggerManager = triggerManager;
     }

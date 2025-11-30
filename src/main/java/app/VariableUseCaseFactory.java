@@ -2,31 +2,28 @@ package app;
 
 import entity.scripting.environment.Environment;
 import interface_adapter.variable.*;
-import use_case.variable.*;
+import interface_adapter.variable.delete.DeleteVariableController;
+import interface_adapter.variable.delete.GlobalVariableDeletePresenter;
+import interface_adapter.variable.delete.LocalVariableDeletePresenter;
+import interface_adapter.variable.get.GetAllGlobalVariablesPresenter;
+import interface_adapter.variable.get.GetAllLocalVariablesPresenter;
+import interface_adapter.variable.get.GetAllVariablesController;
+import interface_adapter.variable.update.GlobalVariableUpdatePresenter;
+import interface_adapter.variable.update.LocalVariableUpdatePresenter;
+import interface_adapter.variable.update.UpdateVariableController;
+import use_case.variable.delete.DeleteVariableInteractor;
+import use_case.variable.get.GetAllVariablesInteractor;
+import use_case.variable.update.UpdateVariableInteractor;
 
-/**
- * Factory for wiring up the Variable use cases.
- * This is the ONLY place that knows about Presenters and Interactors.
- * Views only interact with ViewModels and Controllers.
- */
 public class VariableUseCaseFactory {
 
-    /**
-     * Creates and wires all components for Variable management.
-     *
-     * @param globalEnvironment The global variable environment
-     * @param localEnvironment The local variable environment for the current game object
-     * @return A bundle containing all wired components needed by the View
-     */
     public static VariableWiring create(
             Environment globalEnvironment,
             Environment localEnvironment) {
 
-        // 1. Create ViewModels
         GlobalVariableViewModel globalViewModel = new GlobalVariableViewModel();
         LocalVariableViewModel localViewModel = new LocalVariableViewModel();
 
-        // 2. Create Presenters (View layer doesn't know about these!)
         GlobalVariableUpdatePresenter globalUpdatePresenter =
                 new GlobalVariableUpdatePresenter(globalViewModel);
         GlobalVariableDeletePresenter globalDeletePresenter =
@@ -36,8 +33,11 @@ public class VariableUseCaseFactory {
         LocalVariableDeletePresenter localDeletePresenter =
                 new LocalVariableDeletePresenter(localViewModel);
 
-        // 3. Create Interactors (View layer doesn't know about these!)
-        // Global interactor uses globalEnv for both parameters
+        GetAllGlobalVariablesPresenter getAllGlobalPresenter =
+                new GetAllGlobalVariablesPresenter(globalViewModel);
+        GetAllLocalVariablesPresenter getAllLocalPresenter =
+                new GetAllLocalVariablesPresenter(localViewModel);
+
         UpdateVariableInteractor globalUpdateInteractor =
                 new UpdateVariableInteractor(
                         globalEnvironment,
@@ -51,7 +51,6 @@ public class VariableUseCaseFactory {
                         globalDeletePresenter
                 );
 
-        // Local interactor uses globalEnv and localEnv
         UpdateVariableInteractor localUpdateInteractor =
                 new UpdateVariableInteractor(
                         globalEnvironment,
@@ -65,7 +64,19 @@ public class VariableUseCaseFactory {
                         localDeletePresenter
                 );
 
-        // 4. Create Controllers (View knows about these)
+        GetAllVariablesInteractor getAllGlobalInteractor =
+                new GetAllVariablesInteractor(
+                        globalEnvironment,
+                        globalEnvironment,
+                        getAllGlobalPresenter
+                );
+        GetAllVariablesInteractor getAllLocalInteractor =
+                new GetAllVariablesInteractor(
+                        globalEnvironment,
+                        localEnvironment,
+                        getAllLocalPresenter
+                );
+
         UpdateVariableController updateController =
                 new UpdateVariableController(
                         localUpdateInteractor,
@@ -77,35 +88,40 @@ public class VariableUseCaseFactory {
                         globalDeleteInteractor
                 );
 
-        // 5. Return everything the View needs (ViewModels + Controllers only)
+        GetAllVariablesController getAllController =
+                new GetAllVariablesController(
+                        getAllGlobalInteractor,
+                        getAllLocalInteractor
+                );
+
         return new VariableWiring(
                 globalViewModel,
                 localViewModel,
                 updateController,
-                deleteController
+                deleteController,
+                getAllController
         );
     }
 
-    /**
-     * Data class that bundles all components the View layer needs.
-     * Notice: This only contains ViewModels and Controllers.
-     * Presenters and Interactors are hidden inside the factory.
-     */
+
     public static class VariableWiring {
         private final GlobalVariableViewModel globalViewModel;
         private final LocalVariableViewModel localViewModel;
         private final UpdateVariableController updateController;
         private final DeleteVariableController deleteController;
+        private final GetAllVariablesController getAllController;
 
         public VariableWiring(
                 GlobalVariableViewModel globalViewModel,
                 LocalVariableViewModel localViewModel,
                 UpdateVariableController updateController,
-                DeleteVariableController deleteController) {
+                DeleteVariableController deleteController,
+                GetAllVariablesController getAllController) {
             this.globalViewModel = globalViewModel;
             this.localViewModel = localViewModel;
             this.updateController = updateController;
             this.deleteController = deleteController;
+            this.getAllController = getAllController;
         }
 
         public GlobalVariableViewModel getGlobalViewModel() {
@@ -122,6 +138,10 @@ public class VariableUseCaseFactory {
 
         public DeleteVariableController getDeleteController() {
             return deleteController;
+        }
+
+        public GetAllVariablesController getGetAllController() {
+            return getAllController;
         }
     }
 }

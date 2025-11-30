@@ -61,7 +61,7 @@ public class PropertyPanelUtility {
         JTextField field = new JTextField(defaultText);
 
         // keep these boxes narrow
-        Dimension size = new Dimension(60, 22);
+        Dimension size = new Dimension(92, 22);
         field.setPreferredSize(size);
         field.setMinimumSize(size);
         field.setMaximumSize(size);

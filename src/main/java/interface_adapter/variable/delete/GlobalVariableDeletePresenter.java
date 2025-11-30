@@ -1,8 +1,11 @@
-package interface_adapter.variable;
+package interface_adapter.variable.delete;
 
 import java.util.List;
-import use_case.variable.DeleteVariableOutputBoundary;
-import use_case.variable.DeleteVariableOutputData;
+
+import interface_adapter.variable.GlobalVariableViewModel;
+import interface_adapter.variable.VariableState;
+import use_case.variable.delete.DeleteVariableOutputBoundary;
+import use_case.variable.delete.DeleteVariableOutputData;
 
 public class GlobalVariableDeletePresenter implements DeleteVariableOutputBoundary {
 

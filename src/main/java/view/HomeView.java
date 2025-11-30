@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Vector;
 import javax.swing.*;
 
-import entity.GameController;
 import entity.GameObject;
 import entity.Transform;
 import entity.scripting.TriggerManager;
@@ -15,12 +14,13 @@ import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import app.VariableUseCaseFactory;
-import interface_adapter.variable.DeleteVariableController;
-import interface_adapter.variable.UpdateVariableController;
-import interface_adapter.variable.GlobalVariableViewModel;
-import interface_adapter.variable.LocalVariableViewModel;
+import interface_adapter.variable.*;
+import interface_adapter.variable.delete.DeleteVariableController;
+import interface_adapter.variable.get.GetAllVariablesController;
+import interface_adapter.variable.update.UpdateVariableController;
 import use_case.Sprites.Import.ImportSpriteInteractor;
 import view.property.PropertiesPanel;
+import interface_adapter.selection.SelectionViewModel;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -46,6 +46,7 @@ public class HomeView extends javax.swing.JFrame {
     private UpdateVariableController updateVariableController;
     private DeleteVariableController deleteVariableController;
     private final Environment globalEnvironment = new Environment();
+    private GetAllVariablesController getAllVariablesController;
 
     // Demo wiring
     private ScenePanel scenePanel;
@@ -60,11 +61,44 @@ public class HomeView extends javax.swing.JFrame {
     );
     private TransformViewModel transformViewModel;
     private TransformController transformController;
+    private SelectionViewModel selectionViewModel;
 
     // TODO: Delete this after gameObject selection is implemented
     public static GameObject getDemoGameObject() {
         return DEMO_OBJECT;
     }
+
+    private void rewireLocalVariablesFor(GameObject target) {
+        if (target == null) {
+            target = DEMO_OBJECT;
+        }
+
+        Environment localEnv = target.getEnvironment();
+        if (localEnv == null) {
+            localEnv = new Environment();
+            target.setEnvironment(localEnv);
+        }
+
+        VariableUseCaseFactory.VariableWiring wiring =
+                VariableUseCaseFactory.create(globalEnvironment, localEnv);
+
+        globalVariableViewModel = wiring.getGlobalViewModel();
+        localVariableViewModel = wiring.getLocalViewModel();
+        updateVariableController = wiring.getUpdateController();
+        deleteVariableController = wiring.getDeleteController();
+        getAllVariablesController = wiring.getGetAllController();  // NEW!
+
+        if (propertiesPanel instanceof PropertiesPanel props) {
+            props.setGlobalVariableViewModel(globalVariableViewModel);
+            props.setLocalVariableViewModel(localVariableViewModel);
+            props.setVariableController(updateVariableController);
+            props.setDeleteVariableController(deleteVariableController);
+        }
+
+        getAllVariablesController.refreshGlobalVariables();
+        getAllVariablesController.refreshLocalVariables();
+    }
+
 
     public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
@@ -72,12 +106,23 @@ public class HomeView extends javax.swing.JFrame {
 
     public HomeView(interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
         this.assetLibViewModel = assetLibViewModel;
+        this.selectionViewModel = new SelectionViewModel();
 
         wireImportSpriteUseCase();
         loadExistingAssets();
         initComponents();
         setupAssetLibListener();
         setupImportSpriteListener();
+        setupSelectionListener();
+    }
+
+    private void setupSelectionListener() {
+        selectionViewModel.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                GameObject selected = scenePanel.getSelectedObject();
+                rewireLocalVariablesFor(selected);
+            }
+        });
     }
 
     private void wireImportSpriteUseCase() {
@@ -322,14 +367,12 @@ public class HomeView extends javax.swing.JFrame {
 
         DEMO_OBJECT.setTransform(transform);
 
-        // Create view model
         transformViewModel = new TransformViewModel();
+        selectionViewModel = new SelectionViewModel();
 
-        // Use app-layer factory to wire up use case
         transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
-        // Hook up ScenePanel to viewModel (Observer)
-        scenePanel = new ScenePanel(transformViewModel);
+        scenePanel = new ScenePanel(transformViewModel, selectionViewModel);
 
         transformController.updateTransform(
                 transform.getX(),
@@ -362,6 +405,7 @@ public class HomeView extends javax.swing.JFrame {
         localVariableViewModel = variableWiring.getLocalViewModel();
         updateVariableController = variableWiring.getUpdateController();
         deleteVariableController = variableWiring.getDeleteController();
+        getAllVariablesController = variableWiring.getGetAllController();
 
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.setLocalVariableViewModel(localVariableViewModel);
@@ -369,6 +413,9 @@ public class HomeView extends javax.swing.JFrame {
             props.setVariableController(updateVariableController);
             props.setDeleteVariableController(deleteVariableController);
         }
+
+        getAllVariablesController.refreshGlobalVariables();
+        getAllVariablesController.refreshLocalVariables();
 
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);

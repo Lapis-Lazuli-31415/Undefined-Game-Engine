@@ -5,7 +5,7 @@ import entity.SpriteRenderer;
 import entity.Transform;
 import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
-
+import interface_adapter.selection.SelectionViewModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -20,18 +20,19 @@ import java.util.Vector;
 public class ScenePanel extends JPanel implements PropertyChangeListener {
 
     private final TransformViewModel viewModel;
+    private final SelectionViewModel selectionViewModel;
     private final List<GameObject> gameObjects;
     private GameObject selectedObject;
     private Runnable onSelectionChangeCallback;
 
-    public ScenePanel(TransformViewModel viewModel) {
+    public ScenePanel(TransformViewModel viewModel, SelectionViewModel selectionViewModel) {
         this.viewModel = viewModel;
+        this.selectionViewModel = selectionViewModel;
         this.gameObjects = new ArrayList<>();
         this.selectedObject = null;
 
         setBackground(new Color(35, 35, 35));
 
-        // Listen to changes in the view model
         this.viewModel.addPropertyChangeListener(this);
 
         addMouseListener(new MouseAdapter() {
@@ -40,6 +41,14 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
                 handleMouseClick(e.getX(), e.getY());
             }
         });
+    }
+
+    public GameObject getSelectedObject() {
+        return selectedObject;
+    }
+
+    public void setOnSelectionChangeCallback(Runnable onSelectionChangeCallback) {
+        this.onSelectionChangeCallback = onSelectionChangeCallback;
     }
 
     public void addSprite(entity.Image image) {
@@ -90,8 +99,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             viewModel.firePropertyChange();
         }
 
-        if (onSelectionChangeCallback != null) {
-            onSelectionChangeCallback.run();
+        if (selectionViewModel != null) {
+            if (gameObject == null) {
+                selectionViewModel.setSelection(null, null);
+            } else {
+                selectionViewModel.setSelection(gameObject.getId(), gameObject.getName());
+            }
         }
     }
 
@@ -110,22 +123,27 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         if (existing != null) {
             selectObject(existing);
             repaint();
-        } 
+        }
         else {
             // sprite isnt added yet
             addSprite(image);
         }
     }
 
-    private void handleMouseClick(int mouseX, int mouseY) {
+    private GameObject findObjectAt(int mouseX, int mouseY) {
         for (int i = gameObjects.size() - 1; i >= 0; i--) {
             GameObject obj = gameObjects.get(i);
             if (isPointInObject(mouseX, mouseY, obj)) {
-                selectObject(obj);
-                repaint();
-                return;
+                return obj;
             }
         }
+        return null;
+    }
+
+    private void handleMouseClick(int mouseX, int mouseY) {
+        GameObject hit = findObjectAt(mouseX, mouseY);
+        selectObject(hit);
+        repaint();
     }
 
     private boolean isPointInObject(int x, int y, GameObject obj) {
@@ -246,11 +264,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
                     g2Copy.setStroke(new BasicStroke(2));
                     g2Copy.drawRect(drawX, drawY, drawW, drawH);
                 }
-            } 
+            }
             finally {
                 g2Copy.dispose();
             }
-        } 
+        }
         catch (Exception ex) {
             System.err.println("[ScenePanel] Error rendering object: " + ex.getMessage());
         }

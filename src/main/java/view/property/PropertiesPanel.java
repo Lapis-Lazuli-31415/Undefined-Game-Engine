@@ -9,8 +9,8 @@ import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import interface_adapter.variable.LocalVariableViewModel;
 import interface_adapter.variable.GlobalVariableViewModel;
-import interface_adapter.variable.UpdateVariableController;
-import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.update.UpdateVariableController;
+import interface_adapter.variable.delete.DeleteVariableController;
 import view.property.trigger.TriggerManagerPanel;
 
 public class PropertiesPanel extends JPanel {

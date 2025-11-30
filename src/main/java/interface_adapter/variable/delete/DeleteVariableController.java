@@ -1,7 +1,7 @@
-package interface_adapter.variable;
+package interface_adapter.variable.delete;
 
-import use_case.variable.DeleteVariableInputBoundary;
-import use_case.variable.DeleteVariableInputData;
+import use_case.variable.delete.DeleteVariableInputBoundary;
+import use_case.variable.delete.DeleteVariableInputData;
 
 public class DeleteVariableController {
 

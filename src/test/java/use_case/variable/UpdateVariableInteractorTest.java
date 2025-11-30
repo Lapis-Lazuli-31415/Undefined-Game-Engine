@@ -2,9 +2,12 @@ package use_case.variable;
 
 import entity.scripting.environment.Environment;
 import entity.scripting.expression.variable.NumericVariable;
-import entity.scripting.expression.variable.BooleanVariable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import use_case.variable.update.UpdateVariableInputData;
+import use_case.variable.update.UpdateVariableInteractor;
+import use_case.variable.update.UpdateVariableOutputBoundary;
+import use_case.variable.update.UpdateVariableOutputData;
 
 import static org.junit.jupiter.api.Assertions.*;
 
