@@ -23,6 +23,10 @@ public class WaitAction extends Action{
         this(new NumericValue(0));
     }
 
+    public NumericExpression getSecondsExpression() {
+        return secondsExpression;
+    }
+
     public static String getEventType() {
         return ACTION_TYPE;
     }
