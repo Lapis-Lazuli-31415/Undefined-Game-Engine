@@ -8,6 +8,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.*;
 
+import entity.GameController;
 import entity.GameObject;
 import entity.Scene;
 import entity.Transform;
@@ -17,9 +18,15 @@ import interface_adapter.EditorState;
 import interface_adapter.preview.PreviewController;
 import interface_adapter.preview.PreviewState;
 import interface_adapter.preview.PreviewViewModel;
+import entity.scripting.environment.Environment;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
+import app.VariableUseCaseFactory;
+import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.UpdateVariableController;
+import interface_adapter.variable.GlobalVariableViewModel;
+import interface_adapter.variable.LocalVariableViewModel;
 import use_case.Sprites.Import.ImportSpriteInteractor;
 //// ===== ADDED BY CHENG: Imports for preview functionality =====
 //
@@ -30,6 +37,7 @@ import use_case.Sprites.Import.ImportSpriteInteractor;
 //import java.beans.PropertyChangeEvent;
 //import java.beans.PropertyChangeListener;
 //// ===== END ADDED BY CHENG =====
+import view.property.PropertiesPanel;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -48,6 +56,13 @@ public class HomeView extends javax.swing.JFrame {
     // sprite import
     private interface_adapter.Sprites.ImportSpriteController importSpriteController;
     private interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel;
+
+    // variable management
+    private GlobalVariableViewModel globalVariableViewModel;
+    private LocalVariableViewModel localVariableViewModel;
+    private UpdateVariableController updateVariableController;
+    private DeleteVariableController deleteVariableController;
+    private final Environment globalEnvironment = new Environment();
 
     // Demo wiring
     private ScenePanel scenePanel;
@@ -74,10 +89,8 @@ public class HomeView extends javax.swing.JFrame {
         return DEMO_OBJECT;
     }
 
-    public HomeView(EditorState editorState) {
+    public HomeView() {
         this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
-        this.editorState = editorState;
-        initializePreviewSystem();  // ===== ADDED BY CHENG =====
     }
 
     public HomeView(interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
@@ -94,31 +107,31 @@ public class HomeView extends javax.swing.JFrame {
         try {
             // init DAO
             data_access.FileSystemSpriteDataAccessObject spriteDAO =
-                new data_access.FileSystemSpriteDataAccessObject();
+                    new data_access.FileSystemSpriteDataAccessObject();
 
             // create view model
             importSpriteViewModel = new interface_adapter.Sprites.ImportSpriteViewModel();
 
             // create presenter
             interface_adapter.Sprites.ImportSpritePresenter presenter =
-                new interface_adapter.Sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
+                    new interface_adapter.Sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
 
             // create interactor
             ImportSpriteInteractor interactor =
-                new ImportSpriteInteractor(
-                    spriteDAO,
-                    presenter,
-                    assetLibViewModel.getAssetLib()
-                );
+                    new ImportSpriteInteractor(
+                            spriteDAO,
+                            presenter,
+                            assetLibViewModel.getAssetLib()
+                    );
 
             // create controller
             importSpriteController = new interface_adapter.Sprites.ImportSpriteController(interactor);
 
         } catch (java.io.IOException e) {
             JOptionPane.showMessageDialog(null,
-                "Failed to initialize sprite import: " + e.getMessage(),
-                "Initialization Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Failed to initialize sprite import: " + e.getMessage(),
+                    "Initialization Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -126,18 +139,18 @@ public class HomeView extends javax.swing.JFrame {
         importSpriteViewModel.addPropertyChangeListener(evt -> {
             if (interface_adapter.Sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
                 interface_adapter.Sprites.ImportSpriteState state =
-                    (interface_adapter.Sprites.ImportSpriteState) evt.getNewValue();
+                        (interface_adapter.Sprites.ImportSpriteState) evt.getNewValue();
 
                 if (state.isSuccess()) {
                     JOptionPane.showMessageDialog(this,
-                        state.getMessage(),
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
+                            state.getMessage(),
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(this,
-                        state.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            state.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -364,25 +377,28 @@ public class HomeView extends javax.swing.JFrame {
             );
         }
 
+        // variable usecase wiring
+        Environment localEnvironment = new Environment();
+        DEMO_OBJECT.setEnvironment(localEnvironment);
 
+        VariableUseCaseFactory.VariableWiring variableWiring =
+                VariableUseCaseFactory.create(globalEnvironment, localEnvironment);
 
-        centerPanel.remove(openFolderPanel);
-        centerPanel.add(scenePanel, BorderLayout.CENTER);
-        centerPanel.revalidate();
-        centerPanel.repaint();
+        globalVariableViewModel = variableWiring.getGlobalViewModel();
+        localVariableViewModel = variableWiring.getLocalViewModel();
+        updateVariableController = variableWiring.getUpdateController();
+        deleteVariableController = variableWiring.getDeleteController();
 
-        // Bind properties panel to VM + controller
         if (propertiesPanel instanceof PropertiesPanel props) {
-            props.bind(
-                    transformViewModel,
-                    transformController,
-                    () -> scenePanel.repaint()
-            );
+            props.setLocalVariableViewModel(localVariableViewModel);
+            props.setGlobalVariableViewModel(globalVariableViewModel);
+            props.setVariableController(updateVariableController);
+            props.setDeleteVariableController(deleteVariableController);
         }
 
         getContentPane().add(leftSidebar, BorderLayout.WEST);
         getContentPane().add(centerPanel, BorderLayout.CENTER);
-        getContentPane().add(propertiesPanel, BorderLayout.EAST);
+        getContentPane().add(propertiesScroll, BorderLayout.EAST);
 
         pack();
         setLocationRelativeTo(null);
@@ -416,7 +432,7 @@ public class HomeView extends javax.swing.JFrame {
         // load + scale the image thumbnail
         try {
             java.awt.image.BufferedImage originalImage = javax.imageio.ImageIO.read(
-                new java.io.File(image.getLocalpath().toString())
+                    new java.io.File(image.getLocalpath().toString())
             );
 
             // calc thumbnail size
@@ -432,7 +448,7 @@ public class HomeView extends javax.swing.JFrame {
 
             // scale image
             java.awt.Image scaledImage = originalImage.getScaledInstance(
-                thumbWidth, thumbHeight, java.awt.Image.SCALE_SMOOTH
+                    thumbWidth, thumbHeight, java.awt.Image.SCALE_SMOOTH
             );
 
             // create image label with centered icon
@@ -528,7 +544,7 @@ public class HomeView extends javax.swing.JFrame {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Import Sprite");
         fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-            "Image Files", "jpg", "jpeg", "png"));
+                "Image Files", "jpg", "jpeg", "png"));
 
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -710,8 +726,7 @@ public class HomeView extends javax.swing.JFrame {
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                EditorState editorState = new EditorState();
-                new HomeView(editorState).setVisible(true);
+                new HomeView().setVisible(true);
             }
         });
     }

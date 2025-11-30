@@ -152,7 +152,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         int centerY = (panelH - drawH) / 2;
 
         int drawX = centerX + (int) transform.getX();
-        int drawY = centerY + (int) transform.getY();
+        int drawY = centerY - (int) transform.getY();   // bigger Y --> higher on the screen
 
         return x >= drawX && x <= drawX + drawW && y >= drawY && y <= drawY + drawH;
     }
@@ -225,7 +225,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int centerY = (panelH - drawH) / 2;
 
             int drawX = centerX + (int) transform.getX();
-            int drawY = centerY + (int) transform.getY();
+            int drawY = centerY - (int) transform.getY();   // bigger Y --> higher on the screen
 
             Graphics2D g2Copy = (Graphics2D) g2.create();
             try {

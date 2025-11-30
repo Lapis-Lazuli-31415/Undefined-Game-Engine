@@ -26,7 +26,7 @@ public class EventPanel extends JPanel {
                       TriggerManagerViewModel viewModel,
                       TriggerUseCaseFactory triggerUseCaseFactory) {
 
-        this.eventFactory = new DefaultEventFactory();
+        eventFactory = triggerUseCaseFactory.getEventFactory();
         eventChangeController = triggerUseCaseFactory.createEventChangeController();
         eventParameterChangeController = triggerUseCaseFactory.createEventParameterChangeController();
 
