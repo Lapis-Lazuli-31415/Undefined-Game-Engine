@@ -96,47 +96,65 @@ public class HomeView extends javax.swing.JFrame {
 
         try {
             System.out.println("Attempting to load 'database.json'...");
+            // Use the Data Access Object to deserialize the project from the JSON file
             loadedProject = dataAccess.load("database.json");
             System.out.println("Project loaded successfully: " + loadedProject.getName());
         } catch (Exception e) {
+            // Log failure and proceed to create a default project instead
             System.out.println("Could not load existing project (" + e.getMessage() + "). Creating new default project.");
         }
 
+        // Check if the load operation returned a valid project
         if (loadedProject != null) {
+            // CASE1: IF Project Loaded Successfully
             this.currentProject = loadedProject;
 
+            // Restore the Global Environment (variables shared across scenes)
             if (this.currentProject.getGlobalEnvironment() != null) {
                 this.globalEnvironment = this.currentProject.getGlobalEnvironment();
+                // Fallback if environment is missing in the save file
             } else {
                 this.globalEnvironment = new Environment();
             }
 
+            // Set the Current Scene (default to the first one in the list)
             if (!this.currentProject.getScenes().isEmpty()) {
                 this.currentScene = this.currentProject.getScenes().get(0);
             } else {
+                // Fallback if the project has no scenes
                 this.currentScene = new Scene(UUID.randomUUID(), "Default Scene", new ArrayList<>());
                 this.currentProject.getScenes().add(this.currentScene);
             }
 
+            // Restore Assets (Images/Sprites) into the ViewModel so the UI reflects them
             this.assetLibViewModel.setState(this.currentProject.getAssets());
 
+            // Select the first GameObject in the scene to be the active "Demo Object"
             if (!this.currentScene.getGameObjects().isEmpty()) {
                 DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
                 System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
             } else {
+                // If the scene is empty, create a default object and add it
                 DEMO_OBJECT = createDefaultGameObject();
                 this.currentScene.getGameObjects().add(DEMO_OBJECT);
             }
 
         } else {
+            // CASE 2: Loading Failed or No File Exists (Create New Project)
+
+            // Initialize a fresh Global Environment
             this.globalEnvironment = new Environment();
             GameController gameController = new GameController(this.globalEnvironment);
+
+            // Create a default empty Scene
             this.currentScene = new Scene(UUID.randomUUID(), "Default Scene", new ArrayList<>());
             ArrayList<Scene> scenes = new ArrayList<>();
             scenes.add(this.currentScene);
 
+            // Instantiate a new Project with default settings
             this.currentProject = new Project("proj-1", "My Game Project", scenes, assetLibViewModel.getAssetLib(), gameController);
 
+            // Create and add the default GameObject to the new scene
             DEMO_OBJECT = createDefaultGameObject();
             this.currentScene.getGameObjects().add(DEMO_OBJECT);
         }
@@ -160,6 +178,16 @@ public class HomeView extends javax.swing.JFrame {
         setupImportSpriteListener();
     }
 
+    /**
+     * Creates a default "Demo Sprite" GameObject to populate a new or empty scene.
+     * This object is initialized with:
+     * - A fixed ID and Name
+     * - Active status set to true
+     * - A default Transform at (0,0) with no rotation and scale (1,1)
+     * - An empty TriggerManager
+     *
+     * Returns a new, fully initialized GameObject instance.
+     */
     private GameObject createDefaultGameObject() {
         return new GameObject(
                 "demo-1", "Demo Sprite", true, new ArrayList<>(), null,
@@ -168,16 +196,30 @@ public class HomeView extends javax.swing.JFrame {
         );
     }
 
+    /**
+     * Triggers the Auto-Save mechanism.
+     * This method is typically called as a callback when changes occur in the scene
+     * (e.g., transform updates, sprite changes). It delegates the saving task
+     * to the SaveProjectController.
+     */
     private void triggerAutoSave() {
         System.out.println("Auto-saving project...");
         saveProjectController.execute(currentProject.getName());
     }
 
+    /**
+     * Sets up the observer for the Save Project use case.
+     * Listens for changes in the SaveProjectViewModel's state.
+     * If a save is successful (no error), it triggers a visual confirmation.
+     * If it fails, it logs the error to the standard error stream.
+     */
     private void setupSaveListener() {
         this.saveViewModel.addPropertyChangeListener(evt -> {
+            // Check if the property changed is the state
             if ("state".equals(evt.getPropertyName())) {
                 SaveProjectState state = (SaveProjectState) evt.getNewValue();
 
+                // If there is no error in the state, the save was successful
                 if (state.getError() == null) {
                     showSaveConfirmation();
                 } else {
@@ -187,9 +229,16 @@ public class HomeView extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Displays a temporary "Saved" confirmation message to the user.
+     * The message (a checkmark label) appears for 2 seconds and then fades out
+     * using a Swing Timer.
+     */
     private void showSaveConfirmation() {
         if (saveStatusLabel != null) {
             saveStatusLabel.setVisible(true);
+
+            // Create a timer to hide the label after 2000 milliseconds (2 seconds)
             Timer timer = new Timer(2000, e -> saveStatusLabel.setVisible(false));
             timer.setRepeats(false);
             timer.start();
@@ -417,6 +466,10 @@ public class HomeView extends javax.swing.JFrame {
         updateVariableController = variableWiring.getUpdateController();
         deleteVariableController = variableWiring.getDeleteController();
 
+        // SYNC UI WITH LOADED DATA
+        loadVariablesIntoViewModel(globalEnvironment, globalVariableViewModel, true);
+        loadVariablesIntoViewModel(localEnvironment, localVariableViewModel, false);
+
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.setLocalVariableViewModel(localVariableViewModel);
             props.setGlobalVariableViewModel(globalVariableViewModel);
@@ -441,6 +494,7 @@ public class HomeView extends javax.swing.JFrame {
                 entity.Asset newAsset = (entity.Asset) evt.getNewValue();
                 if (newAsset instanceof entity.Image) {
                     addSpriteToUI((entity.Image) newAsset);
+                    triggerAutoSave();
                 }
             }
         });
@@ -607,4 +661,58 @@ public class HomeView extends javax.swing.JFrame {
             view.setVisible(true);
         });
     }
+
+    // Helper to populate the UI with variables loaded from the Environment
+    private void loadVariablesIntoViewModel(Environment env,
+                                            interface_adapter.variable.LocalVariableViewModel viewModel,
+                                            boolean isGlobal) {
+        if (env == null) return;
+
+        interface_adapter.variable.VariableState state = viewModel.getState();
+        java.util.List<interface_adapter.variable.VariableState.VariableRow> rows = new java.util.ArrayList<>();
+
+        // 1. Iterate over types (e.g., "Numeric", "Boolean")
+        for (java.util.Map.Entry<String, entity.scripting.environment.VariableMap<?>> typeEntry : env.getVariables().entrySet()) {
+            String type = typeEntry.getKey();
+            entity.scripting.environment.VariableMap<?> map = typeEntry.getValue();
+
+            // 2. Iterate over variables (e.g., "health" -> 100.0)
+            for (java.util.Map.Entry<String, ?> varEntry : map.getVariables().entrySet()) {
+                String name = varEntry.getKey();
+                String value = String.valueOf(varEntry.getValue()); // Convert to String for UI
+
+                rows.add(new interface_adapter.variable.VariableState.VariableRow(
+                        name, type, isGlobal, value
+                ));
+            }
+        }
+
+        state.setVariables(rows);
+        viewModel.firePropertyChange();
+    }
+
+    // Overload for Global View Model
+    private void loadVariablesIntoViewModel(Environment env,
+                                            interface_adapter.variable.GlobalVariableViewModel viewModel,
+                                            boolean isGlobal) {
+        if (env == null) return;
+        interface_adapter.variable.VariableState state = viewModel.getState();
+        java.util.List<interface_adapter.variable.VariableState.VariableRow> rows = new java.util.ArrayList<>();
+
+        for (java.util.Map.Entry<String, entity.scripting.environment.VariableMap<?>> typeEntry : env.getVariables().entrySet()) {
+            String type = typeEntry.getKey();
+            entity.scripting.environment.VariableMap<?> map = typeEntry.getValue();
+
+            for (java.util.Map.Entry<String, ?> varEntry : map.getVariables().entrySet()) {
+                String name = varEntry.getKey();
+                String value = String.valueOf(varEntry.getValue());
+                rows.add(new interface_adapter.variable.VariableState.VariableRow(
+                        name, type, isGlobal, value
+                ));
+            }
+        }
+        state.setVariables(rows);
+        viewModel.firePropertyChange();
+    }
+
 }

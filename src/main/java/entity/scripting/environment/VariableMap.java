@@ -1,5 +1,8 @@
 package entity.scripting.environment;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,6 +11,12 @@ public class VariableMap<T> {
 
     public VariableMap() {
         variables = new LinkedHashMap<>();
+    }
+
+    // constructor for Jackson deserialization
+    @JsonCreator
+    public VariableMap(@JsonProperty("variables") Map<String, T> variables) {
+        this.variables = variables != null ? variables : new LinkedHashMap<>();
     }
 
     public void set(String name, T value){

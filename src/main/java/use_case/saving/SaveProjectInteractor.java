@@ -24,7 +24,6 @@ public class SaveProjectInteractor implements SaveProjectInputBoundary {
 
     /**
      * Executes the Save Project logic.
-     *
      * 1. Attempts to save the current Project using the DAO.
      * 2. If successful, it creates OutputData and tells the Presenter to show the Success View.
      * 3. If saving fails (IOException), it catches the error and tells the Presenter to show the Fail View.

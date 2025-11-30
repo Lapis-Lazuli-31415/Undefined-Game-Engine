@@ -7,7 +7,6 @@ public interface SaveProjectOutputBoundary {
      * successfully saved.
      * @param outputData The data required to present the success state (e.g., success message).
      */
-
     void prepareSuccessView(SaveProjectOutputData outputData);
 
     void prepareFailView(String error);

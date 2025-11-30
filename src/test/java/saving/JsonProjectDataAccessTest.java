@@ -29,16 +29,30 @@ import java.util.Vector;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test ensuring the entire object graph is saved and loaded correctly via JSON.
+ * Test class for .
+ * This integration test ensures that the entire object graph of a complex
+ * entity—including scenes, game objects, transform components, variables, and triggers—
+ * is correctly serialized to JSON and subsequently deserialized without data loss or corruption.
  */
 class JsonProjectDataAccessTest {
 
+    /**
+     * JUnit annotation to put a temporary directory path for file operations.
+     * This ensures tests are isolated and don't create permanent files.
+     */
     @TempDir
     Path tempDir;
 
     private Project originalProject;
     private Project loadedProject;
 
+    /**
+     * Sets up the test environment by creating a complex Project object,
+     * saving it to a temporary JSON file, and then loading it back into a new Project instance.
+     * This prepares the loadedProject for all subsequent test methods.
+     *
+     * @throws Exception if an error occurs during project creation, saving, or loading.
+     */
     @BeforeEach
     void setUp() throws Exception {
         // Create a Complex Project
@@ -49,7 +63,7 @@ class JsonProjectDataAccessTest {
         String tempPath = tempFile.getAbsolutePath();
 
         // SAVE IT
-        // We configure the mapper to see PRIVATE fields (Visibility.ANY)
+        //  Configure the mapper to see PRIVATE fields (Visibility.ANY)
         ObjectMapper testMapper = new ObjectMapper();
         testMapper.enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT);
         testMapper.setPropertyNamingStrategy(com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE);
@@ -69,6 +83,9 @@ class JsonProjectDataAccessTest {
         loadedProject = dataAccess.load(tempPath);
     }
 
+    /**
+     * Tests that basic project data (ID and Name) is correctly saved and loaded.
+     */
     @Test
     void testProjectMetadata() {
         assertNotNull(loadedProject, "Loaded project should not be null");
@@ -76,6 +93,12 @@ class JsonProjectDataAccessTest {
         assertEquals(originalProject.getName(), loadedProject.getName());
     }
 
+    /**
+     * Tests that the Environment holding global variables is correctly loaded,
+     * and the value of a specific global numeric variable is preserved.
+     *
+     * @throws Exception if fetching the variable from the environment fails.
+     */
     @Test
     void testGlobalEnvironment() throws Exception {
         Environment globalEnv = loadedProject.getGlobalEnvironment();
@@ -85,6 +108,9 @@ class JsonProjectDataAccessTest {
         assertEquals(100.0, globalEnv.get(scoreVar), "Global variable 'score' should be 100.0");
     }
 
+    /**
+     * Tests that the scene hierarchy and basic GameObject details are maintained.
+     */
     @Test
     void testSceneAndGameObjectStructure() {
         assertEquals(1, loadedProject.getScenes().size(), "Should have 1 scene");
@@ -97,6 +123,10 @@ class JsonProjectDataAccessTest {
         assertTrue(obj.isActive());
     }
 
+    /**
+     * Tests that the Transform component's properties (position, rotation, scale)
+     * are correctly saved and loaded.
+     */
     @Test
     void testGameObjectTransform() {
         GameObject obj = loadedProject.getScenes().get(0).getGameObjects().get(0);
@@ -110,6 +140,12 @@ class JsonProjectDataAccessTest {
         assertEquals(1.0, t.getScaleY());
     }
 
+    /**
+     * Tests that the Environment holding local variables for the game object is correctly loaded,
+     * verifying both a numeric and a boolean local variable.
+     *
+     * @throws Exception if fetching the variables from the environment fails.
+     */
     @Test
     void testGameObjectLocalEnvironment() throws Exception {
         GameObject obj = loadedProject.getScenes().get(0).getGameObjects().get(0);
@@ -124,6 +160,13 @@ class JsonProjectDataAccessTest {
         assertFalse(localEnv.get(isDeadVar), "Local variable 'isDead' should be false");
     }
 
+    /**
+     * Tests that the TriggerManager and its nested components (Trigger,
+     * OnClickEvent, NumericComparisonCondition, WaitAction)
+     * are correctly serialized and deserialized. It verifies the type and content of one of the actions.
+     *
+     * @throws Exception if evaluating the action's expression fails.
+     */
     @Test
     void testTriggersEventsAndActions() throws Exception {
         GameObject obj = loadedProject.getScenes().get(0).getGameObjects().get(0);
@@ -148,7 +191,13 @@ class JsonProjectDataAccessTest {
         assertEquals(1.5, wait.getSecondsExpression().evaluate(globalEnv, localEnv));
     }
 
-    // --- Helper to build the project ---
+    /**
+     * Helper method to construct a complex Project object with various nested entities.
+     * This project serves as the baseline for the serialization test.
+     *
+     * @return a fully configured Project instance.
+     * @throws Exception if an error occurs during variable assignment.
+     */
     private Project createComplexProject() throws Exception {
         Environment globalEnv = new Environment();
         Assign.assign(globalEnv, new NumericVariable("score", true), 100.0);
@@ -172,8 +221,7 @@ class JsonProjectDataAccessTest {
         trigger.addAction(new WaitAction(new NumericValue(1.5)));
         tm.addTrigger(trigger);
 
-        // --- Assembly ---
-        // FIX: Added 'null' as the last argument for SpriteRenderer
+        // Assembly
         GameObject hero = new GameObject("obj-1", "Hero", true, new ArrayList<>(), localEnv, null);
         hero.setTransform(transform);
         hero.setTriggerManager(tm);
