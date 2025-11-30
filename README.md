@@ -1,6 +1,5 @@
 # Undefined-Game-Engine
 **Note: JDK Version 17**
-testtesttesttest
 ## Summary
 
 ## List of User Stories
