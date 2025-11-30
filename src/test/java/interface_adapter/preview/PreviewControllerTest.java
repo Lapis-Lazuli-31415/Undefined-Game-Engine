@@ -112,7 +112,7 @@ class PreviewControllerTest {
 
         @Override
         public void stop() {
-            stopCalled = true;  // ✅ 实现 stop() 方法
+            stopCalled = true;
         }
     }
 }
