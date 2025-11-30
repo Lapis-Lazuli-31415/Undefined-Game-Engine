@@ -15,6 +15,8 @@ public class DefaultActionFactory implements ActionFactory {
         registry.put(NumericVariableAssignmentAction.ACTION_TYPE, NumericVariableAssignmentAction::new);
         registry.put(BooleanVariableAssignmentAction.ACTION_TYPE, BooleanVariableAssignmentAction::new);
         registry.put(WaitAction.ACTION_TYPE, WaitAction::new);
+        registry.put(ChangePositionAction.ACTION_TYPE, ChangePositionAction::new);
+        registry.put(ChangeVisibilityAction.ACTION_TYPE, ChangeVisibilityAction::new);
     }
 
     @Override

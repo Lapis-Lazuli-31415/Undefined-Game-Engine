@@ -107,6 +107,7 @@ public class GameObject {
         this.transform = transform;
     }
 
+
     public TriggerManager getTriggerManager() {
         return triggerManager;
     }
@@ -138,7 +139,5 @@ public class GameObject {
     public void removeProperty(Property property) {
         properties.remove(property);
     }
-
-
 
 }

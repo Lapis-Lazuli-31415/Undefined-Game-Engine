@@ -3,7 +3,6 @@ package entity.scripting;
 import entity.scripting.action.Action;
 import entity.scripting.condition.Condition;
 import entity.scripting.event.Event;
-import entity.scripting.event.EmptyEvent;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -51,6 +50,14 @@ public class Trigger {
 
     public void setAction(int index, Action action) {
         actions.set(index, action);
+    }
+
+    public Condition getCondition(int index) {
+        return conditions.get(index);
+    }
+
+    public Action getAction(int index) {
+        return actions.get(index);
     }
 
     public void deleteCondition(Condition condition) {

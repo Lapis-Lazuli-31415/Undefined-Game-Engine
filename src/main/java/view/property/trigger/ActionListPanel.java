@@ -6,9 +6,11 @@ import entity.scripting.action.ActionFactory;
 import entity.scripting.action.DefaultActionFactory;
 import interface_adapter.trigger.TriggerManagerState;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.action.ActionEditorViewModel;
 import interface_adapter.trigger.action.change.ActionChangeController;
 import interface_adapter.trigger.action.create.ActionCreateController;
 import interface_adapter.trigger.action.delete.ActionDeleteController;
+import interface_adapter.trigger.action.edit.ActionEditController;
 import view.util.PropertyPanelUtility;
 
 import javax.swing.*;
@@ -22,16 +24,19 @@ public class ActionListPanel extends JPanel {
     private final ActionCreateController actionCreateController;
     private final ActionDeleteController actionDeleteController;
     private final ActionChangeController actionChangeController;
+    private final ActionEditController actionEditController;
 
     public ActionListPanel(int triggerIndex,
                            TriggerManagerViewModel viewModel,
+                           ActionEditorViewModel actionEditorViewModel,
                            TriggerUseCaseFactory triggerUseCaseFactory) {
 
         // Initialize triggerUseCaseFactory (or pass it in if available in your architecture)
-        this.actionFactory = new DefaultActionFactory();
+        actionFactory = triggerUseCaseFactory.getActionFactory();
         actionCreateController = triggerUseCaseFactory.createActionCreateController();
         actionDeleteController = triggerUseCaseFactory.createActionDeleteController();
         actionChangeController = triggerUseCaseFactory.createActionChangeController();
+        actionEditController = triggerUseCaseFactory.createActionEditController();
 
         TriggerManagerState state = viewModel.getState();
         List<String> actions = state.getTriggerActions(triggerIndex);
@@ -43,7 +48,6 @@ public class ActionListPanel extends JPanel {
 
         // 2. Add Button (Top Right Header)
         JButton addBtn = PropertyPanelUtility.createAddButton();
-        addBtn.setToolTipText("Add new action");
         addBtn.addActionListener(e ->
                 actionCreateController.execute(triggerIndex)
         );
@@ -64,7 +68,7 @@ public class ActionListPanel extends JPanel {
         // Populate the list
         for (int i = 0; i < actions.size(); i++) {
             String actionType = actions.get(i);
-            JPanel row = createActionRow(triggerIndex, i, actionType, triggerUseCaseFactory);
+            JPanel row = createActionRow(triggerIndex, i, actionType, actionEditorViewModel, triggerUseCaseFactory);
 
             listContainer.add(row);
             listContainer.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -82,7 +86,8 @@ public class ActionListPanel extends JPanel {
     /**
      * Creates a single row for an action: [Dropdown] [Edit Button] [Delete Button]
      */
-    private JPanel createActionRow(int triggerIndex, int actionIndex, String currentType, TriggerUseCaseFactory factory) {
+    private JPanel createActionRow(int triggerIndex, int actionIndex, String currentType,
+                                   ActionEditorViewModel viewModel, TriggerUseCaseFactory factory) {
         JPanel row = new JPanel(new GridBagLayout());
         row.setOpaque(false);
 
@@ -111,6 +116,24 @@ public class ActionListPanel extends JPanel {
         // B. Edit Button (Uses the small utility method with pencil icon)
         JButton editBtn = PropertyPanelUtility.createEditButton();
         // Add listener here when you implement ActionParameterController
+        editBtn.addActionListener(e -> {
+            // 1. Trigger Controller to load script into ViewModel
+            actionEditController.execute(triggerIndex, actionIndex);
+
+            // 2. Get script from ViewModel (assuming Controller updated it synchronously or State has it)
+            String script = viewModel.getState().getAction();
+
+            // 3. Open Dialog
+            ActionEditorDialog dialog = new ActionEditorDialog(
+                    SwingUtilities.getWindowAncestor(this),
+                    triggerIndex,
+                    actionIndex,
+                    script,
+                    viewModel,
+                    factory
+            );
+            dialog.setVisible(true);
+        });
 
         rowGbc.gridx = 1;
         rowGbc.weightx = 0; // Fixed width
