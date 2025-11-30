@@ -1,6 +1,7 @@
 package view;
 
 import entity.GameObject;
+import entity.Scene; // Import Scene
 import entity.SpriteRenderer;
 import entity.Transform;
 import interface_adapter.transform.TransformState;
@@ -20,18 +21,18 @@ import java.util.Vector;
 public class ScenePanel extends JPanel implements PropertyChangeListener {
 
     private final TransformViewModel viewModel;
-    private final List<GameObject> gameObjects;
+    // CHANGE: Removed local 'gameObjects' list. We now use the Scene entity.
+    private Scene currentScene;
     private GameObject selectedObject;
     private Runnable onSelectionChangeCallback;
+    private Runnable onSceneChangeCallback; // Callback for auto-save
 
     public ScenePanel(TransformViewModel viewModel) {
         this.viewModel = viewModel;
-        this.gameObjects = new ArrayList<>();
         this.selectedObject = null;
 
         setBackground(new Color(35, 35, 35));
 
-        // Listen to changes in the view model
         this.viewModel.addPropertyChangeListener(this);
 
         addMouseListener(new MouseAdapter() {
@@ -42,7 +43,20 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         });
     }
 
+    // NEW: Bind the panel to a Scene entity
+    public void setScene(Scene scene) {
+        this.currentScene = scene;
+        repaint();
+    }
+
+    // NEW: Callback for Auto-Save
+    public void setOnSceneChangeCallback(Runnable callback) {
+        this.onSceneChangeCallback = callback;
+    }
+
     public void addSprite(entity.Image image) {
+        if (currentScene == null) return; // Guard clause
+
         try {
             final String id = UUID.randomUUID().toString();
             final String name = image.getName();
@@ -58,18 +72,21 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             Transform transform = new Transform(position, 0f, scale);
             SpriteRenderer spriteRenderer = new SpriteRenderer(image, true);
 
-            // not sure if i should assign environment = null, i only did that as a filler
-            GameObject gameObject = new GameObject(id, name, true, new ArrayList<>(), null,
-                    spriteRenderer);
+            GameObject gameObject = new GameObject(id, name, true, new ArrayList<>(), null, spriteRenderer);
             gameObject.setTransform(transform);
 
-            gameObjects.add(gameObject);
+            // CHANGE: Add directly to the Scene entity
+            currentScene.getGameObjects().add(gameObject);
 
             selectObject(gameObject);
 
-            // log for debugging
-            System.out.println("[ScenePanel] Added sprite: " + name + " (Total objects: " + gameObjects.size() + ")");
+            System.out.println("[ScenePanel] Added sprite: " + name);
             repaint();
+
+            // Trigger Auto-Save
+            if (onSceneChangeCallback != null) {
+                onSceneChangeCallback.run();
+            }
         }
         catch (Exception ex) {
             System.err.println("[ScenePanel] Error adding sprite: " + ex.getMessage());
@@ -85,7 +102,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             viewModel.getState().setX(transform.getX());
             viewModel.getState().setY(transform.getY());
             viewModel.getState().setRotation(transform.getRotation());
-            viewModel.getState().setScale(transform.getScaleX() * 100.0);
+            viewModel.getState().setScale(transform.getScaleX() * 100.0); // Assuming uniform scale
 
             viewModel.firePropertyChange();
         }
@@ -104,7 +121,9 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private GameObject findGameObjectByImage(entity.Image image) {
-        for (GameObject obj : gameObjects) {
+        if (currentScene == null || currentScene.getGameObjects() == null) return null;
+
+        for (GameObject obj : currentScene.getGameObjects()) {
             SpriteRenderer spriteRenderer = obj.getSpriteRenderer();
             if (spriteRenderer != null && spriteRenderer.getSprite() == image) {
                 return obj;
@@ -118,16 +137,19 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         if (existing != null) {
             selectObject(existing);
             repaint();
-        } 
+        }
         else {
-            // sprite isnt added yet
             addSprite(image);
         }
     }
 
     private void handleMouseClick(int mouseX, int mouseY) {
-        for (int i = gameObjects.size() - 1; i >= 0; i--) {
-            GameObject obj = gameObjects.get(i);
+        if (currentScene == null || currentScene.getGameObjects() == null) return;
+
+        List<GameObject> objects = currentScene.getGameObjects();
+        // Iterate backwards to select top-most object first
+        for (int i = objects.size() - 1; i >= 0; i--) {
+            GameObject obj = objects.get(i);
             if (isPointInObject(mouseX, mouseY, obj)) {
                 selectObject(obj);
                 repaint();
@@ -138,14 +160,10 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
 
     private boolean isPointInObject(int x, int y, GameObject obj) {
         Transform transform = obj.getTransform();
-        if (transform == null) {
-            return false;
-        }
+        if (transform == null) return false;
 
         SpriteRenderer spriteRenderer = obj.getSpriteRenderer();
-        if (spriteRenderer == null || spriteRenderer.getSprite() == null) {
-            return false;
-        }
+        if (spriteRenderer == null || spriteRenderer.getSprite() == null) return false;
 
         int spriteW = spriteRenderer.getWidth();
         int spriteH = spriteRenderer.getHeight();
@@ -160,24 +178,23 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         int centerY = (panelH - drawH) / 2;
 
         int drawX = centerX + (int) transform.getX();
-        int drawY = centerY - (int) transform.getY();   // bigger Y --> higher on the screen
+        int drawY = centerY - (int) transform.getY();
 
         return x >= drawX && x <= drawX + drawW && y >= drawY && y <= drawY + drawH;
     }
 
-
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if (currentScene == null || currentScene.getGameObjects() == null) return;
 
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             int panelW = getWidth();
             int panelH = getHeight();
 
-            // sort game objects by z-index
-            java.util.List<GameObject> sortedObjects = new java.util.ArrayList<>(gameObjects);
+            // Copy list to sort safely
+            List<GameObject> sortedObjects = new ArrayList<>(currentScene.getGameObjects());
             sortedObjects.sort((obj1, obj2) -> {
                 int z1 = obj1.getSpriteRenderer() != null ? obj1.getSpriteRenderer().getZIndex() : 0;
                 int z2 = obj2.getSpriteRenderer() != null ? obj2.getSpriteRenderer().getZIndex() : 0;
@@ -199,29 +216,22 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
 
     private void renderGameObject(Graphics2D g2, GameObject obj, int panelW, int panelH) {
         Transform transform = obj.getTransform();
-        if (transform == null) {
-            return;
-        }
+        if (transform == null) return;
 
         SpriteRenderer spriteRenderer = obj.getSpriteRenderer();
-        if (spriteRenderer == null || spriteRenderer.getSprite() == null || !spriteRenderer.getVisible()) {
-            return;
-        }
+        if (spriteRenderer == null || spriteRenderer.getSprite() == null || !spriteRenderer.getVisible()) return;
 
         try {
             entity.Image spriteImage = spriteRenderer.getSprite();
-            String filePath = spriteImage.getLocalpath().toString();
-            Image image = new ImageIcon(filePath).getImage();
+            // Safety check for file existence
+            java.io.File file = spriteImage.getLocalpath().toFile();
+            if (!file.exists()) return;
 
-            if (image == null) {
-                return;
-            }
+            Image image = new ImageIcon(file.toString()).getImage();
 
             float rotationDeg = transform.getRotation();
-
             int spriteW = spriteRenderer.getWidth();
             int spriteH = spriteRenderer.getHeight();
-
             int drawW = (int) (spriteW * transform.getScaleX());
             int drawH = (int) (spriteH * transform.getScaleY());
 
@@ -229,22 +239,23 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int centerY = (panelH - drawH) / 2;
 
             int drawX = centerX + (int) transform.getX();
-            int drawY = centerY - (int) transform.getY();   // bigger Y --> higher on the screen
+            int drawY = centerY - (int) transform.getY();
 
             Graphics2D g2Copy = (Graphics2D) g2.create();
             try {
                 double theta = Math.toRadians(rotationDeg);
-                double pivotX = drawX + drawW / 2;
-                double pivotY = drawY + drawH / 2;
+                double pivotX = drawX + drawW / 2.0;
+                double pivotY = drawY + drawH / 2.0;
 
                 g2Copy.rotate(theta, pivotX, pivotY);
 
                 float opacity = spriteRenderer.getOpacity() / 100.0f;
-                g2Copy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+                // Clamp opacity
+                opacity = Math.max(0f, Math.min(1f, opacity));
 
+                g2Copy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
                 g2Copy.drawImage(image, drawX, drawY, drawW, drawH, this);
 
-                // selection outline
                 if (obj == selectedObject) {
                     g2Copy.setColor(Color.CYAN);
                     g2Copy.setStroke(new BasicStroke(2));
@@ -256,14 +267,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             }
         }
         catch (Exception ex) {
-            System.err.println("[ScenePanel] Error rendering object: " + ex.getMessage());
+            // Silently fail rendering for this frame
         }
     }
 
     private void updateSelectedObjectTransform() {
-        if (selectedObject == null || selectedObject.getTransform() == null) {
-            return;
-        }
+        if (selectedObject == null || selectedObject.getTransform() == null) return;
 
         TransformState state = viewModel.getState();
         Transform transform = selectedObject.getTransform();
@@ -274,7 +283,6 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         double scaleValue = state.getScale() / 100.0;
         transform.setScaleX(scaleValue);
         transform.setScaleY(scaleValue);
-
         transform.setRotation(state.getRotation());
     }
 
@@ -286,4 +294,3 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         }
     }
 }
-
