@@ -4,17 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 import view.util.PropertyPanelUtility;
 
-/**
- * Section panel for managing sprite renderer properties.
- * Follows clean architecture by delegating sprite selection to the parent.
- */
 public class SpriteRendererSectionPanel extends JPanel {
 
     private JTextField imageField;
+    private JTextField zIndexField;
     private JButton browseButton;
     private entity.GameObject currentGameObject;
     private interface_adapter.assets.AssetLibViewModel assetLibViewModel;
     private Runnable onChangeCallback;
+    private boolean isUpdatingUI = false;
 
     public SpriteRendererSectionPanel() {
         setLayout(new BorderLayout());
@@ -52,15 +50,51 @@ public class SpriteRendererSectionPanel extends JPanel {
 
         panel.add(row, gbc);
 
+        // z-index
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel zIndexLabel = PropertyPanelUtility.createFieldLabel("Z-Index:");
+        panel.add(zIndexLabel, gbc);
+
+        gbc.gridx = 1;
+        zIndexField = PropertyPanelUtility.smallField("0");
+        panel.add(zIndexField, gbc);
+
+        attachZIndexListener();
+
         return panel;
     }
 
-    /**
-     * Bind the sprite renderer to a GameObject and AssetLibViewModel.
-     * @param gameObject The GameObject whose sprite renderer we're editing
-     * @param assetLibViewModel The asset library containing available sprites
-     * @param onChangeCallback Callback to invoke when sprite changes
-     */
+    private void attachZIndexListener() {
+        zIndexField.addActionListener(actionEvent -> updateZIndexFromField());
+        zIndexField.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusLost(java.awt.event.FocusEvent focusEvent) {
+                updateZIndexFromField();
+            }
+        });
+    }
+
+    private void updateZIndexFromField() {
+        if (isUpdatingUI || currentGameObject == null || currentGameObject.getSpriteRenderer() == null) {
+            return;
+        }
+
+        try {
+            int newZIndex = Integer.parseInt(zIndexField.getText().trim());
+            entity.SpriteRenderer spriteRenderer = currentGameObject.getSpriteRenderer();
+            spriteRenderer.setZIndex(newZIndex);
+
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
+        } catch (NumberFormatException numberFormatException) {
+            if (currentGameObject.getSpriteRenderer() != null) {
+                zIndexField.setText(String.valueOf(currentGameObject.getSpriteRenderer().getZIndex()));
+            }
+        }
+    }
+
     public void bind(entity.GameObject gameObject,
                      interface_adapter.assets.AssetLibViewModel assetLibViewModel,
                      Runnable onChangeCallback) {
@@ -70,31 +104,34 @@ public class SpriteRendererSectionPanel extends JPanel {
         updateSpriteRendererUI();
     }
 
-    /**
-     * Update the UI to reflect the current sprite.
-     */
     private void updateSpriteRendererUI() {
-        if (currentGameObject == null || currentGameObject.getSpriteRenderer() == null) {
-            imageField.setText("");
-            browseButton.setEnabled(false);
-            return;
+        isUpdatingUI = true;
+        try {
+            if (currentGameObject == null || currentGameObject.getSpriteRenderer() == null) {
+                imageField.setText("");
+                zIndexField.setText("0");
+                browseButton.setEnabled(false);
+                zIndexField.setEnabled(false);
+                return;
+            }
+
+            entity.SpriteRenderer spriteRenderer = currentGameObject.getSpriteRenderer();
+            entity.Image sprite = spriteRenderer.getSprite();
+
+            if (sprite != null) {
+                imageField.setText(sprite.getName());
+            } else {
+                imageField.setText("(No sprite)");
+            }
+
+            zIndexField.setText(String.valueOf(spriteRenderer.getZIndex()));
+            browseButton.setEnabled(true);
+            zIndexField.setEnabled(true);
+        } finally {
+            isUpdatingUI = false;
         }
-
-        entity.SpriteRenderer spriteRenderer = currentGameObject.getSpriteRenderer();
-        entity.Image sprite = spriteRenderer.getSprite();
-
-        if (sprite != null) {
-            imageField.setText(sprite.getName());
-        } else {
-            imageField.setText("(No sprite)");
-        }
-
-        browseButton.setEnabled(true);
     }
 
-    /**
-     * Open a dialog to select a sprite from the asset library.
-     */
     private void openSpritePickerDialog() {
         if (currentGameObject == null || assetLibViewModel == null) {
             JOptionPane.showMessageDialog(this,
@@ -148,6 +185,7 @@ public class SpriteRendererSectionPanel extends JPanel {
                         spriteRenderer.getVisible()
                     );
                     newRenderer.setOpacity(spriteRenderer.getOpacity());
+                    newRenderer.setZIndex(spriteRenderer.getZIndex());
                     currentGameObject.setSpriteRenderer(newRenderer);
                 }
 

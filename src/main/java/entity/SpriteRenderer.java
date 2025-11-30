@@ -35,6 +35,10 @@ public class SpriteRenderer {
         this.visible = visiblity;
     }
 
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
+    }
+
     // for Jackson saving part
     public Image getImage() {
         return sprite;

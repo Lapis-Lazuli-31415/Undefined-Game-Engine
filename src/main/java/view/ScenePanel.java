@@ -176,8 +176,15 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int panelW = getWidth();
             int panelH = getHeight();
 
-            // almost same as the old implementation, but i refactored it into separate methods
-            for (GameObject obj : gameObjects) {
+            // sort game objects by z-index
+            java.util.List<GameObject> sortedObjects = new java.util.ArrayList<>(gameObjects);
+            sortedObjects.sort((obj1, obj2) -> {
+                int z1 = obj1.getSpriteRenderer() != null ? obj1.getSpriteRenderer().getZIndex() : 0;
+                int z2 = obj2.getSpriteRenderer() != null ? obj2.getSpriteRenderer().getZIndex() : 0;
+                return Integer.compare(z1, z2);
+            });
+
+            for (GameObject obj : sortedObjects) {
                 renderGameObject(g2, obj, panelW, panelH);
             }
 
