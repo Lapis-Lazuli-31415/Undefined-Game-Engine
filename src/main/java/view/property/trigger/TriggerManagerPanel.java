@@ -96,6 +96,22 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         repaint();
     }
 
+    public String getSelectedEvent() {
+        return null;
+    }
+
+    public String getSelectedKey() {
+        return null;
+    }
+
+    public java.util.List<String> getConditionTexts() {
+        return java.util.List.of();
+    }
+
+    public java.util.List<String> getActionTexts() {
+        return java.util.List.of();
+    }
+
     // --- Example Integration (Main method to show it works) ---
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ignored) {}

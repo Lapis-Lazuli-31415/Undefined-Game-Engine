@@ -15,11 +15,9 @@ import view.property.trigger.TriggerManagerPanel;
 
 public class PropertiesPanel extends JPanel {
 
-    // Sprite renderer
-    private JTextField imageField;
-
     // Section panels
     private final TransformSectionPanel transformSection;
+    private final SpriteRendererSectionPanel spriteRendererSection;
     private final TriggerManagerPanel triggerManagerPanel;
     private final VariableSectionPanel variableSection;
 
@@ -36,6 +34,7 @@ public class PropertiesPanel extends JPanel {
 
         // Initialize section panels
         transformSection = new TransformSectionPanel();
+        spriteRendererSection = new SpriteRendererSectionPanel();
         triggerManagerPanel = new TriggerManagerPanel();
         variableSection = new VariableSectionPanel();
 
@@ -43,42 +42,12 @@ public class PropertiesPanel extends JPanel {
         add(Box.createVerticalStrut(10));
         add(transformSection);
         add(Box.createVerticalStrut(20));
-        add(createSpriteRendererSection());
+        add(spriteRendererSection);
         add(Box.createVerticalStrut(20));
         add(triggerManagerPanel);
         add(Box.createVerticalStrut(20));
         add(variableSection);
         add(Box.createVerticalGlue());
-    }
-
-    private JPanel createSpriteRendererSection() {
-        JPanel panel = createSectionPanel("Sprite Renderer");
-        GridBagConstraints gbc = baseGbc();
-
-        JLabel imgLabel = createFieldLabel("Image:");
-        panel.add(imgLabel, gbc);
-
-        gbc.gridx = 1;
-        imageField = new JTextField("bear.png");
-        imageField.setBackground(new Color(60, 60, 60));
-        imageField.setForeground(Color.WHITE);
-        imageField.setCaretColor(Color.WHITE);
-        imageField.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
-        imageField.setEditable(false);
-
-        JButton browseButton = new JButton("...");
-        browseButton.setMargin(new Insets(0, 4, 0, 4));
-
-        JPanel row = new JPanel();
-        row.setOpaque(false);
-        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-        row.add(imageField);
-        row.add(Box.createHorizontalStrut(4));
-        row.add(browseButton);
-
-        panel.add(row, gbc);
-
-        return panel;
     }
 
     // ---------- helper UI methods ----------
@@ -95,39 +64,18 @@ public class PropertiesPanel extends JPanel {
         );
     }
 
-    private JPanel createSectionPanel(String title) {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setOpaque(false);
-        panel.setBorder(makeSectionBorder(title));
-        return panel;
-    }
-
-    private GridBagConstraints baseGbc() {
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 2, 2, 2);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        return gbc;
-    }
-
-    private JLabel createFieldLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setForeground(Color.WHITE);
-        label.setFont(label.getFont().deriveFont(Font.PLAIN, 11f));
-        return label;
-    }
-
-
     public void bind(TransformViewModel viewModel,
                      TransformController controller,
                      Runnable onChangeCallback) {
         transformSection.bind(viewModel, controller, onChangeCallback);
     }
 
-    // NEW: Separate setters for local and global ViewModels
+    public void bindSpriteRenderer(entity.GameObject gameObject,
+                                   interface_adapter.assets.AssetLibViewModel assetLibViewModel,
+                                   Runnable onChangeCallback) {
+        spriteRendererSection.bind(gameObject, assetLibViewModel, onChangeCallback);
+    }
+
     public void setLocalVariableViewModel(LocalVariableViewModel viewModel) {
         variableSection.setLocalVariableViewModel(viewModel);
     }
@@ -145,25 +93,25 @@ public class PropertiesPanel extends JPanel {
     }
 
     public String getSelectedEvent() {
-        return null;
+        return triggerManagerPanel.getSelectedEvent();
     }
 
     public String getSelectedKey() {
-        return null;
+        return triggerManagerPanel.getSelectedKey();
     }
 
     public java.util.List<String> getConditionTexts() {
-        return java.util.List.of();
+        return triggerManagerPanel.getConditionTexts();
     }
 
     public java.util.List<String> getActionTexts() {
-        return java.util.List.of();
+        return triggerManagerPanel.getActionTexts();
     }
 
     @Override
     public Dimension getPreferredSize() {
         Dimension naturalSize = super.getPreferredSize();
 
-        return new Dimension(300, naturalSize.height);
+        return new Dimension(290, naturalSize.height);
     }
 }

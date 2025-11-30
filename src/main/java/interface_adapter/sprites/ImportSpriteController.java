@@ -1,10 +1,9 @@
-package interface_adapter.Sprites;
+package interface_adapter.sprites;
 
-import use_case.Sprites.Import.ImportSpriteRequest;
-import use_case.Sprites.Import.SpriteInputBoundary;
+import use_case.sprites.ImportSpriteRequest;
+import use_case.sprites.SpriteInputBoundary;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Controller for importing sprites from a local file.
