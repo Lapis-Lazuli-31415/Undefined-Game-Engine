@@ -14,19 +14,12 @@ import java.util.UUID;
 public class InMemorySceneRepository implements SceneRepository {
 
     private final List<Scene> scenes = new ArrayList<>();
+    private Scene currentScene;
 
     public InMemorySceneRepository() {
-        // Seed sample scenes & game objects
-        Scene s1 = new Scene(UUID.randomUUID(), "Scene A", List.of(
-                new GameObject("go-1", "Player", true, new ArrayList<>(), null),
-                new GameObject("go-2", "Enemy", true, new ArrayList<>(), null)
-        ));
-        Scene s2 = new Scene(UUID.randomUUID(), "Scene B", List.of(
-                new GameObject("go-3", "Tree", true, new ArrayList<>(), null)
-        ));
-
-        scenes.add(s1);
-        scenes.add(s2);
+        Scene defaultScene = new Scene(UUID.randomUUID(), "Default Scene", null);
+        scenes.add(defaultScene);
+        currentScene = defaultScene;
     }
 
     @Override
@@ -48,5 +41,15 @@ public class InMemorySceneRepository implements SceneRepository {
             }
         }
         scenes.add(scene);
+    }
+
+    @Override
+    public void setCurrentScene(Scene scene) {
+        this.currentScene = scene;
+    }
+
+    @Override
+    public Scene getCurrentScene() {
+        return currentScene;
     }
 }

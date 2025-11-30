@@ -1,6 +1,7 @@
 package view;
 
 import entity.GameObject;
+import entity.Scene;
 import entity.SpriteRenderer;
 import entity.Transform;
 import interface_adapter.transform.TransformState;
@@ -20,13 +21,12 @@ import java.util.Vector;
 public class ScenePanel extends JPanel implements PropertyChangeListener {
 
     private final TransformViewModel viewModel;
-    private final List<GameObject> gameObjects;
     private GameObject selectedObject;
     private Runnable onSelectionChangeCallback;
+    private Scene currentScene;
 
     public ScenePanel(TransformViewModel viewModel) {
         this.viewModel = viewModel;
-        this.gameObjects = new ArrayList<>();
         this.selectedObject = null;
 
         setBackground(new Color(35, 35, 35));
@@ -40,6 +40,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
                 handleMouseClick(e.getX(), e.getY());
             }
         });
+    }
+
+    public void setScene(Scene scene) {
+        this.currentScene = scene;
+        this.selectedObject = null;
+        repaint();
     }
 
     public void addSprite(entity.Image image) {
@@ -63,12 +69,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             gameObject.setTransform(transform);
             gameObject.addProperty(spriteRenderer);
 
-            gameObjects.add(gameObject);
+            currentScene.addGameObject(gameObject);
 
             selectObject(gameObject);
 
             // log for debugging
-            System.out.println("[ScenePanel] Added sprite: " + name + " (Total objects: " + gameObjects.size() + ")");
+            System.out.println("[ScenePanel] Added sprite: " + name + " (Total objects: " + currentScene.getGameObjects().size() + ")");
             repaint();
         }
         catch (Exception ex) {
@@ -96,7 +102,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private GameObject findGameObjectByImage(entity.Image image) {
-        for (GameObject obj : gameObjects) {
+        for (GameObject obj : currentScene.getGameObjects()) {
             SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
             if (spriteRenderer != null && spriteRenderer.getSprite() == image) {
                 return obj;
@@ -118,8 +124,8 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private void handleMouseClick(int mouseX, int mouseY) {
-        for (int i = gameObjects.size() - 1; i >= 0; i--) {
-            GameObject obj = gameObjects.get(i);
+        for (int i = currentScene.getGameObjects().size() - 1; i >= 0; i--) {
+            GameObject obj = currentScene.getGameObjects().get(i);
             if (isPointInObject(mouseX, mouseY, obj)) {
                 selectObject(obj);
                 repaint();
@@ -176,7 +182,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int panelH = getHeight();
 
             // almost same as the old implementation, but i refactored it into separate methods
-            for (GameObject obj : gameObjects) {
+            for (GameObject obj : currentScene.getGameObjects()) {
                 renderGameObject(g2, obj, panelW, panelH);
             }
 

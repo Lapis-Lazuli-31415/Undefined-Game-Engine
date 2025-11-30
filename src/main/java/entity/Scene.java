@@ -46,5 +46,9 @@ public class Scene {
         return gameObjects.contains(gameObject);
     }
 
+    public void addGameObject(GameObject gameObject) {
+        gameObjects.add(gameObject);
+    }
+
 
 }

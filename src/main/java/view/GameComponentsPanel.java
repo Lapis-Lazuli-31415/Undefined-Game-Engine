@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.add_scene.AddScenePresenter.SceneCreationListener;
 import use_case.component_management.list_scenes.ListScenesInputBoundary;
 import use_case.component_management.list_scenes.ListScenesOutputBoundary;
 import use_case.component_management.select_scene.SelectSceneInputBoundary;
@@ -27,7 +28,7 @@ import java.util.Enumeration;
  * identity mapping, adapt this panel to keep a map from names to entities.
  */
 public class GameComponentsPanel extends JPanel
-        implements ListScenesOutputBoundary, SceneSelectionListener, GameObjectSelectionListener {
+        implements ListScenesOutputBoundary, SceneSelectionListener, GameObjectSelectionListener, SceneCreationListener {
 
     private final JTree tree;
     private final DefaultTreeModel treeModel;
@@ -154,6 +155,20 @@ public class GameComponentsPanel extends JPanel
                         return;
                     }
                 }
+            }
+        });
+    }
+
+    @Override
+    public void onSceneCreated(Scene scene) {
+        selectSceneUseCase.selectScene(scene.getName());
+        if (listScenesUseCase != null) listScenesUseCase.listScenes();
+        SwingUtilities.invokeLater(() -> {
+            DefaultMutableTreeNode node = findSceneNode(scene.getName());
+            if (node != null) {
+                TreePath p = new TreePath(node.getPath());
+                tree.setSelectionPath(p);
+                tree.scrollPathToVisible(p);
             }
         });
     }
