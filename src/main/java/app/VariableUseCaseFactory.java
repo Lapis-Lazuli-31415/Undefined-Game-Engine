@@ -19,9 +19,13 @@ public class VariableUseCaseFactory {
 
     public static VariableWiring create(
             Environment globalEnvironment,
-            Environment localEnvironment) {
+            Environment localEnvironment,
+            GlobalVariableViewModel globalViewModel) {
 
-        GlobalVariableViewModel globalViewModel = new GlobalVariableViewModel();
+        if (globalViewModel == null) {
+            globalViewModel = new GlobalVariableViewModel();
+        }
+
         LocalVariableViewModel localViewModel = new LocalVariableViewModel();
 
         GlobalVariableUpdatePresenter globalUpdatePresenter =
