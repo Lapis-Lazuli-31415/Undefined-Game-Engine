@@ -5,7 +5,7 @@
     "variables" : {
       "Boolean" : {
         "variables" : {
-          "win:" : false
+          "win" : false
         }
       },
       "Numeric" : {
@@ -18,7 +18,7 @@
   },
   "assets" : [ ],
   "scenes" : [ {
-    "id" : "ddc8a055-8d3e-456e-9e6d-71eddfdc0863",
+    "id" : "bd2177a0-0b72-4247-90e6-52b81fcb2b52",
     "name" : "Forest Level",
     "game_objects" : [ {
       "id" : "obj-bear",
@@ -29,7 +29,7 @@
         "variables" : {
           "Boolean" : {
             "variables" : {
-              "alive:" : true
+              "alive" : true
             }
           },
           "Numeric" : {
@@ -57,76 +57,21 @@
           "conditions" : [ {
             "type" : "NumericComparison",
             "left" : {
-              "type" : "NumericValue",
-              "value" : 100.0
+              "type" : "NumericVariable",
+              "name" : "health",
+              "global" : false
             },
             "comparator" : ">",
             "right" : {
               "type" : "NumericValue",
-              "value" : 50.0
+              "value" : 0.0
             }
           } ],
           "actions" : [ {
             "type" : "WaitAction",
             "seconds_expression" : {
               "type" : "NumericValue",
-              "value" : 0.5
-            }
-          } ],
-          "active" : true
-        } ]
-      }
-    }, {
-      "id" : "obj-bearx2",
-      "name" : "Bearx2",
-      "active" : true,
-      "properties" : [ ],
-      "environment" : {
-        "variables" : {
-          "Boolean" : {
-            "variables" : {
-              "alive:" : true
-            }
-          },
-          "Numeric" : {
-            "variables" : {
-              "health" : 100.0
-            }
-          }
-        }
-      },
-      "transform" : {
-        "x" : 100.0,
-        "y" : 200.0,
-        "rotation" : 45.0,
-        "scale_x" : 1.0,
-        "scale_y" : 1.0
-      },
-      "trigger_manager" : {
-        "triggers" : [ {
-          "event" : {
-            "type" : "OnClick",
-            "event_label" : "On Click",
-            "event_parameters" : { },
-            "required_parameters" : [ ]
-          },
-          "conditions" : [ {
-            "type" : "NumericComparison",
-            "left" : {
-              "type" : "NumericValue",
-              "value" : 100.0
-            },
-            "comparator" : ">",
-            "right" : {
-              "type" : "NumericValue",
-              "value" : 50.0
-            }
-          } ],
-          "actions" : [ {
-            "type" : "WaitAction",
-            "seconds_expression" : {
-              "type" : "NumericValue",
-              "value" : 0.5
+              "value" : 1.0
             }
           } ],
           "active" : true

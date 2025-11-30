@@ -1,8 +1,9 @@
 package entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
+import entity.scripting.expression.SimpleArithmeticOperation;
+import entity.scripting.expression.value.NumericValue;
+import entity.scripting.expression.variable.NumericVariable;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -11,6 +12,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.net.URI;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Image.class, name = "Image")
+})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Image extends Asset {
     private final int width;
     private final int height;
