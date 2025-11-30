@@ -39,7 +39,7 @@ public class GameCanvas extends JPanel {
     private boolean showFps = true;
     private boolean showBoundingBoxes = false;
     private boolean useButtonMode = false;  // Default: use sprite mode
-
+    private boolean sizePrinted = false;
     /**
      * Constructor.
      */
@@ -286,7 +286,11 @@ public class GameCanvas extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
+        // Print canvas size once (add a flag to only print once)
+        if (!sizePrinted) {
+            System.out.println("📐 Canvas actual size: " + getWidth() + "x" + getHeight());
+            sizePrinted = true;
+        }
         // Only render sprites in sprite mode
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
