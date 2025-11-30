@@ -26,7 +26,7 @@ class PreviewControllerTest {
     @BeforeEach
     void setUp() {
         interactor = new TestPreviewInteractor();
-        controller = new PreviewController(interactor);  // ✅ 只传 interactor
+        controller = new PreviewController(interactor);
     }
 
     @Test
