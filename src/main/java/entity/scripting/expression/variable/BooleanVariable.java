@@ -1,5 +1,8 @@
 package entity.scripting.expression.variable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import entity.scripting.environment.Environment;
 import entity.scripting.error.EnvironmentException;
 import entity.scripting.error.ParseSyntaxException;
@@ -7,12 +10,15 @@ import entity.scripting.expression.BooleanExpression;
 import entity.scripting.expression.Expression;
 import entity.scripting.expression.ExpressionFactory;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BooleanVariable extends Variable<Boolean> implements BooleanExpression {
     public final static String VARIABLE_TYPE = "Boolean";
     public final static Class<Boolean> VALUE_TYPE = Boolean.class;
     public final static String KEY_WORD = "boolean_var";
 
-    public BooleanVariable(String name, boolean isGlobal) {
+    @JsonCreator
+    public BooleanVariable(@JsonProperty("name") String name,
+                           @JsonProperty("isGlobal") boolean isGlobal) {
         super(name, isGlobal);
     }
 

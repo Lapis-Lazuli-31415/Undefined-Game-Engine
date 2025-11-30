@@ -421,6 +421,11 @@ public class HomeView extends javax.swing.JFrame {
                     }
             );
             props.setAutoSaveCallback(() -> triggerAutoSave());
+
+            if (DEMO_OBJECT != null && DEMO_OBJECT.getTriggerManager() != null) {
+                System.out.println("Loading triggers for: " + DEMO_OBJECT.getName());
+                props.loadTriggerManager(DEMO_OBJECT.getTriggerManager());
+            }
         }
 
         // rewire variables when selection changes
@@ -436,6 +441,9 @@ public class HomeView extends javax.swing.JFrame {
                     scenePanel.repaint();
                     triggerAutoSave();
                 });
+                if (selectedObject.getTriggerManager() != null) {
+                    props.loadTriggerManager(selectedObject.getTriggerManager());
+                }
             }
         });
 

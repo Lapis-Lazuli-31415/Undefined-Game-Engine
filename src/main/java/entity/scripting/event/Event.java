@@ -1,5 +1,7 @@
 package entity.scripting.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 // TYPE INFO
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -49,6 +53,7 @@ public abstract class Event {
 
     public abstract boolean isRequiredParameter(String key);
 
+    @JsonIgnore
     public abstract List<String> getRequiredParameters();
 
     public String getEventLabel(){
