@@ -27,7 +27,6 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
 
     /**
      * Serializes and saves the Project object to a JSON file.
-     *
      * The project is wrapped in a root Map where the key is the project's name.
      * Saves to the "database.json" (this is not actually saving to the actual file in the code).
      */

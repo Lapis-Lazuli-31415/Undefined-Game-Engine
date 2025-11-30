@@ -3,7 +3,7 @@ package use_case.saving;
 public class SaveProjectOutputData {
     String projectName;
     String message;
-    boolean successful = false;
+    boolean successful;
 
     /**
      * Constructs a new SaveProjectOutputData object.

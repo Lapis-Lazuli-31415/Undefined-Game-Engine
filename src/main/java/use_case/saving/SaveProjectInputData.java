@@ -6,8 +6,4 @@ public class SaveProjectInputData {
     public SaveProjectInputData(String projectName) {
         this.projectName = projectName;
     }
-    public String getProjectName() {
-        return projectName;
-    }
-
 }
