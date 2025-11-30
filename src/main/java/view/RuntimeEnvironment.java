@@ -198,12 +198,41 @@ public class RuntimeEnvironment {
      * Main game loop (called every ~16ms for 60 FPS).
      */
     private void gameLoop() {
-        // 1. Check all triggers and delegate execution to Use Case
+//        // 1. Check all triggers and delegate execution to Use Case
+//        for (Map.Entry<Trigger, EventListener> entry : listeners.entrySet()) {
+//            Trigger trigger = entry.getKey();
+//            EventListener listener = entry.getValue();
+//
+//            if (listener.isTriggered()) {
+        // Debug: Print pressed keys
+        if (!inputManager.getPressedKeys().isEmpty()) {
+            System.out.println("Keys pressed: " + inputManager.getPressedKeys());
+        }
+        // Debug triggers
         for (Map.Entry<Trigger, EventListener> entry : listeners.entrySet()) {
             Trigger trigger = entry.getKey();
             EventListener listener = entry.getValue();
 
             if (listener.isTriggered()) {
+                System.out.println("🔥 Trigger fired!");
+
+                GameObject obj = triggerOwners.get(trigger);
+                TriggerExecutionInputData inputData = new TriggerExecutionInputData(
+                        trigger,
+                        obj,
+                        globalEnvironment,
+                        scene
+                );
+                triggerExecutor.execute(inputData);
+            }
+        }
+        // 1. Check all triggers
+        for (Map.Entry<Trigger, EventListener> entry : listeners.entrySet()) {
+            Trigger trigger = entry.getKey();
+            EventListener listener = entry.getValue();
+
+            if (listener.isTriggered()) {
+                System.out.println("🔥 Trigger fired: " + trigger.getEvent().getClass().getSimpleName());
                 // Delegate to Use Case layer
                 GameObject obj = triggerOwners.get(trigger);
                 TriggerExecutionInputData inputData = new TriggerExecutionInputData(

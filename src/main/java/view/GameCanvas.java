@@ -357,9 +357,14 @@ public class GameCanvas extends JPanel {
             return;
         }
 
-        // Get sprite dimensions
-        int spriteW = spriteRenderer != null ? spriteRenderer.getWidth() : 50;
-        int spriteH = spriteRenderer != null ? spriteRenderer.getHeight() : 50;
+// NEW CODE - check if sprite is null before getting dimensions
+        int spriteW = 50;  // default
+        int spriteH = 50;  // default
+
+        if (spriteRenderer != null && spriteRenderer.getSprite() != null) {
+            spriteW = spriteRenderer.getWidth();
+            spriteH = spriteRenderer.getHeight();
+        }
 
         // Apply scale (uniform scale like ScenePanel)
         int drawW = (int) (spriteW * transform.getScaleX());

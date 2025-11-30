@@ -36,6 +36,20 @@ import use_case.Sprites.Import.ImportSpriteInteractor;
 //import interface_adapter.preview.PreviewState;
 //import java.beans.PropertyChangeEvent;
 //import java.beans.PropertyChangeListener;
+// Existing imports...
+import entity.SpriteRenderer;
+import entity.scripting.Trigger;
+import entity.scripting.action.ChangePositionAction;
+import entity.scripting.action.ChangeVisibilityAction;
+import entity.scripting.action.BooleanVariableAssignmentAction;
+import entity.scripting.action.NumericVariableAssignmentAction;
+import entity.scripting.action.WaitAction;
+import entity.scripting.event.OnClickEvent;
+import entity.scripting.event.OnKeyPressEvent;
+import entity.scripting.expression.value.NumericValue;
+import entity.scripting.expression.value.BooleanValue;
+import entity.scripting.expression.variable.BooleanVariable;
+import entity.scripting.expression.variable.NumericVariable;
 //// ===== END ADDED BY CHENG =====
 import view.property.PropertiesPanel;
 
@@ -95,6 +109,7 @@ public class HomeView extends javax.swing.JFrame {
 
     public HomeView(interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
         this.assetLibViewModel = assetLibViewModel;
+        initializePreviewSystem();
 
         wireImportSpriteUseCase();
         loadExistingAssets();
@@ -704,14 +719,21 @@ public class HomeView extends javax.swing.JFrame {
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      */
     private Scene getCurrentScene() {
-        if (editorState == null) {
-            return null;
-        }
-        return editorState.getCurrentScene();
+//        if (editorState == null) {
+//            return null;
+//        }
+//        return editorState.getCurrentScene();
+        return createTestScene();
     }
     /**
      * Create a comprehensive test scene with triggers for testing preview functionality.
      * Tests all types of triggers, conditions, and actions including new ChangePosition and ChangeVisibility.
+     * TEMPORARY: Used until getCurrentScene() is properly implemented by teammates
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     */
+    /**
+     * Create a comprehensive test scene with triggers for testing preview functionality.
+     * Tests ChangePosition, ChangeVisibility, and all other actions.
      * TEMPORARY: Used until getCurrentScene() is properly implemented by teammates
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      */
@@ -720,7 +742,7 @@ public class HomeView extends javax.swing.JFrame {
 
         // ========== 1. Player - OnClick → ChangePosition ==========
         GameObject player = new GameObject(
-                "player1",
+                "Player",
                 "Player",
                 true,
                 new ArrayList<>(),
@@ -731,18 +753,16 @@ public class HomeView extends javax.swing.JFrame {
         Vector<Double> playerScale = new Vector<>(Arrays.asList(1.0, 1.0));
         player.setTransform(new Transform(playerPos, 0f, playerScale));
 
-        // Add SpriteRenderer for visibility
+        // Add SpriteRenderer (null image = gray placeholder)
         SpriteRenderer playerSprite = new SpriteRenderer(null, true);
-        playerSprite.setWidth(50);
-        playerSprite.setHeight(50);
         player.addProperty(playerSprite);
 
-        // Trigger: Click to move player right by 50 pixels
+        // Trigger: Click to move player right
         Trigger playerClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
         playerClickTrigger.addAction(new entity.scripting.action.ChangePositionAction(
                 "Player",
-                new entity.scripting.expression.value.NumericValue(-150.0),  // new X
-                new entity.scripting.expression.value.NumericValue(-150.0)   // new Y
+                new entity.scripting.expression.value.NumericValue(100.0),  // new X (move right)
+                new entity.scripting.expression.value.NumericValue(-150.0)   // same Y
         ));
         player.getTriggerManager().addTrigger(playerClickTrigger);
 
@@ -750,7 +770,7 @@ public class HomeView extends javax.swing.JFrame {
 
         // ========== 2. Enemy - OnKeyPress(S) → ChangeVisibility (hide) ==========
         GameObject enemy = new GameObject(
-                "enemy1",
+                "Enemy",
                 "Enemy",
                 true,
                 new ArrayList<>(),
@@ -759,11 +779,9 @@ public class HomeView extends javax.swing.JFrame {
 
         Vector<Double> enemyPos = new Vector<>(Arrays.asList(50.0, -100.0));
         Vector<Double> enemyScale = new Vector<>(Arrays.asList(1.3, 1.3));
-        enemy.setTransform(new Transform(enemyPos, 15f, enemyScale));  // 15 degree rotation
+        enemy.setTransform(new Transform(enemyPos, 15f, enemyScale));  // 15° rotation
 
         SpriteRenderer enemySprite = new SpriteRenderer(null, true);
-        enemySprite.setWidth(50);
-        enemySprite.setHeight(50);
         enemy.addProperty(enemySprite);
 
         // Trigger: Press S to hide enemy
@@ -779,9 +797,9 @@ public class HomeView extends javax.swing.JFrame {
 
         scene.addGameObject(enemy);
 
-        // ========== 3. Coin - OnClick → Multiple Actions ==========
+        // ========== 3. Coin - OnClick → Move + Wait + Hide ==========
         GameObject coin = new GameObject(
-                "coin1",
+                "Coin",
                 "Coin",
                 true,
                 new ArrayList<>(),
@@ -793,18 +811,16 @@ public class HomeView extends javax.swing.JFrame {
         coin.setTransform(new Transform(coinPos, 0f, coinScale));
 
         SpriteRenderer coinSprite = new SpriteRenderer(null, true);
-        coinSprite.setWidth(40);
-        coinSprite.setHeight(40);
         coin.addProperty(coinSprite);
 
-        // Trigger: Click to collect coin (move up + set variable + hide)
+        // Trigger: Click to collect coin (move up, wait, then hide)
         Trigger coinClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
 
         // Action 1: Move coin up
         coinClickTrigger.addAction(new entity.scripting.action.ChangePositionAction(
                 "Coin",
                 new entity.scripting.expression.value.NumericValue(200.0),
-                new entity.scripting.expression.value.NumericValue(-100.0)  // Move up
+                new entity.scripting.expression.value.NumericValue(-150.0)  // Move up
         ));
 
         // Action 2: Set collected variable
@@ -831,9 +847,9 @@ public class HomeView extends javax.swing.JFrame {
         coin.getTriggerManager().addTrigger(coinClickTrigger);
         scene.addGameObject(coin);
 
-        // ========== 4. Boss - OnKeyPress(E) → Complex with Conditions ==========
+        // ========== 4. Boss - OnKeyPress(E) → Move to Center + Set Variables ==========
         GameObject boss = new GameObject(
-                "boss1",
+                "Boss",
                 "Boss",
                 true,
                 new ArrayList<>(),
@@ -842,14 +858,12 @@ public class HomeView extends javax.swing.JFrame {
 
         Vector<Double> bossPos = new Vector<>(Arrays.asList(-100.0, 150.0));
         Vector<Double> bossScale = new Vector<>(Arrays.asList(2.0, 2.0));
-        boss.setTransform(new Transform(bossPos, -30f, bossScale));  // -30 degree rotation
+        boss.setTransform(new Transform(bossPos, -30f, bossScale));  // -30° rotation
 
         SpriteRenderer bossSprite = new SpriteRenderer(null, true);
-        bossSprite.setWidth(60);
-        bossSprite.setHeight(60);
         boss.addProperty(bossSprite);
 
-        // Trigger: Press E for boss actions
+        // Trigger: Press E for boss activation
         entity.scripting.event.OnKeyPressEvent bossKeyEvent = new entity.scripting.event.OnKeyPressEvent();
         bossKeyEvent.addEventParameter("Key", "E");
 
@@ -880,9 +894,9 @@ public class HomeView extends javax.swing.JFrame {
         boss.getTriggerManager().addTrigger(bossTrigger);
         scene.addGameObject(boss);
 
-        // ========== 5. Ghost - OnKeyPress(H) → Toggle Visibility ==========
+        // ========== 5. Ghost - OnKeyPress(H) → Hide, OnKeyPress(G) → Show ==========
         GameObject ghost = new GameObject(
-                "ghost1",
+                "Ghost",
                 "Ghost",
                 true,
                 new ArrayList<>(),
@@ -891,14 +905,12 @@ public class HomeView extends javax.swing.JFrame {
 
         Vector<Double> ghostPos = new Vector<>(Arrays.asList(150.0, 150.0));
         Vector<Double> ghostScale = new Vector<>(Arrays.asList(1.2, 1.2));
-        ghost.setTransform(new Transform(ghostPos, 45f, ghostScale));  // 45 degree rotation
+        ghost.setTransform(new Transform(ghostPos, 45f, ghostScale));  // 45° rotation
 
         SpriteRenderer ghostSprite = new SpriteRenderer(null, true);
-        ghostSprite.setWidth(55);
-        ghostSprite.setHeight(55);
         ghost.addProperty(ghostSprite);
 
-        // Trigger: Press H to hide ghost
+        // Trigger 1: Press H to hide ghost
         entity.scripting.event.OnKeyPressEvent hideGhostEvent = new entity.scripting.event.OnKeyPressEvent();
         hideGhostEvent.addEventParameter("Key", "H");
 
@@ -909,11 +921,22 @@ public class HomeView extends javax.swing.JFrame {
         ));
         ghost.getTriggerManager().addTrigger(hideGhostTrigger);
 
+        // Trigger 2: Press G to show ghost again
+        entity.scripting.event.OnKeyPressEvent showGhostEvent = new entity.scripting.event.OnKeyPressEvent();
+        showGhostEvent.addEventParameter("Key", "G");
+
+        Trigger showGhostTrigger = new Trigger(showGhostEvent, true);
+        showGhostTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+                "Ghost",
+                new entity.scripting.expression.value.BooleanValue(true)  // Show
+        ));
+        ghost.getTriggerManager().addTrigger(showGhostTrigger);
+
         scene.addGameObject(ghost);
 
-        // ========== 6. Target - OnKeyPress(T) → Move and Rotate ==========
+        // ========== 6. Target - OnKeyPress(T) → Move Up ==========
         GameObject target = new GameObject(
-                "target1",
+                "Target",
                 "Target",
                 true,
                 new ArrayList<>(),
@@ -925,11 +948,9 @@ public class HomeView extends javax.swing.JFrame {
         target.setTransform(new Transform(targetPos, 0f, targetScale));
 
         SpriteRenderer targetSprite = new SpriteRenderer(null, true);
-        targetSprite.setWidth(50);
-        targetSprite.setHeight(50);
         target.addProperty(targetSprite);
 
-        // Trigger: Press T to move target
+        // Trigger: Press T to move target up
         entity.scripting.event.OnKeyPressEvent moveTargetEvent = new entity.scripting.event.OnKeyPressEvent();
         moveTargetEvent.addEventParameter("Key", "T");
 
@@ -946,17 +967,18 @@ public class HomeView extends javax.swing.JFrame {
         // Print test summary
         System.out.println("✅ Created comprehensive test scene with " + scene.getGameObjects().size() + " GameObjects");
         System.out.println("\n=== Test Controls ===");
-        System.out.println("Player (-200, -150) [size: 1.0x, rot: 0°]:");
-        System.out.println("  → Click: Move to (-150, -150)");
-        System.out.println("\nEnemy (50, -100) [size: 1.3x, rot: 15°]:");
-        System.out.println("  → Press S: Hide enemy");
-        System.out.println("\nCoin (200, 0) [size: 0.8x, rot: 0°]:");
-        System.out.println("  → Click: Move up + Set variable + Wait 1s + Hide");
-        System.out.println("\nBoss (-100, 150) [size: 2.0x, rot: -30°]:");
-        System.out.println("  → Press E: Set health=500 + Move to center + Wait 2s");
-        System.out.println("\nGhost (150, 150) [size: 1.2x, rot: 45°]:");
-        System.out.println("  → Press H: Hide ghost");
-        System.out.println("\nTarget (-250, 100) [size: 1.5x, rot: 0°]:");
+        System.out.println("Player (-200, -150) [1.0x, 0°]:");
+        System.out.println("  → CLICK: Move to (100, -150)");
+        System.out.println("\nEnemy (50, -100) [1.3x, 15°]:");
+        System.out.println("  → Press S: HIDE enemy");
+        System.out.println("\nCoin (200, 0) [0.8x, 0°]:");
+        System.out.println("  → CLICK: Move up + Wait 1s + HIDE");
+        System.out.println("\nBoss (-100, 150) [2.0x, -30°]:");
+        System.out.println("  → Press E: Set health=500 + Move to (0,0) + Wait 2s");
+        System.out.println("\nGhost (150, 150) [1.2x, 45°]:");
+        System.out.println("  → Press H: HIDE ghost");
+        System.out.println("  → Press G: SHOW ghost");
+        System.out.println("\nTarget (-250, 100) [1.5x, 0°]:");
         System.out.println("  → Press T: Move to (-250, -50)");
         System.out.println("==================\n");
 

@@ -26,25 +26,34 @@ public class EventListenerFactory {
 
     private final InputManager inputManager;
     private final boolean useCollisionDetection;
+    private final int canvasWidth;
+    private final int canvasHeight;
 
     /**
-     * Constructor with collision detection option.
+     * Constructor with collision detection option and canvas dimensions.
      *
      * @param inputManager The input manager for keyboard and mouse events
      * @param useCollisionDetection true to use collision-based clicks, false for buttons
+     * @param canvasWidth The width of the game canvas
+     * @param canvasHeight The height of the game canvas
      */
-    public EventListenerFactory(InputManager inputManager, boolean useCollisionDetection) {
+    public EventListenerFactory(InputManager inputManager, boolean useCollisionDetection,
+                                int canvasWidth, int canvasHeight) {
         this.inputManager = inputManager;
         this.useCollisionDetection = useCollisionDetection;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
     }
 
     /**
      * Constructor (defaults to collision detection enabled).
      *
      * @param inputManager The input manager for keyboard and mouse events
+     * @param canvasWidth The width of the game canvas
+     * @param canvasHeight The height of the game canvas
      */
-    public EventListenerFactory(InputManager inputManager) {
-        this(inputManager, true);  // Default: use collision detection
+    public EventListenerFactory(InputManager inputManager, int canvasWidth, int canvasHeight) {
+        this(inputManager, true, canvasWidth, canvasHeight);
     }
 
     /**
@@ -67,11 +76,11 @@ public class EventListenerFactory {
     public EventListener createClickListener(GameObject gameObject) {
         if (useCollisionDetection) {
             // Collision-based detection (new feature)
-            return new ClickListener(gameObject, inputManager);
+            return new ClickListener(gameObject, inputManager, canvasWidth, canvasHeight);
         } else {
             // Button-based detection (legacy)
             String buttonLabel = gameObject != null ? gameObject.getName() : "Unknown";
-            return new ClickListener(buttonLabel);
+            return new ClickListener(buttonLabel, canvasWidth, canvasHeight);
         }
     }
 
@@ -82,7 +91,7 @@ public class EventListenerFactory {
      * @return ClickListener in button mode
      */
     public EventListener createButtonClickListener(String buttonLabel) {
-        return new ClickListener(buttonLabel);
+        return new ClickListener(buttonLabel, canvasWidth, canvasHeight);
     }
 
     /**
@@ -92,7 +101,7 @@ public class EventListenerFactory {
      * @return ClickListener in collision mode
      */
     public EventListener createCollisionClickListener(GameObject gameObject) {
-        return new ClickListener(gameObject, inputManager);
+        return new ClickListener(gameObject, inputManager, canvasWidth, canvasHeight);
     }
 
     /**

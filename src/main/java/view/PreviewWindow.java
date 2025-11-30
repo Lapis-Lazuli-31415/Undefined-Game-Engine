@@ -77,7 +77,16 @@ public class PreviewWindow {
         // Create canvas
         canvas = new GameCanvas();
         canvas.setListenerFactory(listenerFactory); // Inject factory into canvas
-
+        // ✅ ADD THIS CODE RIGHT HERE (after canvas is created)
+        canvas.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (!canvas.hasFocus()) {
+                    canvas.requestFocusInWindow();
+                    System.out.println("Canvas focused via mouse click");
+                }
+            }
+        });
         // Create info panel
         JPanel infoPanel = createInfoPanel();
 
@@ -92,7 +101,6 @@ public class PreviewWindow {
         // Setup runtime
         setupRuntime();
     }
-
     /**
      * Create info panel showing scene information.
      *
@@ -308,14 +316,29 @@ public class PreviewWindow {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        // Request focus for keyboard input
+        // Multiple attempts to grab focus
+        canvas.setFocusable(true);
         canvas.requestFocus();
+
+        SwingUtilities.invokeLater(() -> {
+            canvas.requestFocusInWindow();
+            frame.toFront();
+            frame.requestFocus();
+            canvas.requestFocusInWindow();
+
+            System.out.println("Canvas focus after delay: " + canvas.hasFocus());
+
+            // If still no focus, print instructions
+            if (!canvas.hasFocus()) {
+                System.out.println("⚠️  Canvas doesn't have focus yet!");
+                System.out.println("   Click on the canvas window to enable keyboard input!");
+            }
+        });
 
         // Auto-start the game loop
         runtime.start();
 
         System.out.println("Preview window displayed and started");
-        System.out.println("Canvas has focus: " + canvas.hasFocus());
         System.out.println("\nTry pressing keys or clicking objects!");
         System.out.println("Watch console for trigger outputs\n");
     }

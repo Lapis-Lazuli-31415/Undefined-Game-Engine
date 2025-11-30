@@ -28,19 +28,25 @@ public class ClickListener implements EventListener {
     private final GameObject gameObject;
     private final InputManager inputManager;
     private final boolean useCollisionDetection;
+    private final int canvasWidth;
+    private final int canvasHeight;
 
     /**
      * Create a ClickListener for collision-based detection (NEW).
      *
      * @param gameObject The game object to detect clicks on
      * @param inputManager The input manager with mouse state
+     * @param canvasWidth The width of the game canvas
+     * @param canvasHeight The height of the game canvas
      */
-    public ClickListener(GameObject gameObject, InputManager inputManager) {
+    public ClickListener(GameObject gameObject, InputManager inputManager, int canvasWidth, int canvasHeight) {
         this.gameObject = gameObject;
         this.inputManager = inputManager;
         this.buttonLabel = gameObject != null ? gameObject.getName() : "Unknown";
         this.wasClicked = false;
         this.useCollisionDetection = true;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
     }
 
     /**
@@ -54,6 +60,8 @@ public class ClickListener implements EventListener {
         this.buttonLabel = buttonLabel;
         this.wasClicked = false;
         this.useCollisionDetection = false;
+        this.canvasWidth = 800;  // Default for button mode
+        this.canvasHeight = 600;
     }
 
     /**
@@ -66,7 +74,17 @@ public class ClickListener implements EventListener {
     public boolean isTriggered() {
         if (useCollisionDetection) {
             // Collision-based detection (sprite clicking)
-            return isClickedByCollision();
+            boolean triggered = isClickedByCollision();
+
+            // Debug output when click detected
+            if (inputManager.isLeftClickJustPressed()) {
+                int mx = inputManager.getMouseX();
+                int my = inputManager.getMouseY();
+                System.out.println("🖱️  Click at (" + mx + ", " + my + ") for " + buttonLabel);
+                System.out.println("   Triggered: " + triggered);
+            }
+
+            return triggered;
         } else {
             // Button-based detection (UI button)
             return wasClicked;
@@ -100,84 +118,57 @@ public class ClickListener implements EventListener {
     /**
      * Check if a point (mouse click) is inside GameObject's bounding box.
      *
-     * Bounding box calculation:
-     * - Center: (transform.x, transform.y)
-     * - Size: from SpriteRenderer.getWidth()/getHeight()
-     * - Top-left: (x - width/2, y - height/2)
-     * - Bottom-right: (x + width/2, y + height/2)
+     * Bounding box calculation matches GameCanvas rendering:
+     * - Uses center-based coordinate system
+     * - Applies scale from Transform
+     * - Uses actual canvas dimensions
      *
-     * @param pointX Mouse X coordinate
-     * @param pointY Mouse Y coordinate
+     * @param mouseX Mouse X coordinate
+     * @param mouseY Mouse Y coordinate
      * @return true if point is inside bounding box
      */
-    private boolean isPointInGameObject(int pointX, int pointY) {
-        // Get transform (position)
+    private boolean isPointInGameObject(int mouseX, int mouseY) {
         Transform transform = gameObject.getTransform();
         if (transform == null) {
             return false;
         }
 
-        // Transform returns double
-        double centerX = transform.getX();
-        double centerY = transform.getY();
+        SpriteRenderer spriteRenderer = gameObject.getSpriteRenderer();
 
-        // Get sprite renderer and size
-        SpriteRenderer spriteRenderer = getSpriteRenderer();
-        double width;
-        double height;
+        // Default size if no sprite
+        int width = 50;
+        int height = 50;
 
-        if (spriteRenderer != null) {
-            // SpriteRenderer returns float, convert to double
+        // Get actual size if sprite exists
+        if (spriteRenderer != null && spriteRenderer.getSprite() != null) {
             width = spriteRenderer.getWidth();
             height = spriteRenderer.getHeight();
-        } else {
-            // No sprite renderer, use default size
-            width = 50;
-            height = 50;
         }
 
-        return isPointInBounds(pointX, pointY, centerX, centerY, width, height);
-    }
+        // Apply scale from transform
+        int drawW = (int) (width * transform.getScaleX());
+        int drawH = (int) (height * transform.getScaleY());
 
-    /**
-     * Check if point is inside bounds.
-     *
-     * @param pointX Point X
-     * @param pointY Point Y
-     * @param centerX Center X
-     * @param centerY Center Y
-     * @param width Width
-     * @param height Height
-     * @return true if inside
-     */
-    private boolean isPointInBounds(int pointX, int pointY,
-                                    double centerX, double centerY,
-                                    double width, double height) {
-        // Calculate bounding box edges
-        double left = centerX - width / 2;
-        double right = centerX + width / 2;
-        double top = centerY - height / 2;
-        double bottom = centerY + height / 2;
+        // Use actual canvas size (matches GameCanvas rendering)
+        int panelW = canvasWidth;
+        int panelH = canvasHeight;
 
-        // Check if point is inside
-        return pointX >= left && pointX <= right &&
-                pointY >= top && pointY <= bottom;
-    }
+        // Center-based coordinate calculation (same as GameCanvas)
+        int centerX = (panelW - drawW) / 2;
+        int centerY = (panelH - drawH) / 2;
 
-    /**
-     * Get SpriteRenderer property from GameObject.
-     *
-     * @return SpriteRenderer or null if not found
-     */
-    private SpriteRenderer getSpriteRenderer() {
-        if (gameObject == null) return null;
+        int drawX = centerX + (int) transform.getX();
+        int drawY = centerY + (int) transform.getY();
 
-        for (Property property : gameObject.getProperties()) {
-            if (property instanceof SpriteRenderer) {
-                return (SpriteRenderer) property;
-            }
-        }
-        return null;
+        // Debug output
+        System.out.println("   " + buttonLabel + " bounds: [" + drawX + "," + drawY + " to " + (drawX+drawW) + "," + (drawY+drawH) + "]");
+        System.out.println("   Canvas size: " + canvasWidth + "x" + canvasHeight);
+
+        // Check if mouse is inside bounds
+        boolean inside = mouseX >= drawX && mouseX <= drawX + drawW &&
+                mouseY >= drawY && mouseY <= drawY + drawH;
+
+        return inside;
     }
 
     // ========== BUTTON MODE METHODS (Legacy Support) ==========
@@ -233,6 +224,4 @@ public class ClickListener implements EventListener {
         String mode = useCollisionDetection ? "collision" : "button";
         return "ClickListener[" + buttonLabel + ", mode=" + mode + "]";
     }
-    // test method
-
 }

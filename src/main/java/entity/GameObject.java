@@ -33,6 +33,7 @@ public class GameObject {
         this.id =id;
         this.name=name;
         this.active=active;
+        this.triggerManager = new TriggerManager();
 
         // keep signature, but handle null safely
         if (properties != null) {
@@ -106,8 +107,17 @@ public class GameObject {
         this.transform = transform;
     }
 
+    /**
+     * Get the SpriteRenderer property from this GameObject.
+     *
+     * @return SpriteRenderer if found, null otherwise
+     */
     public SpriteRenderer getSpriteRenderer() {
-        // TODO: implement
+        for (Property property : properties) {
+            if (property instanceof SpriteRenderer) {
+                return (SpriteRenderer) property;
+            }
+        }
         return null;
     }
 
