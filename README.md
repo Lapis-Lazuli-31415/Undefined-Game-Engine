@@ -26,4 +26,5 @@ Undefined is a 2D Game Engine built in Java, designed to allow users to create, 
 ## API Information
 - This project utilizes the Unsplash API to fetch images that can be used within the game engine. 
   - Link to documentation: [Unsplash API Documentation](https://unsplash.com/documentation).
+  - DONT FORGET TO CONFIGURE YOUR API KEY SO THAT ALL FEATURES WORK AS INTENDED
 ## Screenshots/DEMO
