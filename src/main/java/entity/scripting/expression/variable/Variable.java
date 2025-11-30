@@ -1,7 +1,7 @@
 package entity.scripting.expression.variable;
 
 public abstract class Variable<T> {
-    private final String name;
+    protected final String name;
     protected final boolean isGlobal;
 
     public Variable(String name, boolean isGlobal) {

@@ -9,10 +9,16 @@ import javax.swing.*;
 import entity.GameObject;
 import entity.Transform;
 import entity.scripting.TriggerManager;
+import entity.scripting.environment.Environment;
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
-import use_case.Sprites.Import.ImportSpriteInteractor;
+import app.VariableUseCaseFactory;
+import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.UpdateVariableController;
+import interface_adapter.variable.GlobalVariableViewModel;
+import interface_adapter.variable.LocalVariableViewModel;
+import view.property.PropertiesPanel;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -24,13 +30,25 @@ public class HomeView extends javax.swing.JFrame {
     private JPanel propertiesPanel;
 
     // asset manager
-    private interface_adapter.assets.AssetLibViewModel assetLibViewModel;
+    private final interface_adapter.assets.AssetLibViewModel assetLibViewModel;
     private JPanel spritesContent;
     private JButton spritesAddButton;
 
     // sprite import
-    private interface_adapter.Sprites.ImportSpriteController importSpriteController;
-    private interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel;
+    private interface_adapter.sprites.ImportSpriteController importSpriteController;
+    private interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel;
+
+    // unsplash import
+    private interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController;
+    private interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
+    private ImportSpriteFromUnsplashView unsplashView;
+
+    // variable management
+    private GlobalVariableViewModel globalVariableViewModel;
+    private LocalVariableViewModel localVariableViewModel;
+    private UpdateVariableController updateVariableController;
+    private DeleteVariableController deleteVariableController;
+    private final Environment globalEnvironment = new Environment();
 
     // Demo wiring
     private ScenePanel scenePanel;
@@ -51,68 +69,49 @@ public class HomeView extends javax.swing.JFrame {
         return DEMO_OBJECT;
     }
 
-    public HomeView() {
-        this(new interface_adapter.assets.AssetLibViewModel(new entity.AssetLib()));
-    }
+    /**
+     * Constructor that accepts all dependencies (for production use)
+     */
+    public HomeView(
+            interface_adapter.assets.AssetLibViewModel assetLibViewModel,
+            interface_adapter.sprites.ImportSpriteController importSpriteController,
+            interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel,
+            interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController,
+            interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel) {
 
-    public HomeView(interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
         this.assetLibViewModel = assetLibViewModel;
+        this.importSpriteController = importSpriteController;
+        this.importSpriteViewModel = importSpriteViewModel;
+        this.unsplashController = unsplashController;
+        this.unsplashViewModel = unsplashViewModel;
 
-        wireImportSpriteUseCase();
-        loadExistingAssets();
+        // init unsplash view if controller is available
+        if (unsplashController != null && unsplashViewModel != null) {
+            this.unsplashView = new ImportSpriteFromUnsplashView(unsplashViewModel, unsplashController);
+        }
+
         initComponents();
         setupAssetLibListener();
         setupImportSpriteListener();
     }
 
-    private void wireImportSpriteUseCase() {
-        try {
-            // init DAO
-            data_access.FileSystemSpriteDataAccessObject spriteDAO =
-                new data_access.FileSystemSpriteDataAccessObject();
-
-            // create view model
-            importSpriteViewModel = new interface_adapter.Sprites.ImportSpriteViewModel();
-
-            // create presenter
-            interface_adapter.Sprites.ImportSpritePresenter presenter =
-                new interface_adapter.Sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
-
-            // create interactor
-            ImportSpriteInteractor interactor =
-                new ImportSpriteInteractor(
-                    spriteDAO,
-                    presenter,
-                    assetLibViewModel.getAssetLib()
-                );
-
-            // create controller
-            importSpriteController = new interface_adapter.Sprites.ImportSpriteController(interactor);
-
-        } catch (java.io.IOException e) {
-            JOptionPane.showMessageDialog(null,
-                "Failed to initialize sprite import: " + e.getMessage(),
-                "Initialization Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     private void setupImportSpriteListener() {
         importSpriteViewModel.addPropertyChangeListener(evt -> {
-            if (interface_adapter.Sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
-                interface_adapter.Sprites.ImportSpriteState state =
-                    (interface_adapter.Sprites.ImportSpriteState) evt.getNewValue();
+            if (interface_adapter.sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
+                interface_adapter.sprites.ImportSpriteState state =
+                    (interface_adapter.sprites.ImportSpriteState) evt.getNewValue();
 
                 if (state.isSuccess()) {
                     JOptionPane.showMessageDialog(this,
-                        state.getMessage(),
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
-                } else {
+                            state.getMessage(),
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+                else {
                     JOptionPane.showMessageDialog(this,
-                        state.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            state.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -136,6 +135,9 @@ public class HomeView extends javax.swing.JFrame {
         menuBar.add(new JMenu("Save"));
         menuBar.add(new JMenu("Help"));
         setJMenuBar(menuBar);
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+        JPanel homeTabContent = new JPanel(new BorderLayout());
 
         // ====== LEFT SIDEBAR (Assets + Filesystem) ======
         // NOTE: use the fields, not new local variables
@@ -169,12 +171,12 @@ public class HomeView extends javax.swing.JFrame {
 
         spritesAddButton = new JButton("+");
         spritesAddButton.setMargin(new Insets(0, 4, 0, 4));
-        spritesAddButton.addActionListener(e -> openLocalSpriteImport());
+        spritesAddButton.addActionListener(e -> openSpriteImportMenu());
 
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
 
-        // gallery grid view NEED TO ADD SCROLLING
+        // gallery grid view sprites
         spritesContent = new JPanel();
         spritesContent.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         spritesContent.setBackground(new Color(70, 70, 70));
@@ -185,30 +187,6 @@ public class HomeView extends javax.swing.JFrame {
         assetsPanel.add(spritesHeader);
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
-
-//        // ---- AUDIO SCROLL PANEL ---- remove for now, might add back later
-//        JPanel audioHeader = new JPanel(new BorderLayout());
-//        audioHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
-//        audioHeader.setOpaque(false);
-//
-//        JLabel audioLabel = new JLabel("Audio");
-//        audioLabel.setForeground(Color.WHITE);
-//
-//        JButton audioAddButton = new JButton("+");
-//        audioAddButton.setMargin(new Insets(0, 4, 0, 4));
-//
-//        audioHeader.add(audioLabel, BorderLayout.WEST);
-//        audioHeader.add(audioAddButton, BorderLayout.EAST);
-//
-//        JPanel audioContent = new JPanel();
-//        audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
-//        audioContent.setBackground(new Color(70, 70, 70));
-//
-//        JScrollPane audioScroll = new JScrollPane(audioContent);
-//        audioScroll.setPreferredSize(new Dimension(180, 140));
-//
-//        assetsPanel.add(audioHeader);
-//        assetsPanel.add(audioScroll);
 
         // ====== Game Components PANEL ======
         gameComponentsPanel = new JPanel();
@@ -293,7 +271,6 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
         propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
 
-
         // ====== DEMO ENTITY + LAYERS WIRING ======
         java.util.Vector<Double> pos = new java.util.Vector<>();
         pos.add(0.0); // x
@@ -337,26 +314,41 @@ public class HomeView extends javax.swing.JFrame {
             );
         }
 
+        // update properties panel when selection changes
+        scenePanel.setOnSelectionChangeCallback(() -> {
+            GameObject selectedObject = scenePanel.getSelectedObject();
+            if (propertiesPanel instanceof PropertiesPanel props && selectedObject != null) {
+                props.bindSpriteRenderer(selectedObject, assetLibViewModel, () -> scenePanel.repaint());
+            }
+        });
+        // variable usecase wiring
+        Environment localEnvironment = new Environment();
+        DEMO_OBJECT.setEnvironment(localEnvironment);
 
+        VariableUseCaseFactory.VariableWiring variableWiring =
+                VariableUseCaseFactory.create(globalEnvironment, localEnvironment);
 
-        centerPanel.remove(openFolderPanel);
-        centerPanel.add(scenePanel, BorderLayout.CENTER);
-        centerPanel.revalidate();
-        centerPanel.repaint();
+        globalVariableViewModel = variableWiring.getGlobalViewModel();
+        localVariableViewModel = variableWiring.getLocalViewModel();
+        updateVariableController = variableWiring.getUpdateController();
+        deleteVariableController = variableWiring.getDeleteController();
 
-        // Bind properties panel to VM + controller
         if (propertiesPanel instanceof PropertiesPanel props) {
-            props.bind(
-                    transformViewModel,
-                    transformController,
-                    () -> scenePanel.repaint()
-            );
+            props.setLocalVariableViewModel(localVariableViewModel);
+            props.setGlobalVariableViewModel(globalVariableViewModel);
+            props.setVariableController(updateVariableController);
+            props.setDeleteVariableController(deleteVariableController);
         }
 
-        getContentPane().add(leftSidebar, BorderLayout.WEST);
-        getContentPane().add(centerPanel, BorderLayout.CENTER);
-        getContentPane().add(propertiesScroll, BorderLayout.EAST);
+        // Add all components to home tab content
+        homeTabContent.add(leftSidebar, BorderLayout.WEST);
+        homeTabContent.add(centerPanel, BorderLayout.CENTER);
+        homeTabContent.add(propertiesScroll, BorderLayout.EAST);
 
+        // Add home tab to tabbed pane
+        tabbedPane.addTab("Home", homeTabContent);
+
+        getContentPane().add(tabbedPane, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(null);
     }
@@ -389,7 +381,7 @@ public class HomeView extends javax.swing.JFrame {
         // load + scale the image thumbnail
         try {
             java.awt.image.BufferedImage originalImage = javax.imageio.ImageIO.read(
-                new java.io.File(image.getLocalpath().toString())
+                    new java.io.File(image.getLocalpath().toString())
             );
 
             // calc thumbnail size
@@ -405,7 +397,7 @@ public class HomeView extends javax.swing.JFrame {
 
             // scale image
             java.awt.Image scaledImage = originalImage.getScaledInstance(
-                thumbWidth, thumbHeight, java.awt.Image.SCALE_SMOOTH
+                    thumbWidth, thumbHeight, java.awt.Image.SCALE_SMOOTH
             );
 
             // create image label with centered icon
@@ -464,62 +456,82 @@ public class HomeView extends javax.swing.JFrame {
         spritesContent.repaint();
     }
 
-    private void loadExistingAssets() {
-        try {
-            // Create DAO to access uploads directory
-            data_access.FileSystemSpriteDataAccessObject spriteDAO =
-                    new data_access.FileSystemSpriteDataAccessObject();
+    private void openSpriteImportMenu() {
+        JPopupMenu importMenu = new JPopupMenu();
 
-            // Get all existing image files
-            java.util.List<java.io.File> existingImages = spriteDAO.getAllExistingImages();
+        JMenuItem localImport = new JMenuItem("Import from Local");
+        localImport.addActionListener(e -> openLocalSpriteImport());
+        importMenu.add(localImport);
 
-            // Load each image into the asset library
-            for (java.io.File imageFile : existingImages) {
-                try {
-                    // Create Image entity from file path
-                    entity.Image image = new entity.Image(imageFile.toPath());
-
-                    // Add to asset library
-                    assetLibViewModel.getAssetLib().add(image);
-                }
-                catch (Exception e) {
-                    // Log error but continue loading other images
-                    System.err.println("Failed to load image: " + imageFile.getName() + " - " + e.getMessage());
-                }
-            }
+        if (unsplashView != null) {
+            JMenuItem unsplashImport = new JMenuItem("Import from Unsplash");
+            unsplashImport.addActionListener(e -> openUnsplashImportDialog());
+            importMenu.add(unsplashImport);
         }
-        catch (java.io.IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    "Failed to load existing sprites: " + e.getMessage(),
-                    "Loading Error",
-                    JOptionPane.WARNING_MESSAGE);
-        }
+
+        // Show menu below the + button
+        importMenu.show(spritesAddButton, 0, spritesAddButton.getHeight());
     }
-
 
     private void openLocalSpriteImport() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Import Sprite");
         fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-            "Image Files", "jpg", "jpeg", "png"));
+                "Image Files", "jpg", "jpeg", "png"));
 
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            // call controller to import sprite
             importSpriteController.importSprite(selectedFile);
         }
     }
 
-    public interface_adapter.assets.AssetLibViewModel getAssetLibViewModel() {
-        return assetLibViewModel;
+    private void openUnsplashImportDialog() {
+        if (unsplashView == null) {
+            JOptionPane.showMessageDialog(this,
+                "Unsplash import is not available. Please check your API key configuration.",
+                "Feature Unavailable",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Import from Unsplash", true);
+        dialog.setContentPane(unsplashView);
+        dialog.setSize(600, 400);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new HomeView().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            entity.AssetLib assetLib = new entity.AssetLib();
+
+            interface_adapter.assets.AssetLibViewModel assetLibViewModel =
+                new interface_adapter.assets.AssetLibViewModel(assetLib);
+            interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel =
+                new interface_adapter.sprites.ImportSpriteViewModel();
+            interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel =
+                new interface_adapter.sprites.ImportSpriteFromUnsplashViewModel();
+
+            app.use_case_factory.SpriteImportUseCaseFactory.loadExistingAssets(assetLib);
+
+            interface_adapter.sprites.ImportSpriteController importSpriteController =
+                app.use_case_factory.SpriteImportUseCaseFactory.createLocalImportUseCase(
+                    assetLibViewModel, importSpriteViewModel);
+
+            String unsplashApiKey = System.getenv("UNSPLASH_ACCESS_KEY");
+            interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController =
+                app.use_case_factory.SpriteImportUseCaseFactory.createUnsplashImportUseCase(
+                    assetLibViewModel, unsplashViewModel, unsplashApiKey);
+
+            HomeView view = new HomeView(
+                assetLibViewModel,
+                importSpriteController,
+                importSpriteViewModel,
+                unsplashController,
+                unsplashViewModel
+            );
+            view.setVisible(true);
         });
     }
 }

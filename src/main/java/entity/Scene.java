@@ -24,7 +24,7 @@ public class Scene {
                  @JsonProperty("game_objects") List<GameObject> gameObjects) {
         this.id = id;
         this.name = name;
-        this.gameObjects = gameObjects != null ? gameObjects : new ArrayList<>();
+        this.gameObjects = gameObjects;
     }
 
     public static Scene create(String name) {
@@ -59,4 +59,20 @@ public class Scene {
         }
         return gameObjects.contains(gameObject);
     }
+
+    public GameObject getGameObjectByName(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (GameObject gameObject : gameObjects) {
+            if (gameObject.getName().equals(name)) {
+                return gameObject;
+            }
+        }
+
+        return null;
+    }
+
+
 }

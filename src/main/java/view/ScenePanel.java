@@ -59,9 +59,9 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             SpriteRenderer spriteRenderer = new SpriteRenderer(image, true);
 
             // not sure if i should assign environment = null, i only did that as a filler
-            GameObject gameObject = new GameObject(id, name, true, new ArrayList<>(), null);
+            GameObject gameObject = new GameObject(id, name, true, new ArrayList<>(), null,
+                    spriteRenderer);
             gameObject.setTransform(transform);
-            gameObject.addProperty(spriteRenderer);
 
             gameObjects.add(gameObject);
 
@@ -95,9 +95,17 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         }
     }
 
+    public void setOnSelectionChangeCallback(Runnable callback) {
+        this.onSelectionChangeCallback = callback;
+    }
+
+    public GameObject getSelectedObject() {
+        return selectedObject;
+    }
+
     private GameObject findGameObjectByImage(entity.Image image) {
         for (GameObject obj : gameObjects) {
-            SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
+            SpriteRenderer spriteRenderer = obj.getSpriteRenderer();
             if (spriteRenderer != null && spriteRenderer.getSprite() == image) {
                 return obj;
             }
@@ -134,7 +142,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             return false;
         }
 
-        SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
+        SpriteRenderer spriteRenderer = obj.getSpriteRenderer();
         if (spriteRenderer == null || spriteRenderer.getSprite() == null) {
             return false;
         }
@@ -152,19 +160,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         int centerY = (panelH - drawH) / 2;
 
         int drawX = centerX + (int) transform.getX();
-        int drawY = centerY + (int) transform.getY();
+        int drawY = centerY - (int) transform.getY();   // bigger Y --> higher on the screen
 
         return x >= drawX && x <= drawX + drawW && y >= drawY && y <= drawY + drawH;
     }
 
-    private SpriteRenderer getSpriteRenderer(GameObject obj) {
-        for (entity.Property prop : obj.getProperties()) {
-            if (prop instanceof SpriteRenderer) {
-                return (SpriteRenderer) prop;
-            }
-        }
-        return null;
-    }
+
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -175,8 +176,15 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int panelW = getWidth();
             int panelH = getHeight();
 
-            // almost same as the old implementation, but i refactored it into separate methods
-            for (GameObject obj : gameObjects) {
+            // sort game objects by z-index
+            java.util.List<GameObject> sortedObjects = new java.util.ArrayList<>(gameObjects);
+            sortedObjects.sort((obj1, obj2) -> {
+                int z1 = obj1.getSpriteRenderer() != null ? obj1.getSpriteRenderer().getZIndex() : 0;
+                int z2 = obj2.getSpriteRenderer() != null ? obj2.getSpriteRenderer().getZIndex() : 0;
+                return Integer.compare(z1, z2);
+            });
+
+            for (GameObject obj : sortedObjects) {
                 renderGameObject(g2, obj, panelW, panelH);
             }
 
@@ -190,16 +198,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private void renderGameObject(Graphics2D g2, GameObject obj, int panelW, int panelH) {
-        if (!obj.isActive()) {
-            return;
-        }
-
         Transform transform = obj.getTransform();
         if (transform == null) {
             return;
         }
 
-        SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
+        SpriteRenderer spriteRenderer = obj.getSpriteRenderer();
         if (spriteRenderer == null || spriteRenderer.getSprite() == null || !spriteRenderer.getVisible()) {
             return;
         }
@@ -225,7 +229,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int centerY = (panelH - drawH) / 2;
 
             int drawX = centerX + (int) transform.getX();
-            int drawY = centerY + (int) transform.getY();
+            int drawY = centerY - (int) transform.getY();   // bigger Y --> higher on the screen
 
             Graphics2D g2Copy = (Graphics2D) g2.create();
             try {
@@ -246,11 +250,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
                     g2Copy.setStroke(new BasicStroke(2));
                     g2Copy.drawRect(drawX, drawY, drawW, drawH);
                 }
-            } 
+            }
             finally {
                 g2Copy.dispose();
             }
-        } 
+        }
         catch (Exception ex) {
             System.err.println("[ScenePanel] Error rendering object: " + ex.getMessage());
         }

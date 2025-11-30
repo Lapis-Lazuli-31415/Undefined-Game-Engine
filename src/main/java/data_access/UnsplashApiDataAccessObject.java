@@ -1,6 +1,6 @@
 package data_access;
 
-import use_case.Sprites.Import.UnsplashImageDataAccessInterface;
+import use_case.sprites.UnsplashImageDataAccessInterface;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
