@@ -95,8 +95,8 @@ public class HomeView extends javax.swing.JFrame {
         Project loadedProject = null;
 
         try {
-            System.out.println("Attempting to load 'test.json'...");
-            loadedProject = dataAccess.load("test.json");
+            System.out.println("Attempting to load 'database.json'...");
+            loadedProject = dataAccess.load("database.json");
             System.out.println("Project loaded successfully: " + loadedProject.getName());
         } catch (Exception e) {
             System.out.println("Could not load existing project (" + e.getMessage() + "). Creating new default project.");

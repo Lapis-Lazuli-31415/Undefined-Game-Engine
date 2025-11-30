@@ -37,7 +37,7 @@ public class JsonProjectDataAccess implements SaveProjectDataAccessInterface {
     @Override
     public void save(Project project) throws IOException {
         // Root key is the project name
-        File file = new File("test.json");
+        File file = new File("database.json");
         mapper.writeValue(file, project);
     }
 

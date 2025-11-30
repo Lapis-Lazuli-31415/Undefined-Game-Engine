@@ -45,7 +45,7 @@ public class SaveDemo {
         SaveProjectController controller = new SaveProjectController(interactor);
 
         // execute
-        System.out.println("Saving to 'test.json'...");
+        System.out.println("Saving to 'database.json'...");
         controller.execute(null); // null means "use existing project name"
 
         // RESULTS
@@ -56,7 +56,7 @@ public class SaveDemo {
             System.err.println("FAILED: " + errorMessage);
         } else {
             System.out.println("SUCCESS: " + resultMessage);
-            System.out.println("Check 'test.json' to see variables and triggers!");
+            System.out.println("Check 'database.json' to see variables and triggers!");
         }
     }
 

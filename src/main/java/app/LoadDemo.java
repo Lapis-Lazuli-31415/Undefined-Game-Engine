@@ -20,7 +20,7 @@ public class LoadDemo {
 
         try {
             // Load the project from the file saved by SaveDemo
-            Project loadedProject = dataAccess.load("test.json");
+            Project loadedProject = dataAccess.load("database.json");
 
             System.out.println("✅ Project Loaded Successfully!");
             System.out.println("==============================");
