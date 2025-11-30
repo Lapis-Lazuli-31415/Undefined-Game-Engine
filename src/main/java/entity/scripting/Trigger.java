@@ -2,6 +2,7 @@ package entity.scripting;
 
 import entity.scripting.action.Action;
 import entity.scripting.condition.Condition;
+import entity.scripting.event.EmptyEvent;
 import entity.scripting.event.Event;
 
 import java.util.List;

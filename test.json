@@ -16,9 +16,13 @@
       }
     }
   },
-  "assets" : [ ],
+  "assets" : [ {
+    "id" : "f762412e-3324-40a0-a386-39fc3d2e1b4d",
+    "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/CSC258%20Lab%201%20p1.2.png",
+    "name" : "CSC258 Lab 1 p1.2.png"
+  } ],
   "scenes" : [ {
-    "id" : "bd2177a0-0b72-4247-90e6-52b81fcb2b52",
+    "id" : "1fedb227-42bd-4023-805c-278512d92881",
     "name" : "Forest Level",
     "game_objects" : [ {
       "id" : "obj-bear",
@@ -59,6 +63,8 @@
             "left" : {
               "type" : "NumericVariable",
               "name" : "health",
+              "value_type" : "java.lang.Double",
+              "variable_type" : "Numeric",
               "global" : false
             },
             "comparator" : ">",
@@ -76,6 +82,13 @@
           } ],
           "active" : true
         } ]
+      },
+      "sprite_renderer" : {
+        "type" : "SpriteRenderer",
+        "sprite" : "f762412e-3324-40a0-a386-39fc3d2e1b4d",
+        "visible" : true,
+        "opacity" : 100,
+        "zindex" : 0
       }
     } ]
   } ]

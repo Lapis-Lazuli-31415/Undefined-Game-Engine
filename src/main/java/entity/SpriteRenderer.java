@@ -1,6 +1,8 @@
 package entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SpriteRenderer extends Property {
 
@@ -9,12 +11,26 @@ public class SpriteRenderer extends Property {
     private int opacity;
     private int zIndex;
 
+    // Normal Constructor (used by your code)
     public SpriteRenderer(Image sprite, boolean visible) {
         this.sprite = sprite;
         this.visible = visible;
         this.opacity = 100;
+        this.zIndex = 0;
     }
 
+    // JSON Constructor (used by the Save/Load system)
+    @JsonCreator
+    public SpriteRenderer(
+            @JsonProperty("sprite") Image sprite,
+            @JsonProperty("visible") boolean visible,
+            @JsonProperty("opacity") int opacity,
+            @JsonProperty("z_index") int zIndex) { // 'z_index' matches the snake_case JSON
+        this.sprite = sprite;
+        this.visible = visible;
+        this.opacity = opacity;
+        this.zIndex = zIndex;
+    }
 
     public Image getSprite() {
         return sprite;
@@ -40,7 +56,8 @@ public class SpriteRenderer extends Property {
         this.zIndex = zIndex;
     }
 
-    // for Jackson saving part
+    // Mark as ignored so we don't save duplicate "image" and "sprite" fields
+    @JsonIgnore
     public Image getImage() {
         return sprite;
     }
@@ -53,11 +70,13 @@ public class SpriteRenderer extends Property {
         return visible;
     }
 
+    @JsonIgnore
     public int getWidth() {
-        return this.sprite.getWidth();
+        return (this.sprite != null) ? this.sprite.getWidth() : 0;
     }
 
+    @JsonIgnore
     public int getHeight() {
-        return this.sprite.getHeight();
+        return (this.sprite != null) ? this.sprite.getHeight() : 0;
     }
 }

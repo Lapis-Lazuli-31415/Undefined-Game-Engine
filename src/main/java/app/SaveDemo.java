@@ -22,10 +22,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.util.Vector;
 
-/**
- * A standalone runner to test the Saving Feature.
- * Right-click this file and select "Run 'SaveDemo.main()'"
- */
 public class SaveDemo {
 
     public static void main(String[] args) {
@@ -95,19 +91,35 @@ public class SaveDemo {
         // asset library list
         AssetLib assetLib = new AssetLib();
         ArrayList<Property> properties = new ArrayList<>();
+        SpriteRenderer bearRenderer = null;
 
-//        try {
-//            java.nio.file.Path bearPath = java.nio.file.Path.of("src/main/resources/bear.png");
-//            Image image = new Image(bearPath);
-//            assetLib.add(image);
-//            properties.add(new SpriteRenderer(image, true));
-//        } catch (java.io.IOException e) {
-//            System.err.println("Could not load image for demo: " + e.getMessage());
-//        }
+        // --- UPDATED: Load Sprite from 'uploads' folder ---
+        try {
+            // FIX: Pointing to the file you have in your uploads folder
+            java.nio.file.Path spritePath = java.nio.file.Path.of("uploads", "CSC258 Lab 1 p1.2.png");
+
+            // 1. Create the Image entity
+            // (The Image class constructor reads the file to get width/height)
+            Image image = new Image(spritePath);
+
+            // 2. Add it to the AssetLib (CRITICAL for saving!)
+            assetLib.add(image);
+
+            // 3. Create the SpriteRenderer component
+            bearRenderer = new SpriteRenderer(image, true);
+
+            System.out.println("Loaded sprite from uploads: " + image.getName());
+
+        } catch (java.io.IOException e) {
+            System.err.println("Could not load image from uploads: " + e.getMessage());
+            // Fallback so the demo doesn't crash if the file is missing
+            bearRenderer = null;
+        }
 
         // 3. Create GameObject
+        // Pass 'bearRenderer' as the last argument
         GameObject bear = new GameObject(
-                "obj-bear", "Bear", true, properties, bearEnv
+                "obj-bear", "Bear", true, properties, bearEnv, bearRenderer
         );
         bear.setTransform(transform);
 
