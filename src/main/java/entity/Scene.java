@@ -29,8 +29,12 @@ public class Scene {
     }
 
     public List<GameObject> getGameObjects() {
+        if (gameObjects == null) {
+            gameObjects = new ArrayList<>();
+        }
         return gameObjects;
     }
+
 
     public List<String> getGameObjectNames() {
         if (gameObjects == null) return List.of();
@@ -47,8 +51,12 @@ public class Scene {
     }
 
     public void addGameObject(GameObject gameObject) {
+        if (gameObjects == null) {
+            gameObjects = new ArrayList<>();
+        }
         gameObjects.add(gameObject);
     }
+
 
 
 }

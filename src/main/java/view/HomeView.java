@@ -9,6 +9,8 @@ import javax.swing.tree.DefaultTreeModel;
 
 import entity.GameObject;
 import entity.Transform;
+import interface_adapter.add_scene.AddSceneController;
+import interface_adapter.add_scene.AddScenePresenter;
 import interface_adapter.list_scenes.ListScenesPresenter;
 import entity.scripting.TriggerManager;
 import interface_adapter.transform.TransformViewModel;
@@ -16,6 +18,7 @@ import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import use_case.Sprites.Import.ImportSpriteInteractor;
 
+import use_case.component_management.add_scene.AddSceneInteractor;
 import view.GameComponentsPanel;
 import data_access.InMemorySceneRepository;
 
@@ -33,7 +36,10 @@ public class HomeView extends javax.swing.JFrame {
     private JPanel leftSidebar;
     private JPanel assetsPanel;
     private JPanel gameComponentsPanel;
+    private AddScenePresenter addScenePresenter;
     private GameComponentsPanel gameComponents;
+    // for refreshing the tree when game objects change
+    private use_case.component_management.list_scenes.ListScenesInputBoundary listScenesUseCase;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
@@ -224,6 +230,35 @@ public class HomeView extends javax.swing.JFrame {
 //        assetsPanel.add(audioHeader);
 //        assetsPanel.add(audioScroll);
 
+        // ====== DEMO ENTITY + LAYERS WIRING ======
+        java.util.Vector<Double> pos = new java.util.Vector<>();
+        pos.add(0.0); // x
+        pos.add(0.0); // y
+
+        java.util.Vector<Double> scale = new java.util.Vector<>();
+        scale.add(1.0); // scaleX
+        scale.add(1.0); // scaleY
+
+        Transform transform = new Transform(pos, 0f, scale);
+
+        DEMO_OBJECT.setTransform(transform);
+
+        // Create view model
+        transformViewModel = new TransformViewModel();
+
+        // Use app-layer factory to wire up use case
+        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
+
+        // Hook up ScenePanel to viewModel (Observer)
+        scenePanel = new ScenePanel(transformViewModel);
+
+        transformController.updateTransform(
+                transform.getX(),
+                transform.getY(),
+                transform.getScaleX(),
+                transform.getRotation()
+        );
+
         // ====== Game Components PANEL ======
         gameComponentsPanel = new JPanel();
         gameComponentsPanel.setLayout(new BorderLayout());
@@ -232,9 +267,15 @@ public class HomeView extends javax.swing.JFrame {
 
         // Repository
         var sceneRepo = new InMemorySceneRepository();
+        addScenePresenter = new AddScenePresenter();
+        var addSceneInteractor = new AddSceneInteractor(
+                sceneRepo,
+                addScenePresenter
+        );
+        var addSceneController = new AddSceneController(addSceneInteractor);
 
         // 1. Create the GameComponentsPanel FIRST so the JTree + TreeModel exist
-        gameComponents = new GameComponentsPanel(null, null, null);  // no interactors yet
+        gameComponents = new GameComponentsPanel(null, null, null, addScenePresenter, addSceneController, scenePanel);  // no interactors yet
 
         // 2. Now retrieve the tree model needed by the ListScenesPresenter
         DefaultTreeModel treeModel = gameComponents.getTreeModel();
@@ -254,6 +295,8 @@ public class HomeView extends javax.swing.JFrame {
         var selectGameObjectInteractor =
                 new SelectGameObjectInteractor(sceneRepo, selectGameObjectPresenter);
 
+
+
         // 5. Now pass the interactors into the panel
         gameComponents.setInteractors(
                 listScenesInteractor,
@@ -262,11 +305,21 @@ public class HomeView extends javax.swing.JFrame {
         );
 
         // 6. Connect presenter listeners (for selection feedback)
+        addScenePresenter.setListener(gameComponents);
         selectScenePresenter.setListener(gameComponents);
         selectGameObjectPresenter.setListener(gameComponents);
 
         // 7. Add panel to UI
         gameComponentsPanel.add(gameComponents, BorderLayout.CENTER);
+        JButton addSceneButton = new JButton("+ Add Scene");
+        addSceneButton.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog(this, "Scene Name:");
+            if (name != null && !name.isBlank()) {
+                addSceneController.addScene(name.trim());
+            }
+        });
+        gameComponentsPanel.add(addSceneButton, BorderLayout.SOUTH);
+
 
 
         // ====== Assemble Sidebar ======
@@ -347,34 +400,6 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
 
 
-        // ====== DEMO ENTITY + LAYERS WIRING ======
-        java.util.Vector<Double> pos = new java.util.Vector<>();
-        pos.add(0.0); // x
-        pos.add(0.0); // y
-
-        java.util.Vector<Double> scale = new java.util.Vector<>();
-        scale.add(1.0); // scaleX
-        scale.add(1.0); // scaleY
-
-        Transform transform = new Transform(pos, 0f, scale);
-
-        DEMO_OBJECT.setTransform(transform);
-
-        // Create view model
-        transformViewModel = new TransformViewModel();
-
-        // Use app-layer factory to wire up use case
-        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
-
-        // Hook up ScenePanel to viewModel (Observer)
-        scenePanel = new ScenePanel(transformViewModel);
-
-        transformController.updateTransform(
-                transform.getX(),
-                transform.getY(),
-                transform.getScaleX(),
-                transform.getRotation()
-        );
 
         centerPanel.remove(openFolderPanel);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
@@ -505,6 +530,14 @@ public class HomeView extends javax.swing.JFrame {
                 System.out.println("Selected sprite: " + image.getName());
                 if (scenePanel != null) {
                     scenePanel.addOrSelectSprite(image);
+
+                    // ensure the GameComponents list refreshes so the new GO appears under the scene node
+                    if (listScenesUseCase != null) {
+                        listScenesUseCase.listScenes();
+                    } else if (gameComponents != null) {
+                        // fallback: ask the panel to refresh
+                        gameComponents.refreshScenes();
+                    }
                 }
             }
         });

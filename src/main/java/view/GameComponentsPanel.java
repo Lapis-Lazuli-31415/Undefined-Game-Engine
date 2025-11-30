@@ -1,5 +1,7 @@
 package view;
 
+import interface_adapter.add_scene.AddSceneController;
+import interface_adapter.add_scene.AddScenePresenter;
 import interface_adapter.add_scene.AddScenePresenter.SceneCreationListener;
 import use_case.component_management.list_scenes.ListScenesInputBoundary;
 import use_case.component_management.list_scenes.ListScenesOutputBoundary;
@@ -20,15 +22,14 @@ import java.util.Enumeration;
 
 /**
  * GameComponentsPanel renders a hierarchy of Scenes -> GameObjects using a JTree.
- * It implements ListScenesOutputBoundary so it can be passed directly to ListScenesInteractor,
- * and implements the presenters' listener interfaces to be notified of selections.
- *
- * NOTE: When selecting a GameObject from the tree, it constructs a minimal placeholder
- * GameObject (by name) and calls the SelectGameObjectInputBoundary. If you need full
- * identity mapping, adapt this panel to keep a map from names to entities.
+ * It receives use-cases via constructor injection and updates the UI in response
+ * to presenter callbacks.
  */
 public class GameComponentsPanel extends JPanel
-        implements ListScenesOutputBoundary, SceneSelectionListener, GameObjectSelectionListener, SceneCreationListener {
+        implements ListScenesOutputBoundary,
+        SceneSelectionListener,
+        GameObjectSelectionListener,
+        SceneCreationListener {
 
     private final JTree tree;
     private final DefaultTreeModel treeModel;
@@ -37,14 +38,27 @@ public class GameComponentsPanel extends JPanel
     private ListScenesInputBoundary listScenesUseCase;
     private SelectSceneInputBoundary selectSceneUseCase;
     private SelectGameObjectInputBoundary selectGameObjectUseCase;
+    private final AddScenePresenter addScenePresenter;
 
-    public GameComponentsPanel(ListScenesInputBoundary listScenesUseCase,
-                               SelectSceneInputBoundary selectSceneUseCase,
-                               SelectGameObjectInputBoundary selectGameObjectUseCase) {
+    private final ScenePanel scenePanel;
+
+    public GameComponentsPanel(
+            ListScenesInputBoundary listScenesUseCase,
+            SelectSceneInputBoundary selectSceneUseCase,
+            SelectGameObjectInputBoundary selectGameObjectUseCase,
+            AddScenePresenter addScenePresenter,
+            AddSceneController addSceneController,
+            ScenePanel scenePanel
+    ) {
 
         this.listScenesUseCase = listScenesUseCase;
         this.selectSceneUseCase = selectSceneUseCase;
         this.selectGameObjectUseCase = selectGameObjectUseCase;
+        this.addScenePresenter = addScenePresenter;
+        this.scenePanel = scenePanel;
+
+        // Register this panel as listener for scene creation events
+        addScenePresenter.setListener(this);
 
         setLayout(new BorderLayout());
         setOpaque(false);
@@ -56,102 +70,144 @@ public class GameComponentsPanel extends JPanel
         tree.setShowsRootHandles(true);
 
         JScrollPane scroll = new JScrollPane(tree);
-        scroll.setPreferredSize(new Dimension(0, 200)); // let layout control width
+        scroll.setPreferredSize(new Dimension(0, 200));
 
         add(scroll, BorderLayout.CENTER);
 
-        // Selection behavior: dispatch to use-cases depending on node type
+        // Selection behavior
         tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            DefaultMutableTreeNode node =
+                    (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             if (node == null) return;
 
             Object uo = node.getUserObject();
-            if (uo instanceof SceneNode) {
-                String sceneName = ((SceneNode) uo).name;
-                selectSceneUseCase.selectScene(sceneName);
-            } else if (uo instanceof GameObjectNode) {
-                GameObjectNode gon = (GameObjectNode) uo;
-                // pass a minimal placeholder GameObject (by name). Interactor checks by name/contains.
-                GameObject placeholder = new GameObject(gon.idOrName, gon.name, true, null, null);
+
+            if (uo instanceof SceneNode sn) {
+                selectSceneUseCase.selectScene(sn.name);
+            } else if (uo instanceof GameObjectNode gon) {
+                GameObject placeholder = new GameObject(
+                        gon.idOrName,
+                        gon.name,
+                        true,
+                        null,
+                        null
+                );
                 selectGameObjectUseCase.selectGameObject(gon.parentSceneName, placeholder);
             }
         });
 
-        // initially request the list
+        // Initial load
         SwingUtilities.invokeLater(() -> {
             if (listScenesUseCase != null) listScenesUseCase.listScenes();
         });
     }
 
-    public DefaultTreeModel getTreeModel() {
-        return treeModel;
-    }
-
     public void setInteractors(
-            ListScenesInputBoundary listScenesInteractor,
-            SelectSceneInputBoundary selectSceneInteractor,
-            SelectGameObjectInputBoundary selectGameObjectInteractor
+            ListScenesInputBoundary listScenesUseCase,
+            SelectSceneInputBoundary selectSceneUseCase,
+            SelectGameObjectInputBoundary selectGameObjectUseCase
     ) {
-        this.listScenesUseCase = listScenesInteractor;
-        this.selectSceneUseCase = selectSceneInteractor;
-        this.selectGameObjectUseCase = selectGameObjectInteractor;
+        // Assign the use cases
+        // (The fields are final in your current code — so we must REMOVE "final" first.)
+        this.listScenesUseCase = listScenesUseCase;
+        this.selectSceneUseCase = selectSceneUseCase;
+        this.selectGameObjectUseCase = selectGameObjectUseCase;
 
-        // and start by loading scenes:
-        listScenesInteractor.listScenes();
+        // Re-list scenes now that we have a real interactor
+        if (this.listScenesUseCase != null) {
+            SwingUtilities.invokeLater(() -> this.listScenesUseCase.listScenes());
+        }
+    }
+
+    public void refreshScenes() {
+        if (listScenesUseCase != null) {
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    listScenesUseCase.listScenes();
+                } catch (Exception ex) {
+                    System.err.println("[GameComponentsPanel] refreshScenes failed: " + ex.getMessage());
+                }
+            });
+        }
     }
 
 
-    // ListScenesOutputBoundary implementation
+    // ========= LIST SCENES OUTPUT ==========
     @Override
     public void presentScenes(Map<String, List<String>> sceneData) {
         SwingUtilities.invokeLater(() -> {
             root.removeAllChildren();
+
             for (String sceneName : sceneData.keySet()) {
-                DefaultMutableTreeNode sceneNode = new DefaultMutableTreeNode(new SceneNode(sceneName));
+                DefaultMutableTreeNode sceneNode =
+                        new DefaultMutableTreeNode(new SceneNode(sceneName));
+
                 List<String> gos = sceneData.get(sceneName);
                 if (gos != null) {
                     for (String goName : gos) {
-                        // Use name as idOrName for placeholder; adapt if you have stable IDs
-                        DefaultMutableTreeNode goNode = new DefaultMutableTreeNode(new GameObjectNode(goName, goName, sceneName));
-                        sceneNode.add(goNode);
+                        sceneNode.add(new DefaultMutableTreeNode(
+                                new GameObjectNode(goName, goName, sceneName)
+                        ));
                     }
                 }
                 root.add(sceneNode);
             }
+
             treeModel.reload();
             expandAll(tree, true);
+
+            // Auto-select the first scene when loading
+            if (!sceneData.isEmpty() && selectSceneUseCase != null) {
+                String firstSceneName = sceneData.keySet().iterator().next();
+                selectSceneUseCase.selectScene(firstSceneName);
+            }
+
         });
     }
 
-    // Presenter listener when a full Scene entity is selected by the interactor -> presenter
+    // ========= SCENE SELECTION LISTENER ==========
     @Override
     public void onSceneChange(Scene scene) {
-        // Select the scene node in the tree and expand it
-        SwingUtilities.invokeLater(() -> {
-            DefaultMutableTreeNode found = findSceneNode(scene.getName());
-            if (found != null) {
-                TreePath p = new TreePath(found.getPath());
-                tree.setSelectionPath(p);
-                tree.scrollPathToVisible(p);
+        scenePanel.setScene(scene);
+
+        DefaultMutableTreeNode sceneNode = findSceneNode(scene.getName());
+        if (sceneNode != null) {
+
+            // Clear old children
+            sceneNode.removeAllChildren();
+
+            // Add new gameobject nodes
+            if (scene.getGameObjects() != null) {
+                for (GameObject go : scene.getGameObjects()) {
+                    sceneNode.add(new DefaultMutableTreeNode(go.getName()));
+                }
             }
-        });
+
+            ((DefaultTreeModel) tree.getModel()).reload(sceneNode);
+
+            TreePath path = new TreePath(sceneNode.getPath());
+            tree.setSelectionPath(path);
+        }
     }
 
-    // Presenter listener when a GameObject is selected by the interactor -> presenter
+
+    // ========= GAMEOBJECT SELECTION LISTENER ==========
     @Override
     public void onGameObjectSelected(Scene scene, GameObject gameObject) {
         SwingUtilities.invokeLater(() -> {
             DefaultMutableTreeNode sceneNode = findSceneNode(scene.getName());
             if (sceneNode == null) return;
+
             Enumeration<?> en = sceneNode.children();
             while (en.hasMoreElements()) {
                 DefaultMutableTreeNode child = (DefaultMutableTreeNode) en.nextElement();
                 Object uo = child.getUserObject();
+
                 if (uo instanceof GameObjectNode gon) {
                     if (gon.name.equals(gameObject.getName())) {
-                        TreePath p = new TreePath(child.getPath());
-                        tree.setSelectionPath(p);
-                        tree.scrollPathToVisible(p);
+                        TreePath path = new TreePath(child.getPath());
+                        tree.setSelectionPath(path);
+                        tree.scrollPathToVisible(path);
                         return;
                     }
                 }
@@ -159,10 +215,15 @@ public class GameComponentsPanel extends JPanel
         });
     }
 
+    // ========= SCENE CREATION LISTENER ==========
     @Override
     public void onSceneCreated(Scene scene) {
-        selectSceneUseCase.selectScene(scene.getName());
+        if (scenePanel != null) {
+            scenePanel.setScene(scene);
+             }
+        if (selectSceneUseCase != null) selectSceneUseCase.selectScene(scene.getName());
         if (listScenesUseCase != null) listScenesUseCase.listScenes();
+
         SwingUtilities.invokeLater(() -> {
             DefaultMutableTreeNode node = findSceneNode(scene.getName());
             if (node != null) {
@@ -172,6 +233,8 @@ public class GameComponentsPanel extends JPanel
             }
         });
     }
+
+    // ========= HELPERS ==========
 
     private DefaultMutableTreeNode findSceneNode(String sceneName) {
         Enumeration<?> en = root.children();
@@ -192,18 +255,19 @@ public class GameComponentsPanel extends JPanel
     }
 
     private static class GameObjectNode {
-        final String idOrName; // placeholder for id if you have one
+        final String idOrName;
         final String name;
         final String parentSceneName;
         GameObjectNode(String idOrName, String name, String parentSceneName) {
-            this.idOrName = idOrName; this.name = name; this.parentSceneName = parentSceneName;
+            this.idOrName = idOrName;
+            this.name = name;
+            this.parentSceneName = parentSceneName;
         }
         public String toString() { return name; }
     }
 
     private void expandAll(JTree tree, boolean expand) {
         TreeNode root = (TreeNode) tree.getModel().getRoot();
-        // Traverse tree from root
         expandAll(new TreePath(root), expand);
     }
 
@@ -212,14 +276,15 @@ public class GameComponentsPanel extends JPanel
         if (node.getChildCount() >= 0) {
             for (Enumeration<?> e = node.children(); e.hasMoreElements();) {
                 TreeNode n = (TreeNode) e.nextElement();
-                TreePath path = parent.pathByAddingChild(n);
-                expandAll(path, expand);
+                expandAll(parent.pathByAddingChild(n), expand);
             }
         }
-        if (expand) {
-            tree.expandPath(parent);
-        } else {
-            tree.collapsePath(parent);
-        }
+        if (expand) tree.expandPath(parent);
+        else tree.collapsePath(parent);
     }
+
+    public DefaultTreeModel getTreeModel() {
+        return treeModel;
+    }
+
 }
