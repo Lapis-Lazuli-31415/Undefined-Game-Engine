@@ -25,6 +25,7 @@ import use_case.saving.SaveProjectInteractor;
 import interface_adapter.saving.SaveProjectController;
 import interface_adapter.saving.SaveProjectPresenter;
 import interface_adapter.saving.SaveProjectViewModel;
+import interface_adapter.saving.SaveProjectState;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -40,7 +41,12 @@ public class HomeView extends javax.swing.JFrame {
     private final Scene currentScene;
     private SaveProjectController saveProjectController;
 
-    // Environment is no longer final, as it might be loaded from JSON
+    // --- FIX: Add this field so the listener can access it ---
+    private SaveProjectViewModel saveViewModel;
+
+    // Save Status UI
+    private JLabel saveStatusLabel;
+
     private Environment globalEnvironment;
 
     // asset manager
@@ -69,14 +75,10 @@ public class HomeView extends javax.swing.JFrame {
     private TransformViewModel transformViewModel;
     private TransformController transformController;
 
-    // TODO: Delete this after gameObject selection is implemented
     public static GameObject getDemoGameObject() {
         return DEMO_OBJECT;
     }
 
-    /**
-     * Constructor that accepts all dependencies (for production use)
-     */
     public HomeView(
             interface_adapter.assets.AssetLibViewModel assetLibViewModel,
             interface_adapter.sprites.ImportSpriteController importSpriteController,
@@ -103,23 +105,14 @@ public class HomeView extends javax.swing.JFrame {
         }
 
         if (loadedProject != null) {
-            // == LOADED PATH ==
             this.currentProject = loadedProject;
 
-            // 1. Recover Global Environment
-            // Project.getGlobalEnvironment() delegates to GameController
             if (this.currentProject.getGlobalEnvironment() != null) {
                 this.globalEnvironment = this.currentProject.getGlobalEnvironment();
             } else {
                 this.globalEnvironment = new Environment();
-                // Ensure controller has an environment
-                if (this.currentProject.getGameController() != null) {
-                    // We might need a setter if it's missing, but GameController has getEnvironment
-                    // For now, assuming standard load structure holds it.
-                }
             }
 
-            // 2. Recover Scene
             if (!this.currentProject.getScenes().isEmpty()) {
                 this.currentScene = this.currentProject.getScenes().get(0);
             } else {
@@ -127,11 +120,8 @@ public class HomeView extends javax.swing.JFrame {
                 this.currentProject.getScenes().add(this.currentScene);
             }
 
-            // 3. Sync Asset Library
-            // Replace the empty lib in the ViewModel with the loaded one
             this.assetLibViewModel.setState(this.currentProject.getAssets());
 
-            // 4. Recover Selected Object (DEMO_OBJECT)
             if (!this.currentScene.getGameObjects().isEmpty()) {
                 DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
                 System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
@@ -141,7 +131,6 @@ public class HomeView extends javax.swing.JFrame {
             }
 
         } else {
-            // == DEFAULT PATH (Fallback) ==
             this.globalEnvironment = new Environment();
             GameController gameController = new GameController(this.globalEnvironment);
             this.currentScene = new Scene(UUID.randomUUID(), "Default Scene", new ArrayList<>());
@@ -150,18 +139,21 @@ public class HomeView extends javax.swing.JFrame {
 
             this.currentProject = new Project("proj-1", "My Game Project", scenes, assetLibViewModel.getAssetLib(), gameController);
 
-            // Create Default Object
             DEMO_OBJECT = createDefaultGameObject();
             this.currentScene.getGameObjects().add(DEMO_OBJECT);
         }
 
         // --- 2. INITIALIZE SAVE SYSTEM ---
-        SaveProjectViewModel saveViewModel = new SaveProjectViewModel();
-        SaveProjectPresenter savePresenter = new SaveProjectPresenter(saveViewModel);
+        // --- FIX: Initialize the class field (this.saveViewModel), not a local variable ---
+        this.saveViewModel = new SaveProjectViewModel();
+
+        SaveProjectPresenter savePresenter = new SaveProjectPresenter(this.saveViewModel);
         SaveProjectInteractor saveInteractor = new SaveProjectInteractor(dataAccess, savePresenter, currentProject);
         saveProjectController = new SaveProjectController(saveInteractor);
 
-        // init unsplash view if controller is available
+        // --- 3. SETUP SAVE LISTENER ---
+        setupSaveListener();
+
         if (unsplashController != null && unsplashViewModel != null) {
             this.unsplashView = new ImportSpriteFromUnsplashView(unsplashViewModel, unsplashController);
         }
@@ -182,6 +174,29 @@ public class HomeView extends javax.swing.JFrame {
     private void triggerAutoSave() {
         System.out.println("Auto-saving project...");
         saveProjectController.execute(currentProject.getName());
+    }
+
+    private void setupSaveListener() {
+        this.saveViewModel.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                SaveProjectState state = (SaveProjectState) evt.getNewValue();
+
+                if (state.getError() == null) {
+                    showSaveConfirmation();
+                } else {
+                    System.err.println("Save Error: " + state.getError());
+                }
+            }
+        });
+    }
+
+    private void showSaveConfirmation() {
+        if (saveStatusLabel != null) {
+            saveStatusLabel.setVisible(true);
+            Timer timer = new Timer(2000, e -> saveStatusLabel.setVisible(false));
+            timer.setRepeats(false);
+            timer.start();
+        }
     }
 
     private void setupImportSpriteListener() {
@@ -264,7 +279,6 @@ public class HomeView extends javax.swing.JFrame {
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
         spritesHeader.add(spritesAddButton, BorderLayout.EAST);
 
-        // gallery grid view sprites
         spritesContent = new JPanel();
         spritesContent.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         spritesContent.setBackground(new Color(70, 70, 70));
@@ -301,6 +315,14 @@ public class HomeView extends javax.swing.JFrame {
 
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
+        rightTabControls.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+
+        // --- SAVE STATUS LABEL ---
+        saveStatusLabel = new JLabel("✔");
+        saveStatusLabel.setForeground(new Color(100, 255, 100)); // Bright Green
+        saveStatusLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        saveStatusLabel.setVisible(false);
+        rightTabControls.add(saveStatusLabel);
 
         JButton playButton = new JButton("▶");
         playButton.setBackground(new Color(0, 180, 0));   // green
@@ -335,7 +357,6 @@ public class HomeView extends javax.swing.JFrame {
         // ====== ENTITY + LAYERS WIRING ======
         Transform transform = DEMO_OBJECT.getTransform();
         if (transform == null) {
-            // Safety fallback if loaded object has null transform
             java.util.Vector<Double> pos = new java.util.Vector<>(); pos.add(0.0); pos.add(0.0);
             java.util.Vector<Double> scale = new java.util.Vector<>(); scale.add(1.0); scale.add(1.0);
             transform = new Transform(pos, 0f, scale);
@@ -346,12 +367,9 @@ public class HomeView extends javax.swing.JFrame {
         transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
         scenePanel = new ScenePanel(transformViewModel);
-
-        // Link Scene Panel to the current Scene structure
         scenePanel.setScene(currentScene);
         scenePanel.setOnSceneChangeCallback(() -> triggerAutoSave());
 
-        // Update UI with initial transform
         transformController.updateTransform(
                 transform.getX(),
                 transform.getY(),
@@ -389,7 +407,6 @@ public class HomeView extends javax.swing.JFrame {
         });
 
         // Variable Wiring
-        // Ensure local env exists if missing in save
         if (DEMO_OBJECT.getEnvironment() == null) {
             DEMO_OBJECT.setEnvironment(new Environment());
         }
@@ -431,7 +448,6 @@ public class HomeView extends javax.swing.JFrame {
             }
         });
 
-        // display existing assets (This will now iterate over the loaded assets)
         for (entity.Asset asset : assetLibViewModel.getAssetLib().getAll()) {
             if (asset instanceof entity.Image) {
                 addSpriteToUI((entity.Image) asset);
