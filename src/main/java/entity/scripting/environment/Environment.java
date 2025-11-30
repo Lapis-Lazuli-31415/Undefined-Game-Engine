@@ -1,5 +1,7 @@
 package entity.scripting.environment;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import entity.scripting.error.EnvironmentException;
 import entity.scripting.expression.variable.Variable;
 
@@ -11,6 +13,11 @@ public class Environment {
 
     public Environment(){
         variables = new TreeMap<>();
+    }
+
+    @JsonCreator
+    public Environment(@JsonProperty("variables") Map<String, VariableMap<?>> variables) {
+        this.variables = variables != null ? variables : new TreeMap<>();
     }
 
     protected <T> void set(Variable<T> variable, T value) throws EnvironmentException {
