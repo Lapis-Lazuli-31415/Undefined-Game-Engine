@@ -1,5 +1,6 @@
 package use_case.runtime;
 
+import entity.Scene;
 import entity.GameObject;
 import entity.scripting.Trigger;
 import entity.scripting.action.Action;
@@ -34,6 +35,7 @@ public class TriggerExecutionInteractor implements TriggerExecutionInputBoundary
         Trigger trigger = inputData.getTrigger();
         GameObject obj = inputData.getGameObject();
         Environment globalEnv = inputData.getGlobalEnvironment();
+        Scene scene = inputData.getScene();  // ✅ 从 inputData 获取 scene
 
         try {
             // Get local environment from GameObject
@@ -50,7 +52,7 @@ public class TriggerExecutionInteractor implements TriggerExecutionInputBoundary
 
             if (allConditionsMet) {
                 // Execute all actions
-                int actionsExecuted = executeActions(trigger, globalEnv, localEnv);
+                int actionsExecuted = executeActions(trigger, globalEnv, localEnv, scene);  // ✅ 传递 scene
 
                 TriggerExecutionOutputData outputData = new TriggerExecutionOutputData(
                         objName,
@@ -103,12 +105,13 @@ public class TriggerExecutionInteractor implements TriggerExecutionInputBoundary
      * @param trigger The trigger
      * @param globalEnv Global environment
      * @param localEnv Local environment
+     * @param scene The current scene  ✅ 添加 scene 参数
      * @return Number of actions executed
      */
-    private int executeActions(Trigger trigger, Environment globalEnv, Environment localEnv) throws Exception {
+    private int executeActions(Trigger trigger, Environment globalEnv, Environment localEnv, Scene scene) throws Exception {
         int count = 0;
         for (Action action : trigger.getActions()) {
-            action.execute(globalEnv, localEnv);
+            action.execute(globalEnv, localEnv, scene);  // ✅ 传递 scene
             count++;
         }
         return count;

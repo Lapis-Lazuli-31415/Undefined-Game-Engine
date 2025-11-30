@@ -209,7 +209,8 @@ public class RuntimeEnvironment {
                 TriggerExecutionInputData inputData = new TriggerExecutionInputData(
                         trigger,
                         obj,
-                        globalEnvironment
+                        globalEnvironment,
+                        scene
                 );
                 triggerExecutor.execute(inputData);
             }

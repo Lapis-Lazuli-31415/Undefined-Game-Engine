@@ -709,7 +709,259 @@ public class HomeView extends javax.swing.JFrame {
         }
         return editorState.getCurrentScene();
     }
+    /**
+     * Create a comprehensive test scene with triggers for testing preview functionality.
+     * Tests all types of triggers, conditions, and actions including new ChangePosition and ChangeVisibility.
+     * TEMPORARY: Used until getCurrentScene() is properly implemented by teammates
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     */
+    private Scene createTestScene() {
+        Scene scene = Scene.create("ComprehensiveTestScene");
 
+        // ========== 1. Player - OnClick → ChangePosition ==========
+        GameObject player = new GameObject(
+                "player1",
+                "Player",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> playerPos = new Vector<>(Arrays.asList(-200.0, -150.0));
+        Vector<Double> playerScale = new Vector<>(Arrays.asList(1.0, 1.0));
+        player.setTransform(new Transform(playerPos, 0f, playerScale));
+
+        // Add SpriteRenderer for visibility
+        SpriteRenderer playerSprite = new SpriteRenderer(null, true);
+        playerSprite.setWidth(50);
+        playerSprite.setHeight(50);
+        player.addProperty(playerSprite);
+
+        // Trigger: Click to move player right by 50 pixels
+        Trigger playerClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+        playerClickTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+                "Player",
+                new entity.scripting.expression.value.NumericValue(-150.0),  // new X
+                new entity.scripting.expression.value.NumericValue(-150.0)   // new Y
+        ));
+        player.getTriggerManager().addTrigger(playerClickTrigger);
+
+        scene.addGameObject(player);
+
+        // ========== 2. Enemy - OnKeyPress(S) → ChangeVisibility (hide) ==========
+        GameObject enemy = new GameObject(
+                "enemy1",
+                "Enemy",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> enemyPos = new Vector<>(Arrays.asList(50.0, -100.0));
+        Vector<Double> enemyScale = new Vector<>(Arrays.asList(1.3, 1.3));
+        enemy.setTransform(new Transform(enemyPos, 15f, enemyScale));  // 15 degree rotation
+
+        SpriteRenderer enemySprite = new SpriteRenderer(null, true);
+        enemySprite.setWidth(50);
+        enemySprite.setHeight(50);
+        enemy.addProperty(enemySprite);
+
+        // Trigger: Press S to hide enemy
+        entity.scripting.event.OnKeyPressEvent hideEnemyEvent = new entity.scripting.event.OnKeyPressEvent();
+        hideEnemyEvent.addEventParameter("Key", "S");
+
+        Trigger hideEnemyTrigger = new Trigger(hideEnemyEvent, true);
+        hideEnemyTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+                "Enemy",
+                new entity.scripting.expression.value.BooleanValue(false)  // Hide
+        ));
+        enemy.getTriggerManager().addTrigger(hideEnemyTrigger);
+
+        scene.addGameObject(enemy);
+
+        // ========== 3. Coin - OnClick → Multiple Actions ==========
+        GameObject coin = new GameObject(
+                "coin1",
+                "Coin",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> coinPos = new Vector<>(Arrays.asList(200.0, 0.0));
+        Vector<Double> coinScale = new Vector<>(Arrays.asList(0.8, 0.8));
+        coin.setTransform(new Transform(coinPos, 0f, coinScale));
+
+        SpriteRenderer coinSprite = new SpriteRenderer(null, true);
+        coinSprite.setWidth(40);
+        coinSprite.setHeight(40);
+        coin.addProperty(coinSprite);
+
+        // Trigger: Click to collect coin (move up + set variable + hide)
+        Trigger coinClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+
+        // Action 1: Move coin up
+        coinClickTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+                "Coin",
+                new entity.scripting.expression.value.NumericValue(200.0),
+                new entity.scripting.expression.value.NumericValue(-100.0)  // Move up
+        ));
+
+        // Action 2: Set collected variable
+        entity.scripting.expression.variable.BooleanVariable collectedVar =
+                new entity.scripting.expression.variable.BooleanVariable("coinCollected", true);
+        coinClickTrigger.addAction(
+                new entity.scripting.action.BooleanVariableAssignmentAction(
+                        collectedVar,
+                        new entity.scripting.expression.value.BooleanValue(true)
+                )
+        );
+
+        // Action 3: Wait 1 second
+        coinClickTrigger.addAction(new entity.scripting.action.WaitAction(
+                new entity.scripting.expression.value.NumericValue(1.0)
+        ));
+
+        // Action 4: Hide coin
+        coinClickTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+                "Coin",
+                new entity.scripting.expression.value.BooleanValue(false)
+        ));
+
+        coin.getTriggerManager().addTrigger(coinClickTrigger);
+        scene.addGameObject(coin);
+
+        // ========== 4. Boss - OnKeyPress(E) → Complex with Conditions ==========
+        GameObject boss = new GameObject(
+                "boss1",
+                "Boss",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> bossPos = new Vector<>(Arrays.asList(-100.0, 150.0));
+        Vector<Double> bossScale = new Vector<>(Arrays.asList(2.0, 2.0));
+        boss.setTransform(new Transform(bossPos, -30f, bossScale));  // -30 degree rotation
+
+        SpriteRenderer bossSprite = new SpriteRenderer(null, true);
+        bossSprite.setWidth(60);
+        bossSprite.setHeight(60);
+        boss.addProperty(bossSprite);
+
+        // Trigger: Press E for boss actions
+        entity.scripting.event.OnKeyPressEvent bossKeyEvent = new entity.scripting.event.OnKeyPressEvent();
+        bossKeyEvent.addEventParameter("Key", "E");
+
+        Trigger bossTrigger = new Trigger(bossKeyEvent, true);
+
+        // Action 1: Set boss health
+        entity.scripting.expression.variable.NumericVariable healthVar =
+                new entity.scripting.expression.variable.NumericVariable("bossHealth", true);
+        bossTrigger.addAction(
+                new entity.scripting.action.NumericVariableAssignmentAction(
+                        healthVar,
+                        new entity.scripting.expression.value.NumericValue(500.0)
+                )
+        );
+
+        // Action 2: Move boss to center
+        bossTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+                "Boss",
+                new entity.scripting.expression.value.NumericValue(0.0),
+                new entity.scripting.expression.value.NumericValue(0.0)
+        ));
+
+        // Action 3: Wait 2 seconds
+        bossTrigger.addAction(new entity.scripting.action.WaitAction(
+                new entity.scripting.expression.value.NumericValue(2.0)
+        ));
+
+        boss.getTriggerManager().addTrigger(bossTrigger);
+        scene.addGameObject(boss);
+
+        // ========== 5. Ghost - OnKeyPress(H) → Toggle Visibility ==========
+        GameObject ghost = new GameObject(
+                "ghost1",
+                "Ghost",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> ghostPos = new Vector<>(Arrays.asList(150.0, 150.0));
+        Vector<Double> ghostScale = new Vector<>(Arrays.asList(1.2, 1.2));
+        ghost.setTransform(new Transform(ghostPos, 45f, ghostScale));  // 45 degree rotation
+
+        SpriteRenderer ghostSprite = new SpriteRenderer(null, true);
+        ghostSprite.setWidth(55);
+        ghostSprite.setHeight(55);
+        ghost.addProperty(ghostSprite);
+
+        // Trigger: Press H to hide ghost
+        entity.scripting.event.OnKeyPressEvent hideGhostEvent = new entity.scripting.event.OnKeyPressEvent();
+        hideGhostEvent.addEventParameter("Key", "H");
+
+        Trigger hideGhostTrigger = new Trigger(hideGhostEvent, true);
+        hideGhostTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+                "Ghost",
+                new entity.scripting.expression.value.BooleanValue(false)
+        ));
+        ghost.getTriggerManager().addTrigger(hideGhostTrigger);
+
+        scene.addGameObject(ghost);
+
+        // ========== 6. Target - OnKeyPress(T) → Move and Rotate ==========
+        GameObject target = new GameObject(
+                "target1",
+                "Target",
+                true,
+                new ArrayList<>(),
+                new Environment()
+        );
+
+        Vector<Double> targetPos = new Vector<>(Arrays.asList(-250.0, 100.0));
+        Vector<Double> targetScale = new Vector<>(Arrays.asList(1.5, 1.5));
+        target.setTransform(new Transform(targetPos, 0f, targetScale));
+
+        SpriteRenderer targetSprite = new SpriteRenderer(null, true);
+        targetSprite.setWidth(50);
+        targetSprite.setHeight(50);
+        target.addProperty(targetSprite);
+
+        // Trigger: Press T to move target
+        entity.scripting.event.OnKeyPressEvent moveTargetEvent = new entity.scripting.event.OnKeyPressEvent();
+        moveTargetEvent.addEventParameter("Key", "T");
+
+        Trigger moveTargetTrigger = new Trigger(moveTargetEvent, true);
+        moveTargetTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+                "Target",
+                new entity.scripting.expression.value.NumericValue(-250.0),
+                new entity.scripting.expression.value.NumericValue(-50.0)  // Move up
+        ));
+        target.getTriggerManager().addTrigger(moveTargetTrigger);
+
+        scene.addGameObject(target);
+
+        // Print test summary
+        System.out.println("✅ Created comprehensive test scene with " + scene.getGameObjects().size() + " GameObjects");
+        System.out.println("\n=== Test Controls ===");
+        System.out.println("Player (-200, -150) [size: 1.0x, rot: 0°]:");
+        System.out.println("  → Click: Move to (-150, -150)");
+        System.out.println("\nEnemy (50, -100) [size: 1.3x, rot: 15°]:");
+        System.out.println("  → Press S: Hide enemy");
+        System.out.println("\nCoin (200, 0) [size: 0.8x, rot: 0°]:");
+        System.out.println("  → Click: Move up + Set variable + Wait 1s + Hide");
+        System.out.println("\nBoss (-100, 150) [size: 2.0x, rot: -30°]:");
+        System.out.println("  → Press E: Set health=500 + Move to center + Wait 2s");
+        System.out.println("\nGhost (150, 150) [size: 1.2x, rot: 45°]:");
+        System.out.println("  → Press H: Hide ghost");
+        System.out.println("\nTarget (-250, 100) [size: 1.5x, rot: 0°]:");
+        System.out.println("  → Press T: Move to (-250, -50)");
+        System.out.println("==================\n");
+
+        return scene;
+    }
     /**
      * Create global environment for triggers
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature

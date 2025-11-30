@@ -1,9 +1,7 @@
 package use_case.runtime;
 
 import entity.GameObject;
-import entity.Property;
 import entity.scripting.Trigger;
-import entity.scripting.action.PrintAction;
 import entity.scripting.environment.Environment;
 import entity.scripting.event.OnClickEvent;
 import entity.scripting.event.OnKeyPressEvent;

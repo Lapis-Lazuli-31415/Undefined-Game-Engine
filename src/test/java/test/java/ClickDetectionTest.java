@@ -3,7 +3,6 @@ package test.java;
 import entity.*;
 import entity.scripting.Trigger;
 import entity.scripting.event.OnClickEvent;
-import entity.scripting.action.PrintAction;
 import entity.scripting.environment.Environment;
 import view.PreviewWindow;
 
