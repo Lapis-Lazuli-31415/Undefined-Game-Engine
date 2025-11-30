@@ -42,6 +42,9 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
 
     // Sprite renderer
     private JTextField imageField;
+    private JButton browseButton;
+    private entity.GameObject currentGameObject;
+    private interface_adapter.assets.AssetLibViewModel assetLibViewModel;
 
     // Trigger
     private JComboBox<String> eventCombo;
@@ -143,7 +146,6 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         return panel;
     }
 
-
     private JPanel createSpriteRendererSection() {
         JPanel panel = createSectionPanel("Sprite Renderer");
         GridBagConstraints gbc = baseGbc();
@@ -152,15 +154,16 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
         panel.add(imgLabel, gbc);
 
         gbc.gridx = 1;
-        imageField = new JTextField("bear.png");
+        imageField = new JTextField();
         imageField.setBackground(new Color(60, 60, 60));
         imageField.setForeground(Color.WHITE);
         imageField.setCaretColor(Color.WHITE);
         imageField.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
         imageField.setEditable(false);
 
-        JButton browseButton = new JButton("...");
+        browseButton = new JButton("...");
         browseButton.setMargin(new Insets(0, 4, 0, 4));
+        browseButton.addActionListener(e -> openSpritePickerDialog());
 
         JPanel row = new JPanel();
         row.setOpaque(false);
@@ -507,6 +510,97 @@ public class PropertiesPanel extends JPanel implements PropertyChangeListener {
 
         // Initial sync FROM VM TO UI
         syncFromViewModel();
+    }
+
+    public void bindSpriteRenderer(entity.GameObject gameObject,
+                                   interface_adapter.assets.AssetLibViewModel assetLibViewModel) {
+        this.currentGameObject = gameObject;
+        this.assetLibViewModel = assetLibViewModel;
+        updateSpriteRendererUI();
+    }
+
+    private void updateSpriteRendererUI() {
+        if (currentGameObject == null || currentGameObject.getSpriteRenderer() == null) {
+            imageField.setText("");
+            browseButton.setEnabled(false);
+            return;
+        }
+
+        entity.SpriteRenderer spriteRenderer = currentGameObject.getSpriteRenderer();
+        entity.Image sprite = spriteRenderer.getSprite();
+
+        if (sprite != null) {
+            imageField.setText(sprite.getName());
+        } else {
+            imageField.setText("(No sprite)");
+        }
+
+        browseButton.setEnabled(true);
+    }
+
+    private void openSpritePickerDialog() {
+        if (currentGameObject == null || assetLibViewModel == null) {
+            JOptionPane.showMessageDialog(this,
+                "No GameObject selected",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        java.util.List<entity.Image> availableSprites = assetLibViewModel.getAssetLib().getAll().stream()
+            .filter(asset -> asset instanceof entity.Image)
+            .map(asset -> (entity.Image) asset)
+            .collect(java.util.stream.Collectors.toList());
+
+        if (availableSprites.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No sprites available in the asset library. Please import a sprite first.",
+                "No Sprites",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] spriteNames = availableSprites.stream()
+            .map(entity.Asset::getName)
+            .toArray(String[]::new);
+
+        String selectedName = (String) JOptionPane.showInputDialog(
+            this,
+            "Select a sprite:",
+            "Change Sprite",
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            spriteNames,
+            spriteNames[0]
+        );
+
+        if (selectedName != null) {
+            entity.Image selectedSprite = availableSprites.stream()
+                .filter(img -> img.getName().equals(selectedName))
+                .findFirst()
+                .orElse(null);
+
+            if (selectedSprite != null) {
+                entity.SpriteRenderer spriteRenderer = currentGameObject.getSpriteRenderer();
+                if (spriteRenderer == null) {
+                    spriteRenderer = new entity.SpriteRenderer(selectedSprite, true);
+                    currentGameObject.setSpriteRenderer(spriteRenderer);
+                } else {
+                    entity.SpriteRenderer newRenderer = new entity.SpriteRenderer(
+                        selectedSprite,
+                        spriteRenderer.getVisible()
+                    );
+                    newRenderer.setOpacity(spriteRenderer.getOpacity());
+                    currentGameObject.setSpriteRenderer(newRenderer);
+                }
+
+                updateSpriteRendererUI();
+
+                if (onChangeCallback != null) {
+                    onChangeCallback.run();
+                }
+            }
+        }
     }
 
     private void syncFromViewModel() {

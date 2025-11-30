@@ -95,6 +95,14 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         }
     }
 
+    public void setOnSelectionChangeCallback(Runnable callback) {
+        this.onSelectionChangeCallback = callback;
+    }
+
+    public GameObject getSelectedObject() {
+        return selectedObject;
+    }
+
     private GameObject findGameObjectByImage(entity.Image image) {
         for (GameObject obj : gameObjects) {
             SpriteRenderer spriteRenderer = obj.getSpriteRenderer();

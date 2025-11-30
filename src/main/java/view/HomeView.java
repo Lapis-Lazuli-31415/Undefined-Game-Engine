@@ -298,19 +298,19 @@ public class HomeView extends javax.swing.JFrame {
             );
         }
 
+        // update properties panel when selection changes
+        scenePanel.setOnSelectionChangeCallback(() -> {
+            GameObject selectedObject = scenePanel.getSelectedObject();
+            if (propertiesPanel instanceof PropertiesPanel props && selectedObject != null) {
+                props.bindSpriteRenderer(selectedObject, assetLibViewModel);
+            }
+        });
+
         centerPanel.remove(openFolderPanel);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
         centerPanel.revalidate();
         centerPanel.repaint();
 
-        // Bind properties panel to VM + controller
-        if (propertiesPanel instanceof PropertiesPanel props) {
-            props.bind(
-                    transformViewModel,
-                    transformController,
-                    () -> scenePanel.repaint()
-            );
-        }
 
         // Add all components to home tab content
         homeTabContent.add(leftSidebar, BorderLayout.WEST);
