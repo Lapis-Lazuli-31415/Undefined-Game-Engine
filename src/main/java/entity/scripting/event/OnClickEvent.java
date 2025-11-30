@@ -1,9 +1,13 @@
 package entity.scripting.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 public class OnClickEvent extends Event{
     public static final String EVENT_TYPE = "On Click";
+
+    @JsonIgnore
     public static final List<String> REQUIRED_PARAMETERS = List.of();
 
     public OnClickEvent() {
@@ -14,6 +18,7 @@ public class OnClickEvent extends Event{
         return EVENT_TYPE;
     }
 
+    @JsonIgnore
     @Override
     public boolean isRequiredParameter(String key){
         return false;

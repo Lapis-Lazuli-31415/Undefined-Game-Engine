@@ -1,8 +1,11 @@
-package interface_adapter.variable;
+package interface_adapter.variable.update;
 
 import java.util.List;
-import use_case.variable.UpdateVariableOutputBoundary;
-import use_case.variable.UpdateVariableOutputData;
+
+import interface_adapter.variable.GlobalVariableViewModel;
+import interface_adapter.variable.VariableState;
+import use_case.variable.update.UpdateVariableOutputBoundary;
+import use_case.variable.update.UpdateVariableOutputData;
 
 public class GlobalVariableUpdatePresenter implements UpdateVariableOutputBoundary {
 

@@ -14,8 +14,9 @@ import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import app.VariableUseCaseFactory;
-import interface_adapter.variable.DeleteVariableController;
-import interface_adapter.variable.UpdateVariableController;
+import interface_adapter.variable.delete.DeleteVariableController;
+import interface_adapter.variable.update.UpdateVariableController;
+import interface_adapter.variable.get.GetAllVariablesController;
 import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.LocalVariableViewModel;
 import view.property.PropertiesPanel;
@@ -66,6 +67,7 @@ public class HomeView extends javax.swing.JFrame {
     private LocalVariableViewModel localVariableViewModel;
     private UpdateVariableController updateVariableController;
     private DeleteVariableController deleteVariableController;
+    private GetAllVariablesController getAllVariablesController;
 
     // Demo wiring
     private ScenePanel scenePanel;
@@ -166,6 +168,35 @@ public class HomeView extends javax.swing.JFrame {
                 new Transform(new Vector<>(Arrays.asList(0.0, 0.0)), 0f, new Vector<>(Arrays.asList(1.0, 1.0))),
                 new TriggerManager()
         );
+    }
+
+    private void rewireLocalVariablesFor(GameObject target) {
+        if (target == null) {
+            target = DEMO_OBJECT;
+        }
+
+        Environment localEnv = target.getEnvironment();
+        if (localEnv == null) {
+            localEnv = new Environment();
+            target.setEnvironment(localEnv);
+        }
+
+        VariableUseCaseFactory.VariableWiring wiring =
+                VariableUseCaseFactory.create(globalEnvironment, localEnv, globalVariableViewModel);
+
+        localVariableViewModel = wiring.getLocalViewModel();
+        updateVariableController = wiring.getUpdateController();
+        deleteVariableController = wiring.getDeleteController();
+        getAllVariablesController = wiring.getGetAllController();
+
+        if (propertiesPanel instanceof PropertiesPanel props) {
+            props.setLocalVariableViewModel(localVariableViewModel);
+            props.setVariableController(updateVariableController);
+            props.setDeleteVariableController(deleteVariableController);
+        }
+
+        getAllVariablesController.refreshGlobalVariables();
+        getAllVariablesController.refreshLocalVariables();
     }
 
     private void triggerAutoSave() {
@@ -392,9 +423,14 @@ public class HomeView extends javax.swing.JFrame {
             props.setAutoSaveCallback(() -> triggerAutoSave());
         }
 
-        // Selection Wiring
+        // rewire variables when selection changes
         scenePanel.setOnSelectionChangeCallback(() -> {
             GameObject selectedObject = scenePanel.getSelectedObject();
+
+            // Rewire variables for the newly selected object
+            rewireLocalVariablesFor(selectedObject);
+
+            // Also update sprite renderer binding
             if (propertiesPanel instanceof PropertiesPanel props && selectedObject != null) {
                 props.bindSpriteRenderer(selectedObject, assetLibViewModel, () -> {
                     scenePanel.repaint();
@@ -410,12 +446,13 @@ public class HomeView extends javax.swing.JFrame {
         Environment localEnvironment = DEMO_OBJECT.getEnvironment();
 
         VariableUseCaseFactory.VariableWiring variableWiring =
-                VariableUseCaseFactory.create(globalEnvironment, localEnvironment);
+                VariableUseCaseFactory.create(globalEnvironment, localEnvironment, null);
 
         globalVariableViewModel = variableWiring.getGlobalViewModel();
         localVariableViewModel = variableWiring.getLocalViewModel();
         updateVariableController = variableWiring.getUpdateController();
         deleteVariableController = variableWiring.getDeleteController();
+        getAllVariablesController = variableWiring.getGetAllController();
 
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.setLocalVariableViewModel(localVariableViewModel);
@@ -423,6 +460,9 @@ public class HomeView extends javax.swing.JFrame {
             props.setVariableController(updateVariableController);
             props.setDeleteVariableController(deleteVariableController);
         }
+
+        getAllVariablesController.refreshGlobalVariables();
+        getAllVariablesController.refreshLocalVariables();
 
         homeTabContent.add(leftSidebar, BorderLayout.WEST);
         homeTabContent.add(centerPanel, BorderLayout.CENTER);

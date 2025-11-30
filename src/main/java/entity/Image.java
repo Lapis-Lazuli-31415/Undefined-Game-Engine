@@ -15,6 +15,10 @@ import java.net.URI;
 public class Image extends Asset {
     private final int width;
     private final int height;
+
+    // FIX: Use @JsonIgnore to prevent Jackson from trying to serialize this field.
+    // The BufferedImage contains internal AWT types that cause the security exception.
+    @JsonIgnore
     private final BufferedImage image;
 
     // Normal constructor
