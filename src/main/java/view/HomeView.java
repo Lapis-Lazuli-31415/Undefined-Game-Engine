@@ -3,11 +3,11 @@ package view;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.Vector;
 import javax.swing.*;
 
-import entity.GameObject;
-import entity.Transform;
+import entity.*;
 import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
 import interface_adapter.transform.TransformViewModel;
@@ -20,6 +20,12 @@ import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.LocalVariableViewModel;
 import view.property.PropertiesPanel;
 
+import data_access.saving.JsonProjectDataAccess;
+import use_case.saving.SaveProjectInteractor;
+import interface_adapter.saving.SaveProjectController;
+import interface_adapter.saving.SaveProjectPresenter;
+import interface_adapter.saving.SaveProjectViewModel;
+
 public class HomeView extends javax.swing.JFrame {
 
     // ====== FIELDS ======
@@ -28,6 +34,14 @@ public class HomeView extends javax.swing.JFrame {
     private JPanel gameComponentsPanel;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
+
+    // Entities for Project Structure
+    private final Project currentProject;
+    private final Scene currentScene;
+    private SaveProjectController saveProjectController;
+
+    // Environment is no longer final, as it might be loaded from JSON
+    private Environment globalEnvironment;
 
     // asset manager
     private final interface_adapter.assets.AssetLibViewModel assetLibViewModel;
@@ -48,19 +62,10 @@ public class HomeView extends javax.swing.JFrame {
     private LocalVariableViewModel localVariableViewModel;
     private UpdateVariableController updateVariableController;
     private DeleteVariableController deleteVariableController;
-    private final Environment globalEnvironment = new Environment();
 
     // Demo wiring
     private ScenePanel scenePanel;
-    private static GameObject DEMO_OBJECT = new GameObject(
-            "demo-1",
-            "Demo Sprite",
-            true,
-            new ArrayList<>(),
-            null,
-            new Transform(new Vector<Double>(Arrays.asList(0.0, 0.0)), 0f, new Vector<Double>(Arrays.asList(1.0, 1.0))),
-            new TriggerManager()
-    );
+    private static GameObject DEMO_OBJECT;
     private TransformViewModel transformViewModel;
     private TransformController transformController;
 
@@ -85,6 +90,77 @@ public class HomeView extends javax.swing.JFrame {
         this.unsplashController = unsplashController;
         this.unsplashViewModel = unsplashViewModel;
 
+        // --- 1. ATTEMPT TO LOAD PROJECT FROM JSON ---
+        JsonProjectDataAccess dataAccess = new JsonProjectDataAccess();
+        Project loadedProject = null;
+
+        try {
+            System.out.println("Attempting to load 'test.json'...");
+            loadedProject = dataAccess.load("test.json");
+            System.out.println("Project loaded successfully: " + loadedProject.getName());
+        } catch (Exception e) {
+            System.out.println("Could not load existing project (" + e.getMessage() + "). Creating new default project.");
+        }
+
+        if (loadedProject != null) {
+            // == LOADED PATH ==
+            this.currentProject = loadedProject;
+
+            // 1. Recover Global Environment
+            // Project.getGlobalEnvironment() delegates to GameController
+            if (this.currentProject.getGlobalEnvironment() != null) {
+                this.globalEnvironment = this.currentProject.getGlobalEnvironment();
+            } else {
+                this.globalEnvironment = new Environment();
+                // Ensure controller has an environment
+                if (this.currentProject.getGameController() != null) {
+                    // We might need a setter if it's missing, but GameController has getEnvironment
+                    // For now, assuming standard load structure holds it.
+                }
+            }
+
+            // 2. Recover Scene
+            if (!this.currentProject.getScenes().isEmpty()) {
+                this.currentScene = this.currentProject.getScenes().get(0);
+            } else {
+                this.currentScene = new Scene(UUID.randomUUID(), "Default Scene", new ArrayList<>());
+                this.currentProject.getScenes().add(this.currentScene);
+            }
+
+            // 3. Sync Asset Library
+            // Replace the empty lib in the ViewModel with the loaded one
+            this.assetLibViewModel.setState(this.currentProject.getAssets());
+
+            // 4. Recover Selected Object (DEMO_OBJECT)
+            if (!this.currentScene.getGameObjects().isEmpty()) {
+                DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
+                System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
+            } else {
+                DEMO_OBJECT = createDefaultGameObject();
+                this.currentScene.getGameObjects().add(DEMO_OBJECT);
+            }
+
+        } else {
+            // == DEFAULT PATH (Fallback) ==
+            this.globalEnvironment = new Environment();
+            GameController gameController = new GameController(this.globalEnvironment);
+            this.currentScene = new Scene(UUID.randomUUID(), "Default Scene", new ArrayList<>());
+            ArrayList<Scene> scenes = new ArrayList<>();
+            scenes.add(this.currentScene);
+
+            this.currentProject = new Project("proj-1", "My Game Project", scenes, assetLibViewModel.getAssetLib(), gameController);
+
+            // Create Default Object
+            DEMO_OBJECT = createDefaultGameObject();
+            this.currentScene.getGameObjects().add(DEMO_OBJECT);
+        }
+
+        // --- 2. INITIALIZE SAVE SYSTEM ---
+        SaveProjectViewModel saveViewModel = new SaveProjectViewModel();
+        SaveProjectPresenter savePresenter = new SaveProjectPresenter(saveViewModel);
+        SaveProjectInteractor saveInteractor = new SaveProjectInteractor(dataAccess, savePresenter, currentProject);
+        saveProjectController = new SaveProjectController(saveInteractor);
+
         // init unsplash view if controller is available
         if (unsplashController != null && unsplashViewModel != null) {
             this.unsplashView = new ImportSpriteFromUnsplashView(unsplashViewModel, unsplashController);
@@ -95,11 +171,24 @@ public class HomeView extends javax.swing.JFrame {
         setupImportSpriteListener();
     }
 
+    private GameObject createDefaultGameObject() {
+        return new GameObject(
+                "demo-1", "Demo Sprite", true, new ArrayList<>(), null,
+                new Transform(new Vector<>(Arrays.asList(0.0, 0.0)), 0f, new Vector<>(Arrays.asList(1.0, 1.0))),
+                new TriggerManager()
+        );
+    }
+
+    private void triggerAutoSave() {
+        System.out.println("Auto-saving project...");
+        saveProjectController.execute(currentProject.getName());
+    }
+
     private void setupImportSpriteListener() {
         importSpriteViewModel.addPropertyChangeListener(evt -> {
             if (interface_adapter.sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
                 interface_adapter.sprites.ImportSpriteState state =
-                    (interface_adapter.sprites.ImportSpriteState) evt.getNewValue();
+                        (interface_adapter.sprites.ImportSpriteState) evt.getNewValue();
 
                 if (state.isSuccess()) {
                     JOptionPane.showMessageDialog(this,
@@ -122,7 +211,7 @@ public class HomeView extends javax.swing.JFrame {
 
         // ====== MAIN FRAME SETTINGS ======
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Game Editor");
+        setTitle("Game Editor - " + currentProject.getName());
         setPreferredSize(new java.awt.Dimension(1300, 700));
 
         getContentPane().setLayout(new BorderLayout());
@@ -140,7 +229,6 @@ public class HomeView extends javax.swing.JFrame {
         JPanel homeTabContent = new JPanel(new BorderLayout());
 
         // ====== LEFT SIDEBAR (Assets + Filesystem) ======
-        // NOTE: use the fields, not new local variables
         leftSidebar = new JPanel();
         leftSidebar.setLayout(new BoxLayout(leftSidebar, BoxLayout.Y_AXIS));
         leftSidebar.setPreferredSize(new Dimension(200, 700));
@@ -156,7 +244,7 @@ public class HomeView extends javax.swing.JFrame {
                         javax.swing.border.TitledBorder.LEADING,
                         javax.swing.border.TitledBorder.TOP,
                         null,
-                        Color.WHITE // Title text color
+                        Color.WHITE
                 )
         );
         assetsPanel.setBackground(new Color(55, 55, 55));
@@ -211,9 +299,6 @@ public class HomeView extends javax.swing.JFrame {
         JLabel tabLabel = new JLabel("   Start");
         tabLabel.setForeground(Color.WHITE);
 
-//        JButton addTabButton = new JButton("+");
-//        addTabButton.setPreferredSize(new Dimension(45, 35));
-
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
 
@@ -235,65 +320,38 @@ public class HomeView extends javax.swing.JFrame {
         rightTabControls.add(stopButton);
 
         tabBar.add(tabLabel, BorderLayout.WEST);
-//      tabBar.add(addTabButton, BorderLayout.CENTER);
         tabBar.add(rightTabControls, BorderLayout.EAST);
-
-        // Center placeholder content (Open Folder)
-        JPanel openFolderPanel = new JPanel();
-        openFolderPanel.setLayout(new BoxLayout(openFolderPanel, BoxLayout.Y_AXIS));
-        openFolderPanel.setBackground(new Color(55, 55, 55));
-
-        JLabel folderIcon = new JLabel("\uD83D\uDCC1"); // folder emoji
-        folderIcon.setFont(new Font("Arial", Font.PLAIN, 120));
-        folderIcon.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel openFolderLabel = new JLabel("Open Folder");
-        openFolderLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        openFolderLabel.setForeground(Color.WHITE);
-        openFolderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        openFolderPanel.add(Box.createVerticalGlue());
-        openFolderPanel.add(folderIcon);
-        openFolderPanel.add(Box.createVerticalStrut(20));
-        openFolderPanel.add(openFolderLabel);
-        openFolderPanel.add(Box.createVerticalGlue());
-
-        centerPanel.add(tabBar, BorderLayout.NORTH);
-        centerPanel.add(openFolderPanel, BorderLayout.CENTER);
 
         // ====== RIGHT PROPERTIES PANEL ======
         propertiesPanel = new PropertiesPanel();
 
-        // Wrap in a scroll pane so the whole properties area scrolls
         JScrollPane propertiesScroll = new JScrollPane(propertiesPanel);
         propertiesScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
         propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
-        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
+        propertiesScroll.setBorder(null);
 
-        // ====== DEMO ENTITY + LAYERS WIRING ======
-        java.util.Vector<Double> pos = new java.util.Vector<>();
-        pos.add(0.0); // x
-        pos.add(0.0); // y
+        // ====== ENTITY + LAYERS WIRING ======
+        Transform transform = DEMO_OBJECT.getTransform();
+        if (transform == null) {
+            // Safety fallback if loaded object has null transform
+            java.util.Vector<Double> pos = new java.util.Vector<>(); pos.add(0.0); pos.add(0.0);
+            java.util.Vector<Double> scale = new java.util.Vector<>(); scale.add(1.0); scale.add(1.0);
+            transform = new Transform(pos, 0f, scale);
+            DEMO_OBJECT.setTransform(transform);
+        }
 
-        java.util.Vector<Double> scale = new java.util.Vector<>();
-        scale.add(1.0); // scaleX
-        scale.add(1.0); // scaleY
-
-
-        Transform transform = new Transform(pos, 0f, scale);
-
-        DEMO_OBJECT.setTransform(transform);
-
-        // Create view model
         transformViewModel = new TransformViewModel();
-
-        // Use app-layer factory to wire up use case
         transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
-        // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);
 
+        // Link Scene Panel to the current Scene structure
+        scenePanel.setScene(currentScene);
+        scenePanel.setOnSceneChangeCallback(() -> triggerAutoSave());
+
+        // Update UI with initial transform
         transformController.updateTransform(
                 transform.getX(),
                 transform.getY(),
@@ -301,29 +359,41 @@ public class HomeView extends javax.swing.JFrame {
                 transform.getRotation()
         );
 
-        centerPanel.remove(openFolderPanel);
+        centerPanel.add(tabBar, BorderLayout.NORTH);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
         centerPanel.revalidate();
         centerPanel.repaint();
 
+        // Wiring Properties Panel
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.bind(
                     transformViewModel,
                     transformController,
-                    () -> scenePanel.repaint()
+                    () -> {
+                        scenePanel.repaint();
+                        triggerAutoSave();
+                    }
             );
+            props.setAutoSaveCallback(() -> triggerAutoSave());
         }
 
-        // update properties panel when selection changes
+        // Selection Wiring
         scenePanel.setOnSelectionChangeCallback(() -> {
             GameObject selectedObject = scenePanel.getSelectedObject();
             if (propertiesPanel instanceof PropertiesPanel props && selectedObject != null) {
-                props.bindSpriteRenderer(selectedObject, assetLibViewModel, () -> scenePanel.repaint());
+                props.bindSpriteRenderer(selectedObject, assetLibViewModel, () -> {
+                    scenePanel.repaint();
+                    triggerAutoSave();
+                });
             }
         });
-        // variable usecase wiring
-        Environment localEnvironment = new Environment();
-        DEMO_OBJECT.setEnvironment(localEnvironment);
+
+        // Variable Wiring
+        // Ensure local env exists if missing in save
+        if (DEMO_OBJECT.getEnvironment() == null) {
+            DEMO_OBJECT.setEnvironment(new Environment());
+        }
+        Environment localEnvironment = DEMO_OBJECT.getEnvironment();
 
         VariableUseCaseFactory.VariableWiring variableWiring =
                 VariableUseCaseFactory.create(globalEnvironment, localEnvironment);
@@ -340,12 +410,10 @@ public class HomeView extends javax.swing.JFrame {
             props.setDeleteVariableController(deleteVariableController);
         }
 
-        // Add all components to home tab content
         homeTabContent.add(leftSidebar, BorderLayout.WEST);
         homeTabContent.add(centerPanel, BorderLayout.CENTER);
         homeTabContent.add(propertiesScroll, BorderLayout.EAST);
 
-        // Add home tab to tabbed pane
         tabbedPane.addTab("Home", homeTabContent);
 
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
@@ -363,7 +431,7 @@ public class HomeView extends javax.swing.JFrame {
             }
         });
 
-        // display existing assets
+        // display existing assets (This will now iterate over the loaded assets)
         for (entity.Asset asset : assetLibViewModel.getAssetLib().getAll()) {
             if (asset instanceof entity.Image) {
                 addSpriteToUI((entity.Image) asset);
@@ -378,13 +446,11 @@ public class HomeView extends javax.swing.JFrame {
         cardPanel.setBackground(new Color(60, 60, 60));
         cardPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
 
-        // load + scale the image thumbnail
         try {
             java.awt.image.BufferedImage originalImage = javax.imageio.ImageIO.read(
                     new java.io.File(image.getLocalpath().toString())
             );
 
-            // calc thumbnail size
             int thumbWidth = 70;
             int thumbHeight = 70;
             double aspectRatio = (double) originalImage.getWidth() / originalImage.getHeight();
@@ -395,12 +461,10 @@ public class HomeView extends javax.swing.JFrame {
                 thumbWidth = (int) (thumbHeight * aspectRatio);
             }
 
-            // scale image
             java.awt.Image scaledImage = originalImage.getScaledInstance(
                     thumbWidth, thumbHeight, java.awt.Image.SCALE_SMOOTH
             );
 
-            // create image label with centered icon
             JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
             imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
             imageLabel.setVerticalAlignment(SwingConstants.CENTER);
@@ -409,7 +473,6 @@ public class HomeView extends javax.swing.JFrame {
             cardPanel.add(imageLabel, BorderLayout.CENTER);
 
         } catch (Exception e) {
-            // fallback if image fails to load
             JLabel iconLabel = new JLabel("image");
             iconLabel.setFont(new Font("Arial", Font.PLAIN, 30));
             iconLabel.setForeground(Color.WHITE);
@@ -417,7 +480,6 @@ public class HomeView extends javax.swing.JFrame {
             cardPanel.add(iconLabel, BorderLayout.CENTER);
         }
 
-        // add name label to the bottom
         String displayName = image.getName();
         if (displayName.length() > 10) {
             displayName = displayName.substring(0, 8) + "...";
@@ -429,7 +491,6 @@ public class HomeView extends javax.swing.JFrame {
         nameLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         cardPanel.add(nameLabel, BorderLayout.SOUTH);
 
-        // Add hover effect
         cardPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 cardPanel.setBackground(new Color(80, 80, 80));
@@ -469,7 +530,6 @@ public class HomeView extends javax.swing.JFrame {
             importMenu.add(unsplashImport);
         }
 
-        // Show menu below the + button
         importMenu.show(spritesAddButton, 0, spritesAddButton.getHeight());
     }
 
@@ -489,9 +549,9 @@ public class HomeView extends javax.swing.JFrame {
     private void openUnsplashImportDialog() {
         if (unsplashView == null) {
             JOptionPane.showMessageDialog(this,
-                "Unsplash import is not available. Please check your API key configuration.",
-                "Feature Unavailable",
-                JOptionPane.WARNING_MESSAGE);
+                    "Unsplash import is not available. Please check your API key configuration.",
+                    "Feature Unavailable",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -507,29 +567,29 @@ public class HomeView extends javax.swing.JFrame {
             entity.AssetLib assetLib = new entity.AssetLib();
 
             interface_adapter.assets.AssetLibViewModel assetLibViewModel =
-                new interface_adapter.assets.AssetLibViewModel(assetLib);
+                    new interface_adapter.assets.AssetLibViewModel(assetLib);
             interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel =
-                new interface_adapter.sprites.ImportSpriteViewModel();
+                    new interface_adapter.sprites.ImportSpriteViewModel();
             interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel =
-                new interface_adapter.sprites.ImportSpriteFromUnsplashViewModel();
+                    new interface_adapter.sprites.ImportSpriteFromUnsplashViewModel();
 
             app.use_case_factory.SpriteImportUseCaseFactory.loadExistingAssets(assetLib);
 
             interface_adapter.sprites.ImportSpriteController importSpriteController =
-                app.use_case_factory.SpriteImportUseCaseFactory.createLocalImportUseCase(
-                    assetLibViewModel, importSpriteViewModel);
+                    app.use_case_factory.SpriteImportUseCaseFactory.createLocalImportUseCase(
+                            assetLibViewModel, importSpriteViewModel);
 
             String unsplashApiKey = System.getenv("UNSPLASH_ACCESS_KEY");
             interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController =
-                app.use_case_factory.SpriteImportUseCaseFactory.createUnsplashImportUseCase(
-                    assetLibViewModel, unsplashViewModel, unsplashApiKey);
+                    app.use_case_factory.SpriteImportUseCaseFactory.createUnsplashImportUseCase(
+                            assetLibViewModel, unsplashViewModel, unsplashApiKey);
 
             HomeView view = new HomeView(
-                assetLibViewModel,
-                importSpriteController,
-                importSpriteViewModel,
-                unsplashController,
-                unsplashViewModel
+                    assetLibViewModel,
+                    importSpriteController,
+                    importSpriteViewModel,
+                    unsplashController,
+                    unsplashViewModel
             );
             view.setVisible(true);
         });

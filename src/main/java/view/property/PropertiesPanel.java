@@ -50,6 +50,13 @@ public class PropertiesPanel extends JPanel {
         add(Box.createVerticalGlue());
     }
 
+    public void setAutoSaveCallback(Runnable autoSaveCallback) {
+        // Pass callback to Trigger Manager
+        triggerManagerPanel.setOnChangeCallback(autoSaveCallback);
+
+        // Note: Transform callback is passed in the .bind() method separately
+    }
+
     // ---------- helper UI methods ----------
 
     // border creator with white title text

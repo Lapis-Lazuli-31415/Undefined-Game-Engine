@@ -1,91 +1,57 @@
 {
-  "id" : "proj-001",
-  "name" : "project_name",
+  "id" : "proj-1",
+  "name" : "My Game Project",
   "global_environment" : {
-    "variables" : {
-      "Boolean" : {
-        "variables" : {
-          "win" : false
-        }
-      },
-      "Numeric" : {
-        "variables" : {
-          "wins" : 0.0,
-          "losses" : 0.0
-        }
-      }
-    }
+    "variables" : { }
   },
   "assets" : [ {
-    "id" : "f762412e-3324-40a0-a386-39fc3d2e1b4d",
+    "id" : "a3610d07-a91e-41a5-be4d-0b2eb3f86a32",
+    "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/CSC258%20Lab%201%20p3.png",
+    "name" : "CSC258 Lab 1 p3.png"
+  }, {
+    "id" : "b0231413-7fa1-4493-89ee-2b3a4f6b0e30",
     "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/CSC258%20Lab%201%20p1.2.png",
     "name" : "CSC258 Lab 1 p1.2.png"
   } ],
   "scenes" : [ {
-    "id" : "1fedb227-42bd-4023-805c-278512d92881",
-    "name" : "Forest Level",
+    "id" : "50183dc7-5704-42b1-8c8d-ccc89979e510",
+    "name" : "Default Scene",
     "game_objects" : [ {
-      "id" : "obj-bear",
-      "name" : "Bear",
+      "id" : "demo-1",
+      "name" : "Demo Sprite",
       "active" : true,
       "properties" : [ ],
       "environment" : {
-        "variables" : {
-          "Boolean" : {
-            "variables" : {
-              "alive" : true
-            }
-          },
-          "Numeric" : {
-            "variables" : {
-              "health" : 100.0
-            }
-          }
-        }
+        "variables" : { }
       },
       "transform" : {
-        "x" : 100.0,
-        "y" : 200.0,
-        "rotation" : 45.0,
-        "scale_x" : 1.0,
-        "scale_y" : 1.0
+        "x" : 0.0,
+        "y" : 0.0,
+        "rotation" : 0.0,
+        "scale_x" : 20.0,
+        "scale_y" : 20.0
       },
       "trigger_manager" : {
-        "triggers" : [ {
-          "event" : {
-            "type" : "OnClick",
-            "event_label" : "On Click",
-            "event_parameters" : { },
-            "required_parameters" : [ ]
-          },
-          "conditions" : [ {
-            "type" : "NumericComparison",
-            "left" : {
-              "type" : "NumericVariable",
-              "name" : "health",
-              "value_type" : "java.lang.Double",
-              "variable_type" : "Numeric",
-              "global" : false
-            },
-            "comparator" : ">",
-            "right" : {
-              "type" : "NumericValue",
-              "value" : 0.0
-            }
-          } ],
-          "actions" : [ {
-            "type" : "WaitAction",
-            "seconds_expression" : {
-              "type" : "NumericValue",
-              "value" : 1.0
-            }
-          } ],
-          "active" : true
-        } ]
+        "triggers" : [ ]
       },
+      "sprite_renderer" : null
+    }, {
+      "id" : "20830d2b-9c73-47f1-aa22-185727113498",
+      "name" : "CSC258 Lab 1 p1.2.png",
+      "active" : true,
+      "properties" : [ ],
+      "environment" : null,
+      "transform" : {
+        "x" : 0.0,
+        "y" : 0.0,
+        "rotation" : 0.0,
+        "scale_x" : 0.2,
+        "scale_y" : 0.2
+      },
+      "trigger_manager" : null,
       "sprite_renderer" : {
         "type" : "SpriteRenderer",
-        "sprite" : "f762412e-3324-40a0-a386-39fc3d2e1b4d",
+        "sprite" : "b0231413-7fa1-4493-89ee-2b3a4f6b0e30",
         "visible" : true,
         "opacity" : 100,
         "zindex" : 0
