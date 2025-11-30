@@ -86,7 +86,7 @@ public class HomeView extends javax.swing.JFrame {
         localVariableViewModel = wiring.getLocalViewModel();
         updateVariableController = wiring.getUpdateController();
         deleteVariableController = wiring.getDeleteController();
-        getAllVariablesController = wiring.getGetAllController();  // NEW!
+        getAllVariablesController = wiring.getGetAllController();
 
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.setGlobalVariableViewModel(globalVariableViewModel);
