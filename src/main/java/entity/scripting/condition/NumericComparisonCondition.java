@@ -30,6 +30,18 @@ public class NumericComparisonCondition extends Condition{
         this(new NumericValue(0), "=", new NumericValue(0));
     }
 
+    public NumericExpression getLeft() {
+        return left;
+    }
+
+    public String getComparator() {
+        return comparator;
+    }
+
+    public NumericExpression getRight() {
+        return right;
+    }
+
     public void setLeft(NumericExpression left) {
         this.left = left;
     }

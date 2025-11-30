@@ -4,20 +4,29 @@ import use_case.saving.SaveProjectOutputBoundary;
 import use_case.saving.SaveProjectOutputData;
 
 public class SaveProjectPresenter implements SaveProjectOutputBoundary {
+
+    private final SaveProjectViewModel saveProjectViewModel;
+
     public SaveProjectPresenter(SaveProjectViewModel viewModel) {
+        this.saveProjectViewModel = viewModel;
     }
-    // TODO: implement the ViewModel
-    // SOMETHING LIKE: private final SaveViewModel saveViewModel;
 
     @Override
     public void prepareSuccessView(SaveProjectOutputData outputData) {
-        // System.out.println("Success: " + outputData.getMessage());
-        // TODO: update ViewModel here
+        // Update state with success message
+        SaveProjectState state = saveProjectViewModel.getState();
+        state.setMessage(outputData.getMessage());
+        state.setError(null);
+
+        // Notify the View (HomeView)
+        saveProjectViewModel.firePropertyChange();
     }
 
     @Override
     public void prepareFailView(String error) {
-        System.out.println("Error: " + error);
-        // TODO: update ViewModel here
+        SaveProjectState state = saveProjectViewModel.getState();
+        state.setError(error);
+
+        saveProjectViewModel.firePropertyChange();
     }
 }

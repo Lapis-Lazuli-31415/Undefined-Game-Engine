@@ -1,10 +1,25 @@
 package entity.scripting.event;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+// TYPE INFO
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+// REGISTER EVENT SUBCLASSES
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = OnClickEvent.class, name = "OnClick"),
+        @JsonSubTypes.Type(value = OnKeyPressEvent.class, name = "OnKeyPress"),
+        @JsonSubTypes.Type(value = EmptyEvent.class, name = "Empty")
+})
 public abstract class Event {
     private final String eventLabel;
     private final Map<String, String> eventParameters;
