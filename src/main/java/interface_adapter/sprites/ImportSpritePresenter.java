@@ -1,8 +1,8 @@
-package interface_adapter.Sprites;
+package interface_adapter.sprites;
 
 import interface_adapter.assets.AssetLibViewModel;
-import use_case.Sprites.Import.ImportSpriteResponse;
-import use_case.Sprites.Import.SpriteOutputBoundary;
+import use_case.sprites.ImportSpriteResponse;
+import use_case.sprites.SpriteOutputBoundary;
 
 /**
  * Presenter for the Import Sprite use case.

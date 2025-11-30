@@ -1,4 +1,4 @@
-package interface_adapter.Sprites;
+package interface_adapter.sprites;
 
 import interface_adapter.ViewModel;
 

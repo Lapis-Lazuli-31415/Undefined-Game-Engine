@@ -1,4 +1,4 @@
-package interface_adapter.Sprites;
+package interface_adapter.sprites;
 
 /**
  * State object for the Import Sprite from Unsplash view model.

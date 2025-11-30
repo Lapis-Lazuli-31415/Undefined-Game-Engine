@@ -1,4 +1,4 @@
-package use_case.Sprites.Import;
+package use_case.sprites;
 
 /**
  * Request model for importing a sprite from Unsplash API. (Input data)

@@ -1,4 +1,4 @@
-package use_case.Sprites.Import;
+package use_case.sprites;
 
 import entity.AssetLib;
 import entity.Image;

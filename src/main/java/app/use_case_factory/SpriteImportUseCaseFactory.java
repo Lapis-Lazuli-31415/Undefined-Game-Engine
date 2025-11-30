@@ -5,15 +5,15 @@ import javax.swing.JOptionPane;
 import data_access.FileSystemSpriteDataAccessObject;
 import data_access.UnsplashApiDataAccessObject;
 import entity.AssetLib;
-import interface_adapter.Sprites.ImportSpriteController;
-import interface_adapter.Sprites.ImportSpriteFromUnsplashController;
-import interface_adapter.Sprites.ImportSpriteFromUnsplashPresenter;
-import interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel;
-import interface_adapter.Sprites.ImportSpritePresenter;
-import interface_adapter.Sprites.ImportSpriteViewModel;
+import interface_adapter.sprites.ImportSpriteController;
+import interface_adapter.sprites.ImportSpriteFromUnsplashController;
+import interface_adapter.sprites.ImportSpriteFromUnsplashPresenter;
+import interface_adapter.sprites.ImportSpriteFromUnsplashViewModel;
+import interface_adapter.sprites.ImportSpritePresenter;
+import interface_adapter.sprites.ImportSpriteViewModel;
 import interface_adapter.assets.AssetLibViewModel;
-import use_case.Sprites.Import.ImportSpriteFromUnsplashInteractor;
-import use_case.Sprites.Import.ImportSpriteInteractor;
+import use_case.sprites.ImportSpriteFromUnsplashInteractor;
+import use_case.sprites.ImportSpriteInteractor;
 
 import java.io.IOException;
 

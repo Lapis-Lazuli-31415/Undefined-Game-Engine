@@ -28,12 +28,12 @@ public class HomeView extends javax.swing.JFrame {
     private JButton spritesAddButton;
 
     // sprite import
-    private interface_adapter.Sprites.ImportSpriteController importSpriteController;
-    private interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel;
+    private interface_adapter.sprites.ImportSpriteController importSpriteController;
+    private interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel;
 
     // unsplash import
-    private interface_adapter.Sprites.ImportSpriteFromUnsplashController unsplashController;
-    private interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
+    private interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController;
+    private interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
     private ImportSpriteFromUnsplashView unsplashView;
 
     // Demo wiring
@@ -60,10 +60,10 @@ public class HomeView extends javax.swing.JFrame {
      */
     public HomeView(
             interface_adapter.assets.AssetLibViewModel assetLibViewModel,
-            interface_adapter.Sprites.ImportSpriteController importSpriteController,
-            interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel,
-            interface_adapter.Sprites.ImportSpriteFromUnsplashController unsplashController,
-            interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel) {
+            interface_adapter.sprites.ImportSpriteController importSpriteController,
+            interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel,
+            interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController,
+            interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel) {
 
         this.assetLibViewModel = assetLibViewModel;
         this.importSpriteController = importSpriteController;
@@ -83,9 +83,9 @@ public class HomeView extends javax.swing.JFrame {
 
     private void setupImportSpriteListener() {
         importSpriteViewModel.addPropertyChangeListener(evt -> {
-            if (interface_adapter.Sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
-                interface_adapter.Sprites.ImportSpriteState state =
-                    (interface_adapter.Sprites.ImportSpriteState) evt.getNewValue();
+            if (interface_adapter.sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
+                interface_adapter.sprites.ImportSpriteState state =
+                    (interface_adapter.sprites.ImportSpriteState) evt.getNewValue();
 
                 if (state.isSuccess()) {
                     JOptionPane.showMessageDialog(this,
@@ -484,19 +484,19 @@ public class HomeView extends javax.swing.JFrame {
 
             interface_adapter.assets.AssetLibViewModel assetLibViewModel =
                 new interface_adapter.assets.AssetLibViewModel(assetLib);
-            interface_adapter.Sprites.ImportSpriteViewModel importSpriteViewModel =
-                new interface_adapter.Sprites.ImportSpriteViewModel();
-            interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel =
-                new interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel();
+            interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel =
+                new interface_adapter.sprites.ImportSpriteViewModel();
+            interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel =
+                new interface_adapter.sprites.ImportSpriteFromUnsplashViewModel();
 
             app.use_case_factory.SpriteImportUseCaseFactory.loadExistingAssets(assetLib);
 
-            interface_adapter.Sprites.ImportSpriteController importSpriteController =
+            interface_adapter.sprites.ImportSpriteController importSpriteController =
                 app.use_case_factory.SpriteImportUseCaseFactory.createLocalImportUseCase(
                     assetLibViewModel, importSpriteViewModel);
 
             String unsplashApiKey = System.getenv("UNSPLASH_ACCESS_KEY");
-            interface_adapter.Sprites.ImportSpriteFromUnsplashController unsplashController =
+            interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController =
                 app.use_case_factory.SpriteImportUseCaseFactory.createUnsplashImportUseCase(
                     assetLibViewModel, unsplashViewModel, unsplashApiKey);
 
