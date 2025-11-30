@@ -11,6 +11,8 @@ import use_case.variable.update.UpdateVariableOutputData;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+
 class UpdateVariableInteractorTest {
 
     private Environment globalEnv;

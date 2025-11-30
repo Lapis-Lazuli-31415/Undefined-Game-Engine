@@ -77,6 +77,5 @@ public class Project {
         }
     }
 
-    public void play() {}
     public void save() {}
 }

@@ -96,7 +96,7 @@ public class SaveDemo {
         // Load Sprite from 'uploads'
         try {
             // Pointing to the file you have in your uploads folder
-            java.nio.file.Path spritePath = java.nio.file.Path.of("uploads", "CSC258 Lab 1 p1.2.png");
+            java.nio.file.Path spritePath = java.nio.file.Path.of("uploads", null);
 
             // Create the Image entity
             // (The Image class constructor reads the file to get width/height)

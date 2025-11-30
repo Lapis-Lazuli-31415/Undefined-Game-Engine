@@ -2,19 +2,22 @@
   "id" : "proj-1",
   "name" : "My Game Project",
   "global_environment" : {
-    "variables" : { }
+    "variables" : {
+      "Numeric" : {
+        "variables" : { }
+      },
+      "Boolean" : {
+        "variables" : { }
+      }
+    }
   },
   "assets" : [ {
-    "id" : "a21b24a8-dac6-4511-9a2c-9dce1ce0a00d",
-    "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/CSC258%20Lab%201%20p3.png",
-    "name" : "CSC258 Lab 1 p3.png"
-  }, {
-    "id" : "25f47830-e077-46d9-b2fa-53448dd8baa7",
-    "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/CSC258%20Lab%201%20p1.2.png",
-    "name" : "CSC258 Lab 1 p1.2.png"
+    "id" : "709c44c4-a3a6-4cd7-8f26-179c33b960f4",
+    "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg",
+    "name" : "gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg"
   } ],
   "scenes" : [ {
-    "id" : "9ad99b0e-d8f2-491e-a571-0affadcbf19f",
+    "id" : "85e868e9-8f74-4daa-ae97-4be7e8163e9a",
     "name" : "Default Scene",
     "game_objects" : [ {
       "id" : "demo-1",
@@ -22,22 +25,67 @@
       "active" : true,
       "properties" : [ ],
       "environment" : {
-        "variables" : { }
+        "variables" : {
+          "Numeric" : {
+            "variables" : { }
+          }
+        }
       },
       "transform" : {
         "x" : 0.0,
         "y" : 0.0,
         "rotation" : 0.0,
-        "scale_x" : 80.0,
-        "scale_y" : 80.0
+        "scale_x" : 10.0,
+        "scale_y" : 10.0
       },
       "trigger_manager" : {
-        "triggers" : [ ]
+        "triggers" : [ {
+          "event" : {
+            "type" : "OnClick",
+            "event_label" : "On Click",
+            "event_parameters" : { },
+            "required_parameters" : [ ]
+          },
+          "conditions" : [ {
+            "type" : "NumericComparison",
+            "left" : {
+              "type" : "NumericValue",
+              "value" : 0.0
+            },
+            "comparator" : "=",
+            "right" : {
+              "type" : "NumericValue",
+              "value" : 0.0
+            }
+          }, {
+            "type" : "Empty"
+          } ],
+          "actions" : [ {
+            "type" : "WaitAction",
+            "seconds_expression" : {
+              "type" : "NumericValue",
+              "value" : 0.0
+            }
+          }, {
+            "type" : "Empty"
+          } ],
+          "active" : true
+        }, {
+          "event" : {
+            "type" : "Empty",
+            "event_label" : "Empty",
+            "event_parameters" : { },
+            "required_parameters" : [ ]
+          },
+          "conditions" : [ ],
+          "actions" : [ ],
+          "active" : true
+        } ]
       },
       "sprite_renderer" : null
     }, {
-      "id" : "b9e36e6b-0e58-4b89-81f2-614df9d405c8",
-      "name" : "CSC258 Lab 1 p3.png",
+      "id" : "73d27c20-77ff-472b-baec-60aec1551f81",
+      "name" : "gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg",
       "active" : true,
       "properties" : [ ],
       "environment" : null,
@@ -45,13 +93,13 @@
         "x" : 0.0,
         "y" : 0.0,
         "rotation" : 0.0,
-        "scale_x" : 0.8,
-        "scale_y" : 0.8
+        "scale_x" : 0.1,
+        "scale_y" : 0.1
       },
       "trigger_manager" : null,
       "sprite_renderer" : {
         "type" : "SpriteRenderer",
-        "sprite" : "a21b24a8-dac6-4511-9a2c-9dce1ce0a00d",
+        "sprite" : "709c44c4-a3a6-4cd7-8f26-179c33b960f4",
         "visible" : true,
         "opacity" : 100,
         "zindex" : 0
