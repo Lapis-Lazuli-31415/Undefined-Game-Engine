@@ -8,17 +8,14 @@ import use_case.preview.PreviewOutputData;
  * Part of Interface Adapter layer (green ring in CA diagram).
  * Formats Use Case output for the View.
  *
+ * Converts Output Data (simple types) to View Model state.
+ *
  * @author Wanru Cheng
  */
 public class PreviewPresenter implements PreviewOutputBoundary {
 
     private final PreviewViewModel viewModel;
 
-    /**
-     * Constructor.
-     *
-     * @param viewModel The view model to update
-     */
     public PreviewPresenter(PreviewViewModel viewModel) {
         this.viewModel = viewModel;
     }
@@ -26,7 +23,11 @@ public class PreviewPresenter implements PreviewOutputBoundary {
     @Override
     public void presentSuccess(PreviewOutputData outputData) {
         PreviewState state = new PreviewState();
-        state.setScene(outputData.getScene());
+
+        // Use simple types from Output Data
+        state.setSceneId(outputData.getSceneId());
+        state.setSceneName(outputData.getSceneName());
+        state.setGameObjectCount(outputData.getGameObjectCount());
         state.setError(null);
         state.setWarning(outputData.getWarning());
         state.setReadyToPreview(true);
@@ -48,7 +49,11 @@ public class PreviewPresenter implements PreviewOutputBoundary {
     @Override
     public void presentWarning(String warningMessage, PreviewOutputData outputData) {
         PreviewState state = new PreviewState();
-        state.setScene(outputData.getScene());
+
+        // Use simple types from Output Data
+        state.setSceneId(outputData.getSceneId());
+        state.setSceneName(outputData.getSceneName());
+        state.setGameObjectCount(outputData.getGameObjectCount());
         state.setWarning(warningMessage);
         state.setReadyToPreview(true);
 

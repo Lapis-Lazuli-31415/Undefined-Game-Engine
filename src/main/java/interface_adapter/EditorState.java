@@ -3,10 +3,24 @@ package interface_adapter;
 import entity.Scene;
 import entity.GameObject;
 
+/**
+ * Global editor state management.
+ * Utility class with static methods only - not meant to be instantiated.
+ *
+ * @author Wanru Cheng
+ */
 public class EditorState {
 
     private static Scene currentScene;
     private static GameObject currentGameObject;
+
+    /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class with static methods only.
+     */
+    private EditorState() {
+        throw new UnsupportedOperationException("EditorState is a utility class and cannot be instantiated");
+    }
 
     // --- Scene getters/setters ---
     public static Scene getCurrentScene() {
@@ -37,4 +51,3 @@ public class EditorState {
         currentGameObject = null;
     }
 }
-

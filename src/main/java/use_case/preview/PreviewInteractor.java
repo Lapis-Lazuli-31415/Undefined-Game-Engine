@@ -9,6 +9,8 @@ import use_case.validate_scene.ValidationResult;
  * Part of Use Case layer (pink ring in CA diagram).
  * Contains business logic for preview feature.
  *
+ * Extracts simple types from Entity and passes to Presenter.
+ *
  * @author Wanru Cheng
  */
 public class PreviewInteractor implements PreviewInputBoundary {
@@ -16,12 +18,6 @@ public class PreviewInteractor implements PreviewInputBoundary {
     private final ValidateSceneInputBoundary validator;
     private final PreviewOutputBoundary outputBoundary;
 
-    /**
-     * Constructor.
-     *
-     * @param validator Scene validator
-     * @param outputBoundary Output boundary (presenter)
-     */
     public PreviewInteractor(
             ValidateSceneInputBoundary validator,
             PreviewOutputBoundary outputBoundary) {
@@ -36,19 +32,33 @@ public class PreviewInteractor implements PreviewInputBoundary {
         // Validate scene
         ValidationResult result = validator.validate(scene);
 
+        // Extract simple types from Scene
+        String sceneId = scene.getId() != null ? scene.getId().toString() : "unknown";
+        String sceneName = scene.getName() != null ? scene.getName() : "Untitled";
+        int gameObjectCount = scene.getGameObjects() != null ? scene.getGameObjects().size() : 0;
+
         if (result.isError()) {
             // Validation failed
             outputBoundary.presentError(result.getMessage());
         } else if (result.isWarning()) {
             // Validation passed with warning
             PreviewOutputData outputData = new PreviewOutputData(
-                    scene,
-                    result.getMessage()
+                    sceneId,
+                    sceneName,
+                    gameObjectCount,
+                    result.getMessage(),
+                    true
             );
             outputBoundary.presentWarning(result.getMessage(), outputData);
         } else {
             // Validation passed
-            PreviewOutputData outputData = new PreviewOutputData(scene, null);
+            PreviewOutputData outputData = new PreviewOutputData(
+                    sceneId,
+                    sceneName,
+                    gameObjectCount,
+                    null,
+                    true
+            );
             outputBoundary.presentSuccess(outputData);
         }
     }
@@ -56,6 +66,5 @@ public class PreviewInteractor implements PreviewInputBoundary {
     @Override
     public void stop() {
         // Stop preview logic
-        // For now, just notify that preview stopped
     }
 }

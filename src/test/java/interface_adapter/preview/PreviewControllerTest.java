@@ -1,23 +1,15 @@
 package interface_adapter.preview;
 
 import entity.GameObject;
-import entity.InputManager;
 import entity.Scene;
-import entity.event_listener.ClickListener;
-import entity.event_listener.EventListener;
-import entity.event_listener.KeyPressListener;
 import entity.scripting.environment.Environment;
-import entity.scripting.event.Event;
-import entity.scripting.event.OnClickEvent;
-import entity.scripting.event.OnKeyPressEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import use_case.preview.PreviewInputBoundary;
 import use_case.preview.PreviewInputData;
+import use_case.preview.PreviewInputBoundary;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,174 +21,98 @@ import static org.junit.jupiter.api.Assertions.*;
 class PreviewControllerTest {
 
     private PreviewController controller;
-    private TestPreviewInteractor testInteractor;
+    private TestPreviewInteractor interactor;
 
     @BeforeEach
     void setUp() {
-        testInteractor = new TestPreviewInteractor();
-        controller = new PreviewController(testInteractor);
+        interactor = new TestPreviewInteractor();
+        controller = new PreviewController(interactor);  // ✅ 只传 interactor
     }
-
-    // Helper method to create OnKeyPressEvent with a key
-    private OnKeyPressEvent createKeyPressEvent(String key) {
-        OnKeyPressEvent event = new OnKeyPressEvent();
-        event.addEventParameter("Key", key);
-        return event;
-    }
-
-    // ========== PreviewController Tests ==========
 
     @Test
-    void execute_withValidScene_callsInteractor() {
+    void execute_callsInteractorWithCorrectInputData() {
+        // Arrange
         Scene scene = createTestScene();
+
+        // Act
         controller.execute(scene);
 
-        assertTrue(testInteractor.executeCalled);
-        assertNotNull(testInteractor.lastInputData);
-        assertEquals(scene, testInteractor.lastInputData.getScene());
+        // Assert
+        assertTrue(interactor.executeCalled);
+        assertNotNull(interactor.lastInputData);
+        assertEquals(scene, interactor.lastInputData.getScene());
     }
 
     @Test
-    void execute_withNullScene_callsInteractor() {
+    void execute_withNullScene_stillCallsInteractor() {
+        // Act
         controller.execute(null);
 
-        assertTrue(testInteractor.executeCalled);
-        assertNull(testInteractor.lastInputData.getScene());
+        // Assert
+        assertTrue(interactor.executeCalled);
+        assertNotNull(interactor.lastInputData);
+        assertNull(interactor.lastInputData.getScene());
+    }
+
+    @Test
+    void execute_withValidScene_passesSceneToInteractor() {
+        // Arrange
+        Scene scene = createTestScene();
+
+        // Act
+        controller.execute(scene);
+
+        // Assert
+        assertTrue(interactor.executeCalled);
+        Scene passedScene = interactor.lastInputData.getScene();
+        assertEquals(scene, passedScene);
+    }
+
+    @Test
+    void execute_multipleScenes_callsInteractorMultipleTimes() {
+        // Arrange
+        Scene scene1 = createTestScene();
+        Scene scene2 = createTestScene();
+
+        // Act
+        controller.execute(scene1);
+        controller.execute(scene2);
+
+        // Assert
+        assertEquals(2, interactor.executeCallCount);
     }
 
     @Test
     void stop_callsInteractorStop() {
+        // Act
         controller.stop();
-        assertTrue(testInteractor.stopCalled);
+
+        // Assert
+        assertTrue(interactor.stopCalled);
     }
-
-    // ========== Inner EventListenerFactory Tests ==========
-
-    @Test
-    void innerFactory_createKeyPressListener_returnsKeyPressListener() {
-        InputManager inputManager = new InputManager();
-        PreviewController.EventListenerFactory factory =
-                new PreviewController.EventListenerFactory(inputManager);
-        OnKeyPressEvent event = createKeyPressEvent("W");
-
-        EventListener listener = factory.createKeyPressListener(event);
-
-        assertNotNull(listener);
-        assertTrue(listener instanceof KeyPressListener);
-    }
-
-    @Test
-    void innerFactory_createClickListener_returnsClickListener() {
-        InputManager inputManager = new InputManager();
-        PreviewController.EventListenerFactory factory =
-                new PreviewController.EventListenerFactory(inputManager);
-
-        EventListener listener = factory.createClickListener("TestButton");
-
-        assertNotNull(listener);
-        assertTrue(listener instanceof ClickListener);
-    }
-
-    @Test
-    void innerFactory_createListener_withOnKeyPressEvent_returnsKeyPressListener() {
-        InputManager inputManager = new InputManager();
-        PreviewController.EventListenerFactory factory =
-                new PreviewController.EventListenerFactory(inputManager);
-        OnKeyPressEvent event = createKeyPressEvent("A");
-        GameObject obj = createTestGameObject();
-
-        EventListener listener = factory.createListener(event, obj);
-
-        assertNotNull(listener);
-        assertTrue(listener instanceof KeyPressListener);
-    }
-
-    @Test
-    void innerFactory_createListener_withOnClickEvent_returnsClickListener() {
-        InputManager inputManager = new InputManager();
-        PreviewController.EventListenerFactory factory =
-                new PreviewController.EventListenerFactory(inputManager);
-        OnClickEvent event = new OnClickEvent();
-        GameObject obj = createTestGameObject();
-
-        EventListener listener = factory.createListener(event, obj);
-
-        assertNotNull(listener);
-        assertTrue(listener instanceof ClickListener);
-    }
-
-    @Test
-    void innerFactory_createListener_withOnClickEventAndNullGameObject_returnsClickListener() {
-        InputManager inputManager = new InputManager();
-        PreviewController.EventListenerFactory factory =
-                new PreviewController.EventListenerFactory(inputManager);
-        OnClickEvent event = new OnClickEvent();
-
-        EventListener listener = factory.createListener(event, null);
-
-        assertNotNull(listener);
-        assertTrue(listener instanceof ClickListener);
-    }
-
-    @Test
-    void innerFactory_createListener_withUnknownEventType_returnsNull() {
-        InputManager inputManager = new InputManager();
-        PreviewController.EventListenerFactory factory =
-                new PreviewController.EventListenerFactory(inputManager);
-
-        // Create a custom Event that's not OnKeyPress or OnClick
-        Event unknownEvent = new Event("Unknown") {
-            @Override
-            public boolean isRequiredParameter(String key) {
-                return false;
-            }
-
-            @Override
-            public List<String> getRequiredParameters() {
-                return Collections.emptyList();
-            }
-        };
-        GameObject obj = createTestGameObject();
-
-        EventListener listener = factory.createListener(unknownEvent, obj);
-
-        assertNull(listener);
-    }
-
-    // ========== Helper methods ==========
 
     private Scene createTestScene() {
         ArrayList<GameObject> objects = new ArrayList<>();
-        objects.add(createTestGameObject());
-        return new Scene("test-id", "Test Scene", objects);
+        objects.add(new GameObject("obj-1", "TestObject", true, new ArrayList<>(), new Environment()));
+        return new Scene(UUID.randomUUID(), "Test Scene", objects);
     }
-
-    private GameObject createTestGameObject() {
-        return new GameObject(
-                "obj-1",
-                "TestObject",
-                true,
-                new ArrayList<>(),
-                new Environment()
-        );
-    }
-
-    // ========== Test double ==========
 
     private static class TestPreviewInteractor implements PreviewInputBoundary {
         boolean executeCalled = false;
         boolean stopCalled = false;
+        int executeCallCount = 0;
         PreviewInputData lastInputData = null;
 
         @Override
         public void execute(PreviewInputData inputData) {
             executeCalled = true;
+            executeCallCount++;
             lastInputData = inputData;
         }
 
         @Override
         public void stop() {
-            stopCalled = true;
+            stopCalled = true;  // ✅ 实现 stop() 方法
         }
     }
 }

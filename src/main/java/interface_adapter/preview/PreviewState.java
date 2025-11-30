@@ -1,16 +1,18 @@
 package interface_adapter.preview;
 
-import entity.Scene;
-
 /**
  * State for preview feature.
  * Holds all data needed by the View.
+ *
+ * Contains only SIMPLE TYPES (no Entity objects).
  *
  * @author Wanru Cheng
  */
 public class PreviewState {
 
-    private Scene scene;
+    private String sceneId;
+    private String sceneName;
+    private int gameObjectCount;
     private String error;
     private String warning;
     private boolean readyToPreview;
@@ -19,18 +21,36 @@ public class PreviewState {
      * Constructor.
      */
     public PreviewState() {
-        this.scene = null;
+        this.sceneId = null;
+        this.sceneName = null;
+        this.gameObjectCount = 0;
         this.error = null;
         this.warning = null;
         this.readyToPreview = false;
     }
 
-    public Scene getScene() {
-        return scene;
+    public String getSceneId() {
+        return sceneId;
     }
 
-    public void setScene(Scene scene) {
-        this.scene = scene;
+    public void setSceneId(String sceneId) {
+        this.sceneId = sceneId;
+    }
+
+    public String getSceneName() {
+        return sceneName;
+    }
+
+    public void setSceneName(String sceneName) {
+        this.sceneName = sceneName;
+    }
+
+    public int getGameObjectCount() {
+        return gameObjectCount;
+    }
+
+    public void setGameObjectCount(int gameObjectCount) {
+        this.gameObjectCount = gameObjectCount;
     }
 
     public String getError() {

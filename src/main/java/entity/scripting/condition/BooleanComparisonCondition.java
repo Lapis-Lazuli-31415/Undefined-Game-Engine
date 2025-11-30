@@ -2,7 +2,6 @@ package entity.scripting.condition;
 
 import entity.scripting.environment.Environment;
 import entity.scripting.error.ParseSyntaxException;
-import entity.scripting.expression.AndExpression;
 import entity.scripting.expression.BooleanExpression;
 import entity.scripting.expression.Expression;
 import entity.scripting.expression.ExpressionFactory;
@@ -43,7 +42,7 @@ public class BooleanComparisonCondition extends Condition {
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Condition parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 2;
 
@@ -66,6 +65,7 @@ public class BooleanComparisonCondition extends Condition {
             this.left = (BooleanExpression) leftResult;
             this.right = (BooleanExpression) rightResult;
         }
+        return null;
     }
 
     @Override

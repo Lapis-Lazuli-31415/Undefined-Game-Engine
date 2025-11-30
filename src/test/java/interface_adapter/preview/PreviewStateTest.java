@@ -1,11 +1,6 @@
 package interface_adapter.preview;
 
-import entity.GameObject;
-import entity.Scene;
-import entity.scripting.environment.Environment;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,22 +17,51 @@ class PreviewStateTest {
         PreviewState state = new PreviewState();
 
         // Assert
-        assertNull(state.getScene());
+        assertNull(state.getSceneId());
+        assertNull(state.getSceneName());
+        assertEquals(0, state.getGameObjectCount());
         assertNull(state.getError());
         assertNull(state.getWarning());
+        assertFalse(state.isReadyToPreview());
     }
 
     @Test
-    void setScene_storesScene() {
+    void setSceneId_storesSceneId() {
         // Arrange
         PreviewState state = new PreviewState();
-        Scene scene = createTestScene();
+        String sceneId = "test-scene-id-123";
 
         // Act
-        state.setScene(scene);
+        state.setSceneId(sceneId);
 
         // Assert
-        assertEquals(scene, state.getScene());
+        assertEquals(sceneId, state.getSceneId());
+    }
+
+    @Test
+    void setSceneName_storesSceneName() {
+        // Arrange
+        PreviewState state = new PreviewState();
+        String sceneName = "Test Scene";
+
+        // Act
+        state.setSceneName(sceneName);
+
+        // Assert
+        assertEquals(sceneName, state.getSceneName());
+    }
+
+    @Test
+    void setGameObjectCount_storesCount() {
+        // Arrange
+        PreviewState state = new PreviewState();
+        int count = 5;
+
+        // Act
+        state.setGameObjectCount(count);
+
+        // Assert
+        assertEquals(count, state.getGameObjectCount());
     }
 
     @Test
@@ -52,6 +76,20 @@ class PreviewStateTest {
         // Assert
         assertEquals(error, state.getError());
     }
+
+    @Test
+    void setWarning_storesWarning() {
+        // Arrange
+        PreviewState state = new PreviewState();
+        String warning = "Test warning";
+
+        // Act
+        state.setWarning(warning);
+
+        // Assert
+        assertEquals(warning, state.getWarning());
+    }
+
     @Test
     void isReadyToPreview_initialState_returnsFalse() {
         // Arrange
@@ -85,55 +123,68 @@ class PreviewStateTest {
         // Assert
         assertFalse(state.isReadyToPreview());
     }
-    @Test
-    void setWarning_storesWarning() {
-        // Arrange
-        PreviewState state = new PreviewState();
-        String warning = "Test warning";
-
-        // Act
-        state.setWarning(warning);
-
-        // Assert
-        assertEquals(warning, state.getWarning());
-    }
 
     @Test
-    void setScene_withNull_storesNull() {
+    void setSceneId_withNull_storesNull() {
         // Arrange
         PreviewState state = new PreviewState();
-        state.setScene(createTestScene());
+        state.setSceneId("test-id");
 
         // Act
-        state.setScene(null);
+        state.setSceneId(null);
 
         // Assert
-        assertNull(state.getScene());
+        assertNull(state.getSceneId());
     }
 
     @Test
     void multipleSetters_workIndependently() {
         // Arrange
         PreviewState state = new PreviewState();
-        Scene scene = createTestScene();
+        String sceneId = "scene-123";
+        String sceneName = "My Scene";
+        int count = 10;
         String error = "Error";
         String warning = "Warning";
 
         // Act
-        state.setScene(scene);
+        state.setSceneId(sceneId);
+        state.setSceneName(sceneName);
+        state.setGameObjectCount(count);
         state.setError(error);
         state.setWarning(warning);
+        state.setReadyToPreview(true);
 
         // Assert
-        assertEquals(scene, state.getScene());
+        assertEquals(sceneId, state.getSceneId());
+        assertEquals(sceneName, state.getSceneName());
+        assertEquals(count, state.getGameObjectCount());
         assertEquals(error, state.getError());
         assertEquals(warning, state.getWarning());
+        assertTrue(state.isReadyToPreview());
     }
 
-    // Helper method
-    private Scene createTestScene() {
-        ArrayList<GameObject> objects = new ArrayList<>();
-        objects.add(new GameObject("obj-1", "TestObject", true, new ArrayList<>(), new Environment()));
-        return new Scene("test-id", "Test Scene", objects, null);
+    @Test
+    void setGameObjectCount_withZero_storesZero() {
+        // Arrange
+        PreviewState state = new PreviewState();
+
+        // Act
+        state.setGameObjectCount(0);
+
+        // Assert
+        assertEquals(0, state.getGameObjectCount());
+    }
+
+    @Test
+    void setGameObjectCount_withNegative_storesNegative() {
+        // Arrange
+        PreviewState state = new PreviewState();
+
+        // Act
+        state.setGameObjectCount(-1);
+
+        // Assert
+        assertEquals(-1, state.getGameObjectCount());
     }
 }

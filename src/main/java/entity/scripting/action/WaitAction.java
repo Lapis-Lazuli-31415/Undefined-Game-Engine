@@ -42,7 +42,7 @@ public class WaitAction extends Action{
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Action parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 1;
 
@@ -60,6 +60,7 @@ public class WaitAction extends Action{
         } else {
             this.secondsExpression = (NumericVariable) secondsResult;
         }
+        return null;
     }
 
     @Override

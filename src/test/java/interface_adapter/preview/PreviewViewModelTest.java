@@ -78,4 +78,38 @@ class PreviewViewModelTest {
         // Assert
         assertNull(viewModel.getState());
     }
+
+    @Test
+    void firePropertyChanged_sendsCorrectPropertyName() {
+        // Arrange
+        final String[] propertyName = {null};
+        PropertyChangeListener listener = evt -> propertyName[0] = evt.getPropertyName();
+        viewModel.addPropertyChangeListener(listener);
+
+        // Act
+        viewModel.firePropertyChanged();
+
+        // Assert
+        assertEquals("state", propertyName[0]);
+    }
+
+    @Test
+    void setState_withSimpleTypes_storesCorrectly() {
+        // Arrange
+        PreviewState state = new PreviewState();
+        state.setSceneId("test-123");
+        state.setSceneName("Test Scene");
+        state.setGameObjectCount(7);
+        state.setReadyToPreview(true);
+
+        // Act
+        viewModel.setState(state);
+
+        // Assert
+        PreviewState retrievedState = viewModel.getState();
+        assertEquals("test-123", retrievedState.getSceneId());
+        assertEquals("Test Scene", retrievedState.getSceneName());
+        assertEquals(7, retrievedState.getGameObjectCount());
+        assertTrue(retrievedState.isReadyToPreview());
+    }
 }

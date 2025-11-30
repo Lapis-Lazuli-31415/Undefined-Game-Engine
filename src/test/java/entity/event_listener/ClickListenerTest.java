@@ -1,13 +1,14 @@
 package entity.event_listener;
+
 import entity.SpriteRenderer;
 import entity.GameObject;
-import entity.InputManager;
 import entity.Property;
 import entity.Transform;
 import entity.scripting.environment.Environment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import entity.Image;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.imageio.ImageIO;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
+import view.InputManager;
 
 /**
  * Tests for ClickListener.
@@ -28,12 +30,16 @@ class ClickListenerTest {
 
     private InputManager inputManager;
     private JPanel dummyComponent;
+    private static final int CANVAS_WIDTH = 800;
+    private static final int CANVAS_HEIGHT = 600;
 
     @BeforeEach
     void setUp() {
         inputManager = new InputManager();
+        inputManager.setCanvasDimensions(CANVAS_WIDTH, CANVAS_HEIGHT);
         dummyComponent = new JPanel();
     }
+
     @Test
     void collisionMode_withSpriteRenderer_usesSpriteBounds() throws Exception {
         // Create a temporary test image file
@@ -48,10 +54,10 @@ class ClickListenerTest {
             // Create SpriteRenderer with the image
             SpriteRenderer spriteRenderer = new SpriteRenderer(image, true);
 
-            // Create GameObject with SpriteRenderer
+            // Create GameObject at CENTER (0, 0 offset)
             Vector<Double> position = new Vector<>();
-            position.add(100.0);
-            position.add(100.0);
+            position.add(0.0);
+            position.add(0.0);
 
             Vector<Double> scale = new Vector<>();
             scale.add(1.0);
@@ -73,11 +79,13 @@ class ClickListenerTest {
 
             ClickListener listener = new ClickListener(obj, inputManager);
 
-            // Simulate click at center
+            int centerX = CANVAS_WIDTH / 2;
+            int centerY = CANVAS_HEIGHT / 2;
+
             MouseEvent mouseEvent = new MouseEvent(
                     dummyComponent, MouseEvent.MOUSE_PRESSED,
                     System.currentTimeMillis(), 0,
-                    100, 100, 1, false, MouseEvent.BUTTON1
+                    centerX, centerY, 1, false, MouseEvent.BUTTON1
             );
             inputManager.getMouseListener().mousePressed(mouseEvent);
 
@@ -89,46 +97,6 @@ class ClickListenerTest {
         }
     }
 
-//    @Test
-//    void collisionMode_withSpriteRenderer_usesSpriteBounds() {
-//        // Arrange - create GameObject with SpriteRenderer
-//        Vector<Double> position = new Vector<>();
-//        position.add(100.0);
-//        position.add(100.0);
-//
-//        Vector<Double> scale = new Vector<>();
-//        scale.add(1.0);
-//        scale.add(1.0);
-//
-//        Transform transform = new Transform(position, 0f, scale);
-//
-//        // Create SpriteRenderer and add to properties
-//        ArrayList<Property> properties = new ArrayList<>();
-//        SpriteRenderer spriteRenderer = new SpriteRenderer();
-//        properties.add(spriteRenderer);
-//
-//        GameObject obj = new GameObject(
-//                "obj-1",
-//                "TestObject",
-//                true,
-//                properties,
-//                new Environment()
-//        );
-//        obj.setTransform(transform);
-//
-//        ClickListener listener = new ClickListener(obj, inputManager);
-//
-//        // Simulate click
-//        MouseEvent mouseEvent = new MouseEvent(
-//                dummyComponent, MouseEvent.MOUSE_PRESSED,
-//                System.currentTimeMillis(), 0,
-//                100, 100, 1, false, MouseEvent.BUTTON1
-//        );
-//        inputManager.getMouseListener().mousePressed(mouseEvent);
-//
-//        // This will trigger getSpriteRenderer() and the for loop
-//        listener.isTriggered();
-//    }
     // ========== Button Mode Tests ==========
 
     @Test
@@ -174,42 +142,44 @@ class ClickListenerTest {
 
     @Test
     void collisionMode_isUsingCollisionDetection_returnsTrue() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
         assertTrue(listener.isUsingCollisionDetection());
     }
 
     @Test
     void collisionMode_getGameObject_returnsObject() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
         assertEquals(obj, listener.getGameObject());
     }
 
     @Test
     void collisionMode_getButtonLabel_returnsObjectName() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
         assertEquals("TestObject", listener.getButtonLabel());
     }
 
     @Test
     void collisionMode_isTriggered_noClick_returnsFalse() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
         assertFalse(listener.isTriggered());
     }
 
     @Test
     void collisionMode_isTriggered_clickInsideBounds_returnsTrue() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
 
-        // Simulate left click at center of object
+        int centerX = CANVAS_WIDTH / 2;
+        int centerY = CANVAS_HEIGHT / 2;
+
         MouseEvent mouseEvent = new MouseEvent(
                 dummyComponent, MouseEvent.MOUSE_PRESSED,
                 System.currentTimeMillis(), 0,
-                100, 100, 1, false, MouseEvent.BUTTON1
+                centerX, centerY, 1, false, MouseEvent.BUTTON1
         );
         inputManager.getMouseListener().mousePressed(mouseEvent);
 
@@ -218,14 +188,14 @@ class ClickListenerTest {
 
     @Test
     void collisionMode_isTriggered_clickOutsideBounds_returnsFalse() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
 
         // Simulate left click far from object
         MouseEvent mouseEvent = new MouseEvent(
                 dummyComponent, MouseEvent.MOUSE_PRESSED,
                 System.currentTimeMillis(), 0,
-                500, 500, 1, false, MouseEvent.BUTTON1
+                50, 50, 1, false, MouseEvent.BUTTON1
         );
         inputManager.getMouseListener().mousePressed(mouseEvent);
 
@@ -234,14 +204,17 @@ class ClickListenerTest {
 
     @Test
     void collisionMode_isTriggered_rightClick_returnsFalse() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
+
+        int centerX = CANVAS_WIDTH / 2;
+        int centerY = CANVAS_HEIGHT / 2;
 
         // Simulate right click (not left)
         MouseEvent mouseEvent = new MouseEvent(
                 dummyComponent, MouseEvent.MOUSE_PRESSED,
                 System.currentTimeMillis(), 0,
-                100, 100, 1, false, MouseEvent.BUTTON3
+                centerX, centerY, 1, false, MouseEvent.BUTTON3
         );
         inputManager.getMouseListener().mousePressed(mouseEvent);
 
@@ -260,10 +233,13 @@ class ClickListenerTest {
         );
         ClickListener listener = new ClickListener(obj, inputManager);
 
+        int centerX = CANVAS_WIDTH / 2;
+        int centerY = CANVAS_HEIGHT / 2;
+
         MouseEvent mouseEvent = new MouseEvent(
                 dummyComponent, MouseEvent.MOUSE_PRESSED,
                 System.currentTimeMillis(), 0,
-                100, 100, 1, false, MouseEvent.BUTTON1
+                centerX, centerY, 1, false, MouseEvent.BUTTON1
         );
         inputManager.getMouseListener().mousePressed(mouseEvent);
 
@@ -278,8 +254,9 @@ class ClickListenerTest {
 
     @Test
     void collisionMode_nullInputManager_isTriggeredReturnsFalse() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, null);
+
         assertFalse(listener.isTriggered());
     }
 
@@ -295,7 +272,7 @@ class ClickListenerTest {
 
     @Test
     void toString_collisionMode_containsCollision() {
-        GameObject obj = createTestGameObject(100, 100);
+        GameObject obj = createTestGameObject(0, 0);
         ClickListener listener = new ClickListener(obj, inputManager);
         String str = listener.toString();
         assertTrue(str.contains("collision"));

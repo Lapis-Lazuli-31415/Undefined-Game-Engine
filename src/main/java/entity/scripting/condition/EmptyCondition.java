@@ -16,10 +16,11 @@ public class EmptyCondition extends Condition{
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Condition parse(String string) throws ParseSyntaxException {
         if (string != null && !string.isEmpty()) {
             throw new ParseSyntaxException("Invalid Syntax: Empty Condition expects empty string");
         }
+        return null;
     }
 
     @Override

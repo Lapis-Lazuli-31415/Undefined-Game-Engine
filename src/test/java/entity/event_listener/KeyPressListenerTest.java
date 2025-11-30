@@ -1,6 +1,5 @@
 package entity.event_listener;
 
-import entity.InputManager;
 import entity.scripting.event.OnKeyPressEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,7 @@ import javax.swing.JPanel;
 import java.awt.event.KeyEvent;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+import view.InputManager;
 /**
  * Tests for KeyPressListener.
  *

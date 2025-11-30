@@ -13,7 +13,7 @@ public class TriggerExecutionInputData {
     private final Trigger trigger;
     private final GameObject gameObject;
     private final Environment globalEnvironment;
-    private final Scene scene;  // ✅ 添加 scene 字段
+    private final Scene scene;
 
     /**
      * Constructor.
@@ -21,14 +21,14 @@ public class TriggerExecutionInputData {
      * @param trigger The trigger to execute
      * @param gameObject The game object that triggered the event
      * @param globalEnvironment The global environment
-     * @param scene The current scene  ✅ 添加 scene 参数
+     * @param scene The current scene
      */
     public TriggerExecutionInputData(Trigger trigger, GameObject gameObject,
                                      Environment globalEnvironment, Scene scene) {
         this.trigger = trigger;
         this.gameObject = gameObject;
         this.globalEnvironment = globalEnvironment;
-        this.scene = scene;  // ✅ 保存 scene
+        this.scene = scene;
     }
 
     public Trigger getTrigger() {
@@ -43,7 +43,7 @@ public class TriggerExecutionInputData {
         return globalEnvironment;
     }
 
-    public Scene getScene() {  // ✅ 添加 getter
+    public Scene getScene() {
         return scene;
     }
 }

@@ -1,13 +1,8 @@
 package interface_adapter.preview;
 
-import entity.GameObject;
-import entity.Scene;
-import entity.scripting.environment.Environment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import use_case.preview.PreviewOutputData;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,10 +23,15 @@ class PreviewPresenterTest {
     }
 
     @Test
-    void presentSuccess_updatesViewModelWithScene() {
+    void presentSuccess_updatesViewModelWithSimpleTypes() {
         // Arrange
-        Scene scene = createTestScene();
-        PreviewOutputData outputData = new PreviewOutputData(scene, null);
+        PreviewOutputData outputData = new PreviewOutputData(
+                "scene-123",
+                "Test Scene",
+                5,
+                null,
+                true
+        );
 
         // Act
         presenter.presentSuccess(outputData);
@@ -39,8 +39,12 @@ class PreviewPresenterTest {
         // Assert
         PreviewState state = viewModel.getState();
         assertNotNull(state);
-        assertEquals(scene, state.getScene());
+        assertEquals("scene-123", state.getSceneId());
+        assertEquals("Test Scene", state.getSceneName());
+        assertEquals(5, state.getGameObjectCount());
         assertNull(state.getError());
+        assertNull(state.getWarning());
+        assertTrue(state.isReadyToPreview());
     }
 
     @Test
@@ -55,14 +59,20 @@ class PreviewPresenterTest {
         PreviewState state = viewModel.getState();
         assertNotNull(state);
         assertEquals(errorMessage, state.getError());
+        assertFalse(state.isReadyToPreview());
     }
 
     @Test
-    void presentWarning_updatesViewModelWithSceneAndWarning() {
+    void presentWarning_updatesViewModelWithSceneDataAndWarning() {
         // Arrange
-        Scene scene = createTestScene();
         String warningMessage = "Test warning";
-        PreviewOutputData outputData = new PreviewOutputData(scene, warningMessage);
+        PreviewOutputData outputData = new PreviewOutputData(
+                "scene-456",
+                "Warning Scene",
+                3,
+                warningMessage,
+                true
+        );
 
         // Act
         presenter.presentWarning(warningMessage, outputData);
@@ -70,14 +80,66 @@ class PreviewPresenterTest {
         // Assert
         PreviewState state = viewModel.getState();
         assertNotNull(state);
-        assertEquals(scene, state.getScene());
+        assertEquals("scene-456", state.getSceneId());
+        assertEquals("Warning Scene", state.getSceneName());
+        assertEquals(3, state.getGameObjectCount());
         assertEquals(warningMessage, state.getWarning());
+        assertTrue(state.isReadyToPreview());
     }
 
-    // Helper method
-    private Scene createTestScene() {
-        ArrayList<GameObject> objects = new ArrayList<>();
-        objects.add(new GameObject("obj-1", "TestObject", true, new ArrayList<>(), new Environment()));
-        return new Scene("test-id", "Test Scene", objects, null);
+    @Test
+    void presentSuccess_withZeroGameObjects_updatesCorrectly() {
+        // Arrange
+        PreviewOutputData outputData = new PreviewOutputData(
+                "empty-scene",
+                "Empty Scene",
+                0,
+                null,
+                true
+        );
+
+        // Act
+        presenter.presentSuccess(outputData);
+
+        // Assert
+        PreviewState state = viewModel.getState();
+        assertEquals(0, state.getGameObjectCount());
+    }
+
+    @Test
+    void presentSuccess_withWarningInOutputData_storesWarning() {
+        // Arrange
+        PreviewOutputData outputData = new PreviewOutputData(
+                "scene-789",
+                "Scene With Warning",
+                2,
+                "Minor issue detected",
+                true
+        );
+
+        // Act
+        presenter.presentSuccess(outputData);
+
+        // Assert
+        PreviewState state = viewModel.getState();
+        assertEquals("Minor issue detected", state.getWarning());
+    }
+
+    @Test
+    void presentError_clearsOtherFields() {
+        // Arrange
+        String errorMessage = "Fatal error";
+
+        // Act
+        presenter.presentError(errorMessage);
+
+        // Assert
+        PreviewState state = viewModel.getState();
+        assertEquals(errorMessage, state.getError());
+        assertFalse(state.isReadyToPreview());
+        // Other fields should be default values
+        assertNull(state.getSceneId());
+        assertNull(state.getSceneName());
+        assertEquals(0, state.getGameObjectCount());
     }
 }

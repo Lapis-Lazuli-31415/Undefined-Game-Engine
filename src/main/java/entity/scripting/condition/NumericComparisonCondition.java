@@ -6,7 +6,6 @@ import entity.scripting.error.ParseSyntaxException;
 import entity.scripting.expression.Expression;
 import entity.scripting.expression.ExpressionFactory;
 import entity.scripting.expression.NumericExpression;
-import entity.scripting.expression.SimpleArithmeticOperation;
 import entity.scripting.expression.value.NumericValue;
 
 import java.util.Set;
@@ -64,7 +63,7 @@ public class NumericComparisonCondition extends Condition{
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Condition parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 3;
 
@@ -92,6 +91,7 @@ public class NumericComparisonCondition extends Condition{
             this.comparator = comparator;
             this.right = (NumericExpression) rightResult;
         }
+        return null;
     }
 
     private static boolean isValidComparator(String comparator) {

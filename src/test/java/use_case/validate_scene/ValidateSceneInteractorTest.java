@@ -1,13 +1,13 @@
 package use_case.validate_scene;
 
 import entity.GameObject;
-import entity.Property;
 import entity.Scene;
 import entity.scripting.environment.Environment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,37 +55,7 @@ class ValidateSceneInteractorTest {
         // Arrange
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(createTestGameObject());
-        Scene scene = new Scene(null, "Test Scene", objects, null);
-
-        // Act
-        ValidationResult result = validator.validate(scene);
-
-        // Assert
-        assertTrue(result.isError());
-        assertEquals("Scene ID needed", result.getMessage());
-    }
-
-    @Test
-    void validate_sceneWithEmptyId_returnsError() {
-        // Arrange
-        ArrayList<GameObject> objects = new ArrayList<>();
-        objects.add(createTestGameObject());
-        Scene scene = new Scene("", "Test Scene", objects, null);
-
-        // Act
-        ValidationResult result = validator.validate(scene);
-
-        // Assert
-        assertTrue(result.isError());
-        assertEquals("Scene ID needed", result.getMessage());
-    }
-
-    @Test
-    void validate_sceneWithWhitespaceId_returnsError() {
-        // Arrange
-        ArrayList<GameObject> objects = new ArrayList<>();
-        objects.add(createTestGameObject());
-        Scene scene = new Scene("   ", "Test Scene", objects, null);
+        Scene scene = new Scene(null, "Test Scene", objects);
 
         // Act
         ValidationResult result = validator.validate(scene);
@@ -100,7 +70,7 @@ class ValidateSceneInteractorTest {
         // Arrange
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(createTestGameObject());
-        Scene scene = new Scene("test-id", null, objects, null);
+        Scene scene = new Scene(UUID.randomUUID(), null, objects);
 
         // Act
         ValidationResult result = validator.validate(scene);
@@ -115,7 +85,7 @@ class ValidateSceneInteractorTest {
         // Arrange
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(createTestGameObject());
-        Scene scene = new Scene("test-id", "", objects, null);
+        Scene scene = new Scene(UUID.randomUUID(), "", objects);
 
         // Act
         ValidationResult result = validator.validate(scene);
@@ -128,7 +98,7 @@ class ValidateSceneInteractorTest {
     @Test
     void validate_sceneWithNullGameObjects_returnsError() {
         // Arrange
-        Scene scene = new Scene("test-id", "Test Scene", null, null);
+        Scene scene = new Scene(UUID.randomUUID(), "Test Scene", null);
 
         // Act
         ValidationResult result = validator.validate(scene);
@@ -141,7 +111,7 @@ class ValidateSceneInteractorTest {
     @Test
     void validate_sceneWithEmptyGameObjects_returnsError() {
         // Arrange
-        Scene scene = new Scene("test-id", "Test Scene", new ArrayList<>(), null);
+        Scene scene = new Scene(UUID.randomUUID(), "Test Scene", new ArrayList<>());
 
         // Act
         ValidationResult result = validator.validate(scene);
@@ -158,7 +128,7 @@ class ValidateSceneInteractorTest {
         objects.add(createTestGameObject());
         objects.add(new GameObject("obj-2", "Object2", true, new ArrayList<>(), null));
         objects.add(new GameObject("obj-3", "Object3", true, new ArrayList<>(), null));
-        Scene scene = new Scene("test-id", "Test Scene", objects, null);
+        Scene scene = new Scene(UUID.randomUUID(), "Test Scene", objects);
 
         // Act
         ValidationResult result = validator.validate(scene);
@@ -173,7 +143,7 @@ class ValidateSceneInteractorTest {
     private Scene createValidScene() {
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(createTestGameObject());
-        return new Scene("test-id", "Test Scene", objects, null);
+        return new Scene(UUID.randomUUID(), "Test Scene", objects);
     }
 
     private GameObject createTestGameObject() {
