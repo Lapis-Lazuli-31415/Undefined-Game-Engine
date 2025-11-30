@@ -494,6 +494,7 @@ public class HomeView extends javax.swing.JFrame {
                 entity.Asset newAsset = (entity.Asset) evt.getNewValue();
                 if (newAsset instanceof entity.Image) {
                     addSpriteToUI((entity.Image) newAsset);
+                    triggerAutoSave();
                 }
             }
         });

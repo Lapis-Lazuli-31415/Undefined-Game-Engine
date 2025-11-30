@@ -54,6 +54,9 @@ public class PropertiesPanel extends JPanel {
         // Pass callback to Trigger Manager
         triggerManagerPanel.setOnChangeCallback(autoSaveCallback);
 
+        // Pass callback to Variable Section
+        variableSection.setOnChangeCallback(autoSaveCallback);
+
         // Note: Transform callback is passed in the .bind() method separately
     }
 

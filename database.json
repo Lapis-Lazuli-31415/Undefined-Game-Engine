@@ -4,9 +4,10 @@
   "global_environment" : {
     "variables" : {
       "Numeric" : {
-        "variables" : {
-          "hello" : 10.0
-        }
+        "variables" : { }
+      },
+      "Boolean" : {
+        "variables" : { }
       }
     }
   },
@@ -24,7 +25,11 @@
       "active" : true,
       "properties" : [ ],
       "environment" : {
-        "variables" : { }
+        "variables" : {
+          "Numeric" : {
+            "variables" : { }
+          }
+        }
       },
       "transform" : {
         "x" : 0.0,
@@ -34,7 +39,48 @@
         "scale_y" : 10.0
       },
       "trigger_manager" : {
-        "triggers" : [ ]
+        "triggers" : [ {
+          "event" : {
+            "type" : "OnClick",
+            "event_label" : "On Click",
+            "event_parameters" : { },
+            "required_parameters" : [ ]
+          },
+          "conditions" : [ {
+            "type" : "NumericComparison",
+            "left" : {
+              "type" : "NumericValue",
+              "value" : 0.0
+            },
+            "comparator" : "=",
+            "right" : {
+              "type" : "NumericValue",
+              "value" : 0.0
+            }
+          }, {
+            "type" : "Empty"
+          } ],
+          "actions" : [ {
+            "type" : "WaitAction",
+            "seconds_expression" : {
+              "type" : "NumericValue",
+              "value" : 0.0
+            }
+          }, {
+            "type" : "Empty"
+          } ],
+          "active" : true
+        }, {
+          "event" : {
+            "type" : "Empty",
+            "event_label" : "Empty",
+            "event_parameters" : { },
+            "required_parameters" : [ ]
+          },
+          "conditions" : [ ],
+          "actions" : [ ],
+          "active" : true
+        } ]
       },
       "sprite_renderer" : null
     }, {
