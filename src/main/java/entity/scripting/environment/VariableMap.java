@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class VariableMap<T> {
     private final Map<String, T> variables;
@@ -38,6 +39,11 @@ public class VariableMap<T> {
     // needed for Jackson to see and save the internal map
     public Map<String, T> getVariables() {
         return variables;
+    }
+
+    // to iterate through the variables
+    public Set<String> getNames() {
+        return variables.keySet();
     }
 
 }

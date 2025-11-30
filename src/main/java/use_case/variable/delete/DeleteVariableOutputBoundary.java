@@ -1,4 +1,4 @@
-package use_case.variable;
+package use_case.variable.delete;
 
 public interface DeleteVariableOutputBoundary {
 

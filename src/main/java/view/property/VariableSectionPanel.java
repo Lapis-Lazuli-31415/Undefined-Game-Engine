@@ -12,8 +12,8 @@ import view.util.PropertyPanelUtility;
 import interface_adapter.variable.LocalVariableViewModel;
 import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.VariableState;
-import interface_adapter.variable.UpdateVariableController;
-import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.update.UpdateVariableController;
+import interface_adapter.variable.delete.DeleteVariableController;
 import use_case.variable.factory.DefaultVariableFactoryRegistry;
 
 import use_case.variable.factory.VariableFactory;

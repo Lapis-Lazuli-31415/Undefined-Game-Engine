@@ -1,7 +1,7 @@
-package interface_adapter.variable;
+package interface_adapter.variable.update;
 
-import use_case.variable.UpdateVariableInputBoundary;
-import use_case.variable.UpdateVariableInputData;
+import use_case.variable.update.UpdateVariableInputBoundary;
+import use_case.variable.update.UpdateVariableInputData;
 
 public class UpdateVariableController {
 

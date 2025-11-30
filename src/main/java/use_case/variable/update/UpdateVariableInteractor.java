@@ -1,4 +1,4 @@
-package use_case.variable;
+package use_case.variable.update;
 
 import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;

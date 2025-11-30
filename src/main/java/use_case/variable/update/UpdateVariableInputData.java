@@ -1,16 +1,25 @@
-package use_case.variable;
+package use_case.variable.update;
 
-public class DeleteVariableInputData {
+
+public final class UpdateVariableInputData {
+
     private final String name;
+    private final String value;
     private final boolean isGlobal;
-    private final String type;
-    public DeleteVariableInputData(String name, boolean isGlobal, String type) {
+    public final String type;
+
+    public UpdateVariableInputData(String name, String value, boolean isGlobal, String type) {
         this.name = name;
+        this.value = value;
         this.isGlobal = isGlobal;
         this.type = type;
     }
+
     public String getName() {
         return name;
+    }
+    public String getValue() {
+        return value;
     }
     public boolean isGlobal() {
         return isGlobal;
@@ -18,4 +27,5 @@ public class DeleteVariableInputData {
     public String getType() {
         return type;
     }
+
 }
