@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Vector;
 import javax.swing.*;
 
-import entity.GameController;
 import entity.GameObject;
 import entity.Transform;
 import entity.scripting.TriggerManager;
@@ -19,7 +18,6 @@ import interface_adapter.variable.DeleteVariableController;
 import interface_adapter.variable.UpdateVariableController;
 import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.LocalVariableViewModel;
-import use_case.sprites.ImportSpriteInteractor;
 import view.property.PropertiesPanel;
 
 public class HomeView extends javax.swing.JFrame {
@@ -32,7 +30,7 @@ public class HomeView extends javax.swing.JFrame {
     private JPanel propertiesPanel;
 
     // asset manager
-    private interface_adapter.assets.AssetLibViewModel assetLibViewModel;
+    private final interface_adapter.assets.AssetLibViewModel assetLibViewModel;
     private JPanel spritesContent;
     private JButton spritesAddButton;
 
@@ -97,38 +95,6 @@ public class HomeView extends javax.swing.JFrame {
         setupImportSpriteListener();
     }
 
-    private void wireImportSpriteUseCase() {
-        try {
-            // init DAO
-            data_access.FileSystemSpriteDataAccessObject spriteDAO =
-                    new data_access.FileSystemSpriteDataAccessObject();
-
-            // create view model
-            importSpriteViewModel = new interface_adapter.sprites.ImportSpriteViewModel();
-
-            // create presenter
-            interface_adapter.sprites.ImportSpritePresenter presenter =
-                    new interface_adapter.sprites.ImportSpritePresenter(importSpriteViewModel, assetLibViewModel);
-
-            // create interactor
-            ImportSpriteInteractor interactor =
-                    new ImportSpriteInteractor(
-                            spriteDAO,
-                            presenter,
-                            assetLibViewModel.getAssetLib()
-                    );
-
-            // create controller
-            importSpriteController = new interface_adapter.sprites.ImportSpriteController(interactor);
-
-        } catch (java.io.IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    "Failed to initialize sprite import: " + e.getMessage(),
-                    "Initialization Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     private void setupImportSpriteListener() {
         importSpriteViewModel.addPropertyChangeListener(evt -> {
             if (interface_adapter.sprites.ImportSpriteViewModel.IMPORT_SPRITE_PROPERTY.equals(evt.getPropertyName())) {
@@ -140,7 +106,8 @@ public class HomeView extends javax.swing.JFrame {
                             state.getMessage(),
                             "Success",
                             JOptionPane.INFORMATION_MESSAGE);
-                } else {
+                }
+                else {
                     JOptionPane.showMessageDialog(this,
                             state.getMessage(),
                             "Error",
@@ -532,10 +499,6 @@ public class HomeView extends javax.swing.JFrame {
         dialog.setSize(600, 400);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
-    }
-
-    public interface_adapter.assets.AssetLibViewModel getAssetLibViewModel() {
-        return assetLibViewModel;
     }
 
     public static void main(String[] args) {

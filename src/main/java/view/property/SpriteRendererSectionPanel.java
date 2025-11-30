@@ -144,7 +144,7 @@ public class SpriteRendererSectionPanel extends JPanel {
         java.util.List<entity.Image> availableSprites = assetLibViewModel.getAssetLib().getAll().stream()
             .filter(asset -> asset instanceof entity.Image)
             .map(asset -> (entity.Image) asset)
-            .collect(java.util.stream.Collectors.toList());
+            .toList();
 
         if (availableSprites.isEmpty()) {
             JOptionPane.showMessageDialog(this,
