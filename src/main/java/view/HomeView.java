@@ -466,6 +466,10 @@ public class HomeView extends javax.swing.JFrame {
         updateVariableController = variableWiring.getUpdateController();
         deleteVariableController = variableWiring.getDeleteController();
 
+        // SYNC UI WITH LOADED DATA
+        loadVariablesIntoViewModel(globalEnvironment, globalVariableViewModel, true);
+        loadVariablesIntoViewModel(localEnvironment, localVariableViewModel, false);
+
         if (propertiesPanel instanceof PropertiesPanel props) {
             props.setLocalVariableViewModel(localVariableViewModel);
             props.setGlobalVariableViewModel(globalVariableViewModel);
@@ -656,4 +660,58 @@ public class HomeView extends javax.swing.JFrame {
             view.setVisible(true);
         });
     }
+
+    // Helper to populate the UI with variables loaded from the Environment
+    private void loadVariablesIntoViewModel(Environment env,
+                                            interface_adapter.variable.LocalVariableViewModel viewModel,
+                                            boolean isGlobal) {
+        if (env == null) return;
+
+        interface_adapter.variable.VariableState state = viewModel.getState();
+        java.util.List<interface_adapter.variable.VariableState.VariableRow> rows = new java.util.ArrayList<>();
+
+        // 1. Iterate over types (e.g., "Numeric", "Boolean")
+        for (java.util.Map.Entry<String, entity.scripting.environment.VariableMap<?>> typeEntry : env.getVariables().entrySet()) {
+            String type = typeEntry.getKey();
+            entity.scripting.environment.VariableMap<?> map = typeEntry.getValue();
+
+            // 2. Iterate over variables (e.g., "health" -> 100.0)
+            for (java.util.Map.Entry<String, ?> varEntry : map.getVariables().entrySet()) {
+                String name = varEntry.getKey();
+                String value = String.valueOf(varEntry.getValue()); // Convert to String for UI
+
+                rows.add(new interface_adapter.variable.VariableState.VariableRow(
+                        name, type, isGlobal, value
+                ));
+            }
+        }
+
+        state.setVariables(rows);
+        viewModel.firePropertyChange();
+    }
+
+    // Overload for Global View Model
+    private void loadVariablesIntoViewModel(Environment env,
+                                            interface_adapter.variable.GlobalVariableViewModel viewModel,
+                                            boolean isGlobal) {
+        if (env == null) return;
+        interface_adapter.variable.VariableState state = viewModel.getState();
+        java.util.List<interface_adapter.variable.VariableState.VariableRow> rows = new java.util.ArrayList<>();
+
+        for (java.util.Map.Entry<String, entity.scripting.environment.VariableMap<?>> typeEntry : env.getVariables().entrySet()) {
+            String type = typeEntry.getKey();
+            entity.scripting.environment.VariableMap<?> map = typeEntry.getValue();
+
+            for (java.util.Map.Entry<String, ?> varEntry : map.getVariables().entrySet()) {
+                String name = varEntry.getKey();
+                String value = String.valueOf(varEntry.getValue());
+                rows.add(new interface_adapter.variable.VariableState.VariableRow(
+                        name, type, isGlobal, value
+                ));
+            }
+        }
+        state.setVariables(rows);
+        viewModel.firePropertyChange();
+    }
+
 }

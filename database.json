@@ -1,0 +1,63 @@
+{
+  "id" : "proj-1",
+  "name" : "My Game Project",
+  "global_environment" : {
+    "variables" : {
+      "Numeric" : {
+        "variables" : {
+          "hello" : 10.0
+        }
+      }
+    }
+  },
+  "assets" : [ {
+    "id" : "709c44c4-a3a6-4cd7-8f26-179c33b960f4",
+    "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg",
+    "name" : "gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg"
+  } ],
+  "scenes" : [ {
+    "id" : "85e868e9-8f74-4daa-ae97-4be7e8163e9a",
+    "name" : "Default Scene",
+    "game_objects" : [ {
+      "id" : "demo-1",
+      "name" : "Demo Sprite",
+      "active" : true,
+      "properties" : [ ],
+      "environment" : {
+        "variables" : { }
+      },
+      "transform" : {
+        "x" : 0.0,
+        "y" : 0.0,
+        "rotation" : 0.0,
+        "scale_x" : 10.0,
+        "scale_y" : 10.0
+      },
+      "trigger_manager" : {
+        "triggers" : [ ]
+      },
+      "sprite_renderer" : null
+    }, {
+      "id" : "73d27c20-77ff-472b-baec-60aec1551f81",
+      "name" : "gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg",
+      "active" : true,
+      "properties" : [ ],
+      "environment" : null,
+      "transform" : {
+        "x" : 0.0,
+        "y" : 0.0,
+        "rotation" : 0.0,
+        "scale_x" : 0.1,
+        "scale_y" : 0.1
+      },
+      "trigger_manager" : null,
+      "sprite_renderer" : {
+        "type" : "SpriteRenderer",
+        "sprite" : "709c44c4-a3a6-4cd7-8f26-179c33b960f4",
+        "visible" : true,
+        "opacity" : 100,
+        "zindex" : 0
+      }
+    } ]
+  } ]
+}
