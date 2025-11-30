@@ -40,8 +40,6 @@ public class HomeView extends javax.swing.JFrame {
     private final Project currentProject;
     private final Scene currentScene;
     private SaveProjectController saveProjectController;
-
-    // --- FIX: Add this field so the listener can access it ---
     private SaveProjectViewModel saveViewModel;
 
     // Save Status UI
@@ -92,7 +90,7 @@ public class HomeView extends javax.swing.JFrame {
         this.unsplashController = unsplashController;
         this.unsplashViewModel = unsplashViewModel;
 
-        // --- 1. ATTEMPT TO LOAD PROJECT FROM JSON ---
+        // 1. ATTEMPT TO LOAD PROJECT FROM JSON
         JsonProjectDataAccess dataAccess = new JsonProjectDataAccess();
         Project loadedProject = null;
 
@@ -143,15 +141,14 @@ public class HomeView extends javax.swing.JFrame {
             this.currentScene.getGameObjects().add(DEMO_OBJECT);
         }
 
-        // --- 2. INITIALIZE SAVE SYSTEM ---
-        // --- FIX: Initialize the class field (this.saveViewModel), not a local variable ---
+        // 2. INITIALIZE SAVE SYSTEM
         this.saveViewModel = new SaveProjectViewModel();
 
         SaveProjectPresenter savePresenter = new SaveProjectPresenter(this.saveViewModel);
         SaveProjectInteractor saveInteractor = new SaveProjectInteractor(dataAccess, savePresenter, currentProject);
         saveProjectController = new SaveProjectController(saveInteractor);
 
-        // --- 3. SETUP SAVE LISTENER ---
+        // 3. SETUP SAVE LISTENER
         setupSaveListener();
 
         if (unsplashController != null && unsplashViewModel != null) {

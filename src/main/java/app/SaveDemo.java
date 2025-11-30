@@ -93,16 +93,16 @@ public class SaveDemo {
         ArrayList<Property> properties = new ArrayList<>();
         SpriteRenderer bearRenderer = null;
 
-        // --- UPDATED: Load Sprite from 'uploads' folder ---
+        // Load Sprite from 'uploads'
         try {
-            // FIX: Pointing to the file you have in your uploads folder
+            // Pointing to the file you have in your uploads folder
             java.nio.file.Path spritePath = java.nio.file.Path.of("uploads", "CSC258 Lab 1 p1.2.png");
 
-            // 1. Create the Image entity
+            // Create the Image entity
             // (The Image class constructor reads the file to get width/height)
             Image image = new Image(spritePath);
 
-            // 2. Add it to the AssetLib (CRITICAL for saving!)
+            // Add it to the AssetLib
             assetLib.add(image);
 
             // 3. Create the SpriteRenderer component

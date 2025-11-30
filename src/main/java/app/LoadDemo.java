@@ -47,7 +47,7 @@ public class LoadDemo {
                         System.out.println("  Object: " + obj.getName());
                         System.out.println("    Active: " + obj.isActive());
 
-                        // --- NEW: Verify SpriteRenderer ---
+                        // Verify SpriteRenderer
                         if (obj.getSpriteRenderer() != null) {
                             System.out.println("    [SpriteRenderer]");
                             if (obj.getSpriteRenderer().getSprite() != null) {
@@ -95,7 +95,7 @@ public class LoadDemo {
             }
 
         } catch (IOException e) {
-            System.err.println("❌ Failed to load project: " + e.getMessage());
+            System.err.println("Failed to load project: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -122,7 +122,6 @@ public class LoadDemo {
             Field[] fields = currentClass.getDeclaredFields();
 
             for (Field field : fields) {
-                // Skip static fields
                 if (Modifier.isStatic(field.getModifiers())) continue;
 
                 field.setAccessible(true);

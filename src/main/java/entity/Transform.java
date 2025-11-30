@@ -23,7 +23,7 @@ public class Transform {
         this.scale = scale;
     }
 
-    // REQUIRED: JSON Constructor for Jackson
+    // JSON Constructor for Jackson
     // This takes the flat JSON fields (x, y, etc.) and rebuilds the Vectors.
     @JsonCreator
     public Transform(@JsonProperty("x") double x,

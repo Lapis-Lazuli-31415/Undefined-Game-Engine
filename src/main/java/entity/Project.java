@@ -11,8 +11,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "id", "name", "global_environment", "assets", "scenes" })
 public class Project {
 
-    // CHANGE 1: REMOVED 'final'.
-    // Jackson cannot update final variables after creating the object.
     private String id;
     private String name;
     private ArrayList<Scene> scenes;

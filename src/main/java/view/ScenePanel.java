@@ -21,7 +21,6 @@ import java.util.Vector;
 public class ScenePanel extends JPanel implements PropertyChangeListener {
 
     private final TransformViewModel viewModel;
-    // CHANGE: Removed local 'gameObjects' list. We now use the Scene entity.
     private Scene currentScene;
     private GameObject selectedObject;
     private Runnable onSelectionChangeCallback;
@@ -43,7 +42,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         });
     }
 
-    // NEW: Bind the panel to a Scene entity
+    // Bind the panel to a Scene entity
     public void setScene(Scene scene) {
         this.currentScene = scene;
         repaint();
@@ -75,7 +74,6 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             GameObject gameObject = new GameObject(id, name, true, new ArrayList<>(), null, spriteRenderer);
             gameObject.setTransform(transform);
 
-            // CHANGE: Add directly to the Scene entity
             currentScene.getGameObjects().add(gameObject);
 
             selectObject(gameObject);

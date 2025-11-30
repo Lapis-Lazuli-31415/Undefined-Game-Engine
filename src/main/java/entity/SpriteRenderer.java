@@ -11,7 +11,7 @@ public class SpriteRenderer extends Property {
     private int opacity;
     private int zIndex;
 
-    // Normal Constructor (used by your code)
+    // Normal Constructor
     public SpriteRenderer(Image sprite, boolean visible) {
         this.sprite = sprite;
         this.visible = visible;
@@ -19,7 +19,7 @@ public class SpriteRenderer extends Property {
         this.zIndex = 0;
     }
 
-    // JSON Constructor (used by the Save/Load system)
+    // JSON Constructor (used for the Save/Load system)
     @JsonCreator
     public SpriteRenderer(
             @JsonProperty("sprite") Image sprite,

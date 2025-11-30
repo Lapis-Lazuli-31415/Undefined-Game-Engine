@@ -43,7 +43,7 @@ public class Scene {
         return gameObjects;
     }
 
-    // ADD @JsonIgnore HERE
+
     // This tells Jackson: "Do not save this to JSON, and do not try to load it."
     @JsonIgnore
     public List<String> getGameObjectNames() {
