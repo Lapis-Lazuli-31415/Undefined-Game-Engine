@@ -1,6 +1,8 @@
 package entity.scripting;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -10,6 +12,11 @@ public class TriggerManager {
 
     public TriggerManager() {
         triggers = new ArrayList<>();
+    }
+
+    @JsonCreator
+    public TriggerManager(@JsonProperty("triggers") List<Trigger> triggers) {
+        this.triggers = triggers != null ? triggers : new ArrayList<>();
     }
 
     // @JsonIgnore tells Jackson to skip this method when saving

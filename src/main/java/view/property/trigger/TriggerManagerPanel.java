@@ -8,6 +8,15 @@ import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.create.TriggerCreateController;
 import view.util.PropertyPanelUtility;
 
+// --- Imports for Entity conversion ---
+import entity.scripting.Trigger;
+import entity.scripting.condition.Condition;
+import entity.scripting.action.Action;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+// -------------------------------------
+
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -23,11 +32,9 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
 
     private final JPanel triggerListPanel;
 
-    // NEW: Callback for auto-save
     private Runnable onChangeCallback;
 
     public TriggerManagerPanel() {
-        // ... (Keep existing constructor logic exactly as is until the listeners setup) ...
         triggerManagerViewModel = new TriggerManagerViewModel();
         conditionEditorViewModel = new ConditionEditorViewModel();
         actionEditorViewModel = new ActionEditorViewModel();
@@ -69,21 +76,53 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         refresh();
     }
 
-    // NEW: Setter for the callback
     public void setOnChangeCallback(Runnable callback) {
         this.onChangeCallback = callback;
     }
 
+    // load data from the Entity to the UI
+    public void loadTriggerManager(entity.scripting.TriggerManager manager) {
+        // 1. Reset the View Model to a clean state
+        triggerManagerViewModel.setState(new TriggerManagerState());
+        TriggerManagerState state = triggerManagerViewModel.getState();
+
+        if (manager != null) {
+            // 2. Loop through loaded Entities
+            for (Trigger t : manager.getTriggers()) {
+                String event = t.getEvent().getEventLabel();
+                Map<String, String> params = t.getEvent().getEventParameters();
+
+                // Convert Conditions to Scripts
+                List<String> conditions = new ArrayList<>();
+                for (Condition c : t.getConditions()) {
+                    conditions.add(c.format());
+                }
+
+                // Convert Actions to Scripts
+                List<String> actions = new ArrayList<>();
+                for (Action a : t.getActions()) {
+                    actions.add(a.format());
+                }
+
+                // 3. Add to View State
+                state.addTrigger(event, params, conditions, actions);
+            }
+        }
+
+        // 4. Trigger UI Refresh
+        triggerManagerViewModel.firePropertyChange();
+        refresh();
+    }
+    // -------------------------------------------------------------
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         refresh();
-        // NEW: Trigger the callback whenever state changes
         if (onChangeCallback != null) {
             onChangeCallback.run();
         }
     }
 
-    // ... (Keep the rest of the file: refresh(), methods, etc.) ...
     private void refresh() {
         triggerListPanel.removeAll();
 

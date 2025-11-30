@@ -4,20 +4,19 @@
   "global_environment" : {
     "variables" : {
       "Numeric" : {
-        "variables" : { }
-      },
-      "Boolean" : {
-        "variables" : { }
+        "variables" : {
+          "loawfajwf" : 17.0
+        }
       }
     }
   },
   "assets" : [ {
-    "id" : "709c44c4-a3a6-4cd7-8f26-179c33b960f4",
+    "id" : "a46d4db9-2df0-4577-b890-4a7189bf326b",
     "localpath" : "file:///Users/welcentfeng/IdeaProjects/Undefined-Game-Engine/uploads/gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg",
     "name" : "gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg"
   } ],
   "scenes" : [ {
-    "id" : "85e868e9-8f74-4daa-ae97-4be7e8163e9a",
+    "id" : "372af9bc-c9b7-4db1-bc56-dedbfcb26511",
     "name" : "Default Scene",
     "game_objects" : [ {
       "id" : "demo-1",
@@ -25,72 +24,27 @@
       "active" : true,
       "properties" : [ ],
       "environment" : {
-        "variables" : {
-          "Numeric" : {
-            "variables" : { }
-          }
-        }
+        "variables" : { }
       },
       "transform" : {
-        "x" : 0.0,
+        "x" : 20.0,
         "y" : 0.0,
         "rotation" : 0.0,
         "scale_x" : 10.0,
         "scale_y" : 10.0
       },
       "trigger_manager" : {
-        "triggers" : [ {
-          "event" : {
-            "type" : "OnClick",
-            "event_label" : "On Click",
-            "event_parameters" : { },
-            "required_parameters" : [ ]
-          },
-          "conditions" : [ {
-            "type" : "NumericComparison",
-            "left" : {
-              "type" : "NumericValue",
-              "value" : 0.0
-            },
-            "comparator" : "=",
-            "right" : {
-              "type" : "NumericValue",
-              "value" : 0.0
-            }
-          }, {
-            "type" : "Empty"
-          } ],
-          "actions" : [ {
-            "type" : "WaitAction",
-            "seconds_expression" : {
-              "type" : "NumericValue",
-              "value" : 0.0
-            }
-          }, {
-            "type" : "Empty"
-          } ],
-          "active" : true
-        }, {
-          "event" : {
-            "type" : "Empty",
-            "event_label" : "Empty",
-            "event_parameters" : { },
-            "required_parameters" : [ ]
-          },
-          "conditions" : [ ],
-          "actions" : [ ],
-          "active" : true
-        } ]
+        "triggers" : [ ]
       },
       "sprite_renderer" : null
     }, {
-      "id" : "73d27c20-77ff-472b-baec-60aec1551f81",
+      "id" : "671324a6-fe33-4abd-90ca-65ddd3bc350f",
       "name" : "gipsy_the_cat_was_sitting_on_a_gKXKBY-C-Dk.jpg",
       "active" : true,
       "properties" : [ ],
       "environment" : null,
       "transform" : {
-        "x" : 0.0,
+        "x" : 20.0,
         "y" : 0.0,
         "rotation" : 0.0,
         "scale_x" : 0.1,
@@ -99,7 +53,7 @@
       "trigger_manager" : null,
       "sprite_renderer" : {
         "type" : "SpriteRenderer",
-        "sprite" : "709c44c4-a3a6-4cd7-8f26-179c33b960f4",
+        "sprite" : "a46d4db9-2df0-4577-b890-4a7189bf326b",
         "visible" : true,
         "opacity" : 100,
         "zindex" : 0
