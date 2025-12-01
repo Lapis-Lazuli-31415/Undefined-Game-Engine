@@ -41,3 +41,12 @@ public class ValidateSceneInteractor implements ValidateSceneInputBoundary {
         return ValidationResult.valid();
     }
 }
+
+
+
+
+
+
+
+
+
