@@ -7,20 +7,16 @@ import use_case.component_management.select_game_object.SelectGameObjectOutputBo
 
 public class SelectGameObjectPresenter implements SelectGameObjectOutputBoundary {
 
-    private GameObjectSelectionListener listener;
+    private final GameObjectSelectionListener listener;
 
     public SelectGameObjectPresenter(
                                          GameObjectSelectionListener listener) {
         this.listener = listener;
     }
 
-    public void setListener(GameObjectSelectionListener listener) {
-        this.listener = listener;
-    }
-
     @Override
     public void gameObjectSelected(Scene scene, GameObject gameObject) {
-        EditorState.getSceneRepository().setCurrentScene(scene);         // ensure scene synced
+        EditorState.setCurrentScene(scene);           // ensure scene synced
         EditorState.setCurrentGameObject(gameObject); // store actual entity
         listener.onGameObjectSelected(scene, gameObject);
     }

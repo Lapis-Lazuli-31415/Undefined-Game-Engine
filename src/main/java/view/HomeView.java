@@ -9,6 +9,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.*;
 
+
 import entity.GameObject;
 import entity.Scene;
 import entity.Transform;
@@ -17,9 +18,6 @@ import javax.swing.tree.DefaultTreeModel;
 import entity.GameObject;
 import entity.Transform;
 import interface_adapter.EditorState;
-import interface_adapter.add_scene.AddSceneController;
-import interface_adapter.add_scene.AddScenePresenter;
-import interface_adapter.list_scenes.ListScenesPresenter;
 import entity.*;
 import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
@@ -52,28 +50,12 @@ import interface_adapter.saving.SaveProjectViewModel;
 import interface_adapter.saving.SaveProjectState;
 import view.util.PropertyPanelUtility;
 
-import use_case.component_management.add_scene.AddSceneInteractor;
-import view.GameComponentsPanel;
-import data_access.InMemorySceneRepository;
-
-import use_case.component_management.list_scenes.ListScenesInteractor;
-import use_case.component_management.select_scene.SelectSceneInteractor;
-import use_case.component_management.select_game_object.SelectGameObjectInteractor;
-
-import interface_adapter.select_scene.SelectScenePresenter;
-import interface_adapter.select_game_object.SelectGameObjectPresenter;
-
-
 public class HomeView extends javax.swing.JFrame {
 
     // ====== FIELDS ======
     private JPanel leftSidebar;
     private JPanel assetsPanel;
     private JPanel gameComponentsPanel;
-    private AddScenePresenter addScenePresenter;
-    private GameComponentsPanel gameComponents;
-    // for refreshing the tree when game objects change
-    private use_case.component_management.list_scenes.ListScenesInputBoundary listScenesUseCase;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
@@ -369,122 +351,11 @@ public class HomeView extends javax.swing.JFrame {
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
 
-//        // ---- AUDIO SCROLL PANEL ---- remove for now, might add back later
-//        JPanel audioHeader = new JPanel(new BorderLayout());
-//        audioHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
-//        audioHeader.setOpaque(false);
-//
-//        JLabel audioLabel = new JLabel("Audio");
-//        audioLabel.setForeground(Color.WHITE);
-//
-//        JButton audioAddButton = new JButton("+");
-//        audioAddButton.setMargin(new Insets(0, 4, 0, 4));
-//
-//        audioHeader.add(audioLabel, BorderLayout.WEST);
-//        audioHeader.add(audioAddButton, BorderLayout.EAST);
-//
-//        JPanel audioContent = new JPanel();
-//        audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
-//        audioContent.setBackground(new Color(70, 70, 70));
-//
-//        JScrollPane audioScroll = new JScrollPane(audioContent);
-//        audioScroll.setPreferredSize(new Dimension(180, 140));
-//
-//        assetsPanel.add(audioHeader);
-//        assetsPanel.add(audioScroll);
-
-        // ====== DEMO ENTITY + LAYERS WIRING ======
-        java.util.Vector<Double> pos = new java.util.Vector<>();
-        pos.add(0.0); // x
-        pos.add(0.0); // y
-
-        java.util.Vector<Double> scale = new java.util.Vector<>();
-        scale.add(1.0); // scaleX
-        scale.add(1.0); // scaleY
-
-        Transform transform = new Transform(pos, 0f, scale);
-
-        DEMO_OBJECT.setTransform(transform);
-
-        // Create view model
-        transformViewModel = new TransformViewModel();
-
-        // Use app-layer factory to wire up use case
-        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
-
-        var sceneRepo = new InMemorySceneRepository();
-        EditorState.init(sceneRepo);
-
-        // Hook up ScenePanel to viewModel (Observer)
-        scenePanel = new ScenePanel(transformViewModel);
-        scenePanel.setScene(sceneRepo.getCurrentScene());
-
-        transformController.updateTransform(
-                transform.getX(),
-                transform.getY(),
-                transform.getScaleX(),
-                transform.getRotation()
-        );
-
         // ====== Game Components PANEL ======
         gameComponentsPanel = new JPanel();
         gameComponentsPanel.setLayout(new BorderLayout());
         gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
-
-        // Repository
-        addScenePresenter = new AddScenePresenter();
-        var addSceneInteractor = new AddSceneInteractor(
-                sceneRepo,
-                addScenePresenter
-        );
-        var addSceneController = new AddSceneController(addSceneInteractor);
-
-        // 1. Create the GameComponentsPanel FIRST so the JTree + TreeModel exist
-        gameComponents = new GameComponentsPanel(null, null, null, addScenePresenter, addSceneController, scenePanel);  // no interactors yet
-
-        // 2. Now retrieve the tree model needed by the ListScenesPresenter
-        DefaultTreeModel treeModel = gameComponents.getTreeModel();
-
-        // 3. Create presenters with the REAL model
-        var listScenesPresenter = new ListScenesPresenter(treeModel);
-        var selectScenePresenter = new SelectScenePresenter(null);
-        var selectGameObjectPresenter = new SelectGameObjectPresenter(null);
-
-        // 6. Connect presenter listeners (for selection feedback)
-        addScenePresenter.setListener(gameComponents);
-        selectScenePresenter.setListener(gameComponents);
-        selectGameObjectPresenter.setListener(gameComponents);
-
-        // 4. Create interactors
-        var listScenesInteractor =
-                new ListScenesInteractor(sceneRepo, listScenesPresenter);
-
-        var selectSceneInteractor =
-                new SelectSceneInteractor(sceneRepo, selectScenePresenter);
-
-        var selectGameObjectInteractor =
-                new SelectGameObjectInteractor(sceneRepo, selectGameObjectPresenter);
-
-
-        // 5. Now pass the interactors into the panel
-        gameComponents.setInteractors(
-                listScenesInteractor,
-                selectSceneInteractor,
-                selectGameObjectInteractor
-        );
-
-        // 7. Add panel to UI
-        gameComponentsPanel.add(gameComponents, BorderLayout.CENTER);
-        JButton addSceneButton = new JButton("+ Add Scene");
-        addSceneButton.addActionListener(e -> {
-            String name = JOptionPane.showInputDialog(this, "Scene Name:");
-            if (name != null && !name.isBlank()) {
-                addSceneController.addScene(name.trim());
-            }
-        });
-        gameComponentsPanel.add(addSceneButton, BorderLayout.SOUTH);
-
-
+        gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
 
         // ====== Assemble Sidebar ======
         leftSidebar.add(assetsPanel);
@@ -500,7 +371,8 @@ public class HomeView extends javax.swing.JFrame {
         tabBar.setPreferredSize(new Dimension(0, 35));
         tabBar.setBackground(new Color(60, 60, 60));
 
-
+        JLabel tabLabel = new JLabel("   Start");
+        tabLabel.setForeground(Color.WHITE);
 
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
@@ -532,8 +404,7 @@ public class HomeView extends javax.swing.JFrame {
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
 
-
-//      tabBar.add(addTabButton, BorderLayout.CENTER);
+        tabBar.add(tabLabel, BorderLayout.WEST);
         tabBar.add(rightTabControls, BorderLayout.EAST);
 
         // ====== RIGHT PROPERTIES PANEL ======
@@ -544,9 +415,30 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
         propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
-        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
+        propertiesScroll.setBorder(null);
 
+        // ====== ENTITY + LAYERS WIRING ======
+        Transform transform = DEMO_OBJECT.getTransform();
+        if (transform == null) {
+            java.util.Vector<Double> pos = new java.util.Vector<>(); pos.add(0.0); pos.add(0.0);
+            java.util.Vector<Double> scale = new java.util.Vector<>(); scale.add(1.0); scale.add(1.0);
+            transform = new Transform(pos, 0f, scale);
+            DEMO_OBJECT.setTransform(transform);
+        }
 
+        transformViewModel = new TransformViewModel();
+        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
+
+        scenePanel = new ScenePanel(transformViewModel, triggerManagerViewModel);
+        scenePanel.setScene(currentScene);
+        scenePanel.setOnSceneChangeCallback(() -> triggerAutoSave());
+
+        transformController.updateTransform(
+                transform.getX(),
+                transform.getY(),
+                transform.getScaleX(),
+                transform.getRotation()
+        );
 
         centerPanel.add(tabBar, BorderLayout.NORTH);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
@@ -710,16 +602,6 @@ public class HomeView extends javax.swing.JFrame {
                 System.out.println("Selected sprite: " + image.getName());
                 if (scenePanel != null) {
                     scenePanel.addOrSelectSprite(image);
-
-                    try {
-                        if (listScenesUseCase != null) {
-                            listScenesUseCase.listScenes();
-                        } else if (gameComponents != null) {
-                            gameComponents.refreshScenes();
-                        }
-                    } catch (Exception ex) {
-                        System.err.println("[HomeView] refresh after addSprite failed: " + ex.getMessage());
-                    }
                 }
             }
         });
