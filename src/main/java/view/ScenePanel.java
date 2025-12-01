@@ -1,6 +1,5 @@
 package view;
 
-import data_access.InMemorySceneRepository;
 import entity.GameObject;
 import entity.Scene; // Import Scene
 import entity.SpriteRenderer;
@@ -27,13 +26,6 @@ import java.util.List;
 
 public class ScenePanel extends JPanel implements PropertyChangeListener {
 
-    private final TransformViewModel viewModel;
-    private GameObject selectedObject;
-    private Runnable onSelectionChangeCallback;
-    private Runnable onSceneModifiedCallback;
-
-    public ScenePanel(TransformViewModel viewModel) {
-        this.viewModel = viewModel;
     private final TransformViewModel transformViewModel;
     private final TriggerManagerViewModel triggerManagerViewModel;
     private Scene currentScene;
@@ -58,26 +50,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         });
     }
 
-    public void setOnSceneModified(Runnable callback) {
-        this.onSceneModifiedCallback = callback;
-    }
-
+    // Bind the panel to a Scene entity
     public void setScene(Scene scene) {
-        EditorState.getSceneRepository().setCurrentScene(scene);
-
-        // 1. Remove all visual sprites
-        this.removeAll();
-
-        // 2. Re-render game objects belonging to this scene
-        if (scene != null && scene.getGameObjects() != null) {
-            for (GameObject go : scene.getGameObjects()) {
-                go.setActive(true);
-            }
-        }
-
-        // 3. Refresh Swing layout
-        this.revalidate();
-        this.repaint();
+        this.currentScene = scene;
+        repaint();
+    }
 
     // NEW: Callback for Auto-Save
     public void setOnSceneChangeCallback(Runnable callback) {
@@ -106,21 +83,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             GameObject gameObject = new GameObject(id, name, true,
                     new Environment(), transform, spriteRenderer, triggerManager);
 
-            EditorState.getSceneRepository().getCurrentScene().addGameObject(gameObject);
-
-            // notify UI that the scene changed (gameobject added)
-            if (onSceneModifiedCallback != null) {
-                try {
-                    onSceneModifiedCallback.run();
-                } catch (Exception ex) {
-                    System.err.println("[ScenePanel] onSceneModified callback failed: " + ex.getMessage());
-                }
-            }
+            currentScene.getGameObjects().add(gameObject);
 
             selectObject(gameObject);
 
-            // log for debugging
-            System.out.println("[ScenePanel] Added sprite: " + name + " (Total objects: " + EditorState.getSceneRepository().getCurrentScene().getGameObjects().size() + ")");
+            System.out.println("[ScenePanel] Added sprite: " + name);
             repaint();
 
             // Trigger Auto-Save
@@ -190,11 +157,10 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private GameObject findGameObjectByImage(entity.Image image) {
-        if (EditorState.getSceneRepository().getCurrentScene().getGameObjects() == null) {
-            return null;
-        }
-        for (GameObject obj : EditorState.getSceneRepository().getCurrentScene().getGameObjects()) {
-            SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
+        if (currentScene == null || currentScene.getGameObjects() == null) return null;
+
+        for (GameObject obj : currentScene.getGameObjects()) {
+            SpriteRenderer spriteRenderer = obj.getSpriteRenderer();
             if (spriteRenderer != null && spriteRenderer.getSprite() == image) {
                 return obj;
             }
@@ -214,11 +180,12 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private void handleMouseClick(int mouseX, int mouseY) {
-        if (EditorState.getSceneRepository().getCurrentScene() == null) {
-            return;
-        }
-        for (int i = EditorState.getSceneRepository().getCurrentScene().getGameObjects().size() - 1; i >= 0; i--) {
-            GameObject obj = EditorState.getSceneRepository().getCurrentScene().getGameObjects().get(i);
+        if (currentScene == null || currentScene.getGameObjects() == null) return;
+
+        List<GameObject> objects = currentScene.getGameObjects();
+        // Iterate backwards to select top-most object first
+        for (int i = objects.size() - 1; i >= 0; i--) {
+            GameObject obj = objects.get(i);
             if (isPointInObject(mouseX, mouseY, obj)) {
                 selectObject(obj);
                 repaint();
@@ -257,21 +224,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         super.paintComponent(g);
         if (currentScene == null || currentScene.getGameObjects() == null) return;
 
-        if (EditorState.getSceneRepository().getCurrentScene() == null) {
-            return;
-        }
-
-        if (EditorState.getSceneRepository().getCurrentScene().getGameObjects() == null) {
-            return;
-        }
-
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             int panelW = getWidth();
             int panelH = getHeight();
 
-            // almost same as the old implementation, but i refactored it into separate methods
-            for (GameObject obj : EditorState.getSceneRepository().getCurrentScene().getGameObjects()) {
             // Copy list to sort safely
             List<GameObject> sortedObjects = new ArrayList<>(currentScene.getGameObjects());
             sortedObjects.sort((obj1, obj2) -> {
