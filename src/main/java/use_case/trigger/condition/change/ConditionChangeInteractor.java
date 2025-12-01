@@ -4,6 +4,7 @@ import entity.GameObject;
 import entity.scripting.condition.Condition;
 import entity.scripting.condition.ConditionFactory;
 import entity.scripting.condition.DefaultConditionFactory;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 public class ConditionChangeInteractor implements ConditionChangeInputBoundary {
@@ -18,8 +19,8 @@ public class ConditionChangeInteractor implements ConditionChangeInputBoundary {
 
     @Override
     public void execute(ConditionChangeInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int triggerIndex = inputData.getTriggerIndex();
         int conditionIndex = inputData.getConditionIndex();

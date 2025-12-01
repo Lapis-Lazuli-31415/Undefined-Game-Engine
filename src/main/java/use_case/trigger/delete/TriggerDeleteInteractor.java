@@ -1,6 +1,7 @@
 package use_case.trigger.delete;
 
 import entity.GameObject;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 public class TriggerDeleteInteractor implements TriggerDeleteInputBoundary {
@@ -12,8 +13,8 @@ public class TriggerDeleteInteractor implements TriggerDeleteInputBoundary {
 
     @Override
     public void execute(TriggerDeleteInputData inputData){
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int index = inputData.getIndex();
         gameObject.getTriggerManager().deleteTrigger(index);

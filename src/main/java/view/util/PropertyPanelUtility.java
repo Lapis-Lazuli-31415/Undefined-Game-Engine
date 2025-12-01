@@ -61,7 +61,7 @@ public class PropertyPanelUtility {
         JTextField field = new JTextField(defaultText);
 
         // keep these boxes narrow
-        Dimension size = new Dimension(60, 22);
+        Dimension size = new Dimension(89, 22);
         field.setPreferredSize(size);
         field.setMinimumSize(size);
         field.setMaximumSize(size);
@@ -177,7 +177,7 @@ public class PropertyPanelUtility {
         button.setForeground(Color.WHITE);
 
         // 4. Size explicitly (Icon size)
-        button.setPreferredSize(new Dimension(20, 20));
+        button.setPreferredSize(new Dimension(18, 18));
 
         return button;
     }
@@ -227,7 +227,7 @@ public class PropertyPanelUtility {
         button.setForeground(Color.WHITE);
 
         // 4. Size explicitly (Icon size)
-        button.setPreferredSize(new Dimension(20, 20));
+        button.setPreferredSize(new Dimension(18, 18));
 
         return button;
     }
@@ -289,7 +289,7 @@ public class PropertyPanelUtility {
         button.setForeground(Color.WHITE);
 
         // 4. Size explicitly (Icon size)
-        button.setPreferredSize(new Dimension(20, 20));
+        button.setPreferredSize(new Dimension(18, 18));
 
         return button;
     }

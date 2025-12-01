@@ -5,6 +5,10 @@ import entity.scripting.environment.Environment;
 import entity.scripting.error.EnvironmentException;
 import entity.scripting.expression.variable.NumericVariable;
 import org.junit.jupiter.api.Test;
+import use_case.variable.delete.DeleteVariableInputData;
+import use_case.variable.delete.DeleteVariableInteractor;
+import use_case.variable.delete.DeleteVariableOutputBoundary;
+import use_case.variable.delete.DeleteVariableOutputData;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,10 +1,29 @@
 package entity.scripting.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+// TYPE INFO
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+// REGISTER EVENT SUBCLASSES
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = OnClickEvent.class, name = "OnClick"),
+        @JsonSubTypes.Type(value = OnKeyPressEvent.class, name = "OnKeyPress"),
+        @JsonSubTypes.Type(value = EmptyEvent.class, name = "Empty")
+})
 public abstract class Event {
     private final String eventLabel;
     private final Map<String, String> eventParameters;
@@ -34,6 +53,7 @@ public abstract class Event {
 
     public abstract boolean isRequiredParameter(String key);
 
+    @JsonIgnore
     public abstract List<String> getRequiredParameters();
 
     public String getEventLabel(){

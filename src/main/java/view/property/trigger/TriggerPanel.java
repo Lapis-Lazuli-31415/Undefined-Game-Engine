@@ -2,6 +2,8 @@ package view.property.trigger;
 
 import app.use_case_factory.TriggerUseCaseFactory;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.action.ActionEditorViewModel;
+import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.delete.TriggerDeleteController;
 import view.util.PropertyPanelUtility;
 
@@ -14,7 +16,9 @@ public class TriggerPanel extends JPanel {
 
     public TriggerPanel(
             int triggerIndex,
-            TriggerManagerViewModel viewModel,
+            TriggerManagerViewModel triggerManagerViewModel,
+            ConditionEditorViewModel conditionEditorViewModel,
+            ActionEditorViewModel actionEditorViewModel,
             TriggerUseCaseFactory factory) {
 
         triggerDeleteController = factory.createTriggerDeleteController();
@@ -43,17 +47,18 @@ public class TriggerPanel extends JPanel {
         GridBagConstraints contentGbc = PropertyPanelUtility.baseGbc();
         contentGbc.gridy = 1;
         contentGbc.insets = new Insets(0, 2, 10, 2); // Spacing between sections
-        add(new EventPanel(triggerIndex, viewModel, factory), contentGbc);
+        add(new EventPanel(triggerIndex, triggerManagerViewModel, factory), contentGbc);
 
         // 4. Conditions Section
         // Row 2
         contentGbc.gridy = 2;
-        add(new ConditionListPanel(triggerIndex, viewModel, factory), contentGbc);
+        add(new ConditionListPanel(triggerIndex, triggerManagerViewModel,
+                conditionEditorViewModel, factory), contentGbc);
 
         // 5. Actions Section
         // Row 3
         contentGbc.gridy = 3;
         // Use weightY if you want this to expand, otherwise default is fine
-        add(new ActionListPanel(triggerIndex, viewModel, factory), contentGbc);
+        add(new ActionListPanel(triggerIndex, triggerManagerViewModel, actionEditorViewModel, factory), contentGbc);
     }
 }

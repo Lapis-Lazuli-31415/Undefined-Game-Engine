@@ -3,10 +3,6 @@ package use_case.transform;
 import entity.GameObject;
 import entity.Transform;
 
-/**
- * Use case: update the Transform of a GameObject.
- * This sits in the use_case layer and only depends on entities and boundaries.
- */
 public class UpdateTransformInteractor implements UpdateTransformInputBoundary {
 
     private final GameObject gameObject;
@@ -20,9 +16,12 @@ public class UpdateTransformInteractor implements UpdateTransformInputBoundary {
 
     @Override
     public void updateTransform(UpdateTransformInputData data) {
+        if (gameObject == null) {
+            return;
+        }
+
         Transform t = gameObject.getTransform();
         if (t == null) {
-            // If somehow null, you could create one here or just return.
             return;
         }
 
@@ -32,6 +31,14 @@ public class UpdateTransformInteractor implements UpdateTransformInputBoundary {
         t.setScaleY(data.scale);
         t.setRotation(data.rotation);
 
-        presenter.presentTransform(t);
+        UpdateTransformOutputData outputData =
+                new UpdateTransformOutputData(
+                        t.getX(),
+                        t.getY(),
+                        t.getScaleX(),
+                        t.getRotation()
+                );
+
+        presenter.presentTransform(outputData);
     }
 }

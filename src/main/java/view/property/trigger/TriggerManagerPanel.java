@@ -1,29 +1,44 @@
 package view.property.trigger;
 
 import app.use_case_factory.TriggerUseCaseFactory;
+import entity.scripting.Trigger;
+import entity.scripting.action.Action;
+import entity.scripting.condition.Condition;
 import interface_adapter.trigger.TriggerManagerState;
 import interface_adapter.trigger.TriggerManagerViewModel;
+import interface_adapter.trigger.action.ActionEditorViewModel;
+import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.create.TriggerCreateController;
-import interface_adapter.trigger.delete.TriggerDeleteController;
 import view.util.PropertyPanelUtility;
 
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class TriggerManagerPanel extends JPanel implements PropertyChangeListener {
 
-    private final TriggerManagerViewModel viewModel;
+    private final TriggerManagerViewModel triggerManagerViewModel;
+    private final ConditionEditorViewModel conditionEditorViewModel;
+    private final ActionEditorViewModel actionEditorViewModel;
     private final TriggerUseCaseFactory triggerUseCaseFactory;
     private final TriggerCreateController triggerCreateController;
 
     private final JPanel triggerListPanel;
 
-    public TriggerManagerPanel() {
+    // NEW: Callback for auto-save
+    private Runnable onChangeCallback;
 
-        viewModel = new TriggerManagerViewModel();
-        triggerUseCaseFactory = new TriggerUseCaseFactory(viewModel);
+    public TriggerManagerPanel(TriggerManagerViewModel triggerManagerViewModel) {
+        // ... (Keep existing constructor logic exactly as is until the listeners setup) ...
+        this.triggerManagerViewModel = triggerManagerViewModel;
+        conditionEditorViewModel = new ConditionEditorViewModel();
+        actionEditorViewModel = new ActionEditorViewModel();
+        triggerUseCaseFactory = new TriggerUseCaseFactory(triggerManagerViewModel,
+                conditionEditorViewModel, actionEditorViewModel);
         triggerCreateController = triggerUseCaseFactory.createTriggerCreateController();
 
         setLayout(new BorderLayout());
@@ -31,54 +46,102 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
 
         JPanel mainSection = PropertyPanelUtility.createSectionPanel("Trigger Manager");
 
-        // 3. Create and Add the "Add (+)" Button
-        // We place it at the Top-Right (NorthEast) inside the section
         JButton addButton = PropertyPanelUtility.createAddButton();
         addButton.addActionListener(e -> triggerCreateController.execute());
 
         GridBagConstraints btnGbc = PropertyPanelUtility.baseGbc();
         btnGbc.gridx = 0;
         btnGbc.gridy = 0;
-        btnGbc.anchor = GridBagConstraints.NORTHEAST; // Pin to top-right
-        btnGbc.fill = GridBagConstraints.NONE; // Don't stretch the button
+        btnGbc.anchor = GridBagConstraints.NORTHEAST;
+        btnGbc.fill = GridBagConstraints.NONE;
         btnGbc.weightx = 1.0;
         btnGbc.weighty = 0.0;
         mainSection.add(addButton, btnGbc);
 
-        // 4. Create the Trigger List Container
         triggerListPanel = new JPanel();
         triggerListPanel.setLayout(new BoxLayout(triggerListPanel, BoxLayout.Y_AXIS));
         triggerListPanel.setOpaque(false);
 
-        // Add list below the button
         GridBagConstraints listGbc = PropertyPanelUtility.baseGbc();
         listGbc.gridx = 0;
         listGbc.gridy = 1;
-        listGbc.weighty = 1.0; // Allow list to grow vertically
-        listGbc.fill = GridBagConstraints.BOTH; // Fill available space
+        listGbc.weighty = 1.0;
+        listGbc.fill = GridBagConstraints.BOTH;
         mainSection.add(triggerListPanel, listGbc);
 
         add(mainSection, BorderLayout.CENTER);
 
-        // 5. Setup Listeners
-        this.viewModel.addPropertyChangeListener(this);
+        this.triggerManagerViewModel.addPropertyChangeListener(this);
+        refresh();
+    }
+
+    // NEW: Setter for the callback
+    public void setOnChangeCallback(Runnable callback) {
+        this.onChangeCallback = callback;
+    }
+
+    // load data from the Entity to the UI
+    public void loadTriggerManager(entity.scripting.TriggerManager manager) {
+        // 1. Reset the View Model to a clean state
+        triggerManagerViewModel.setState(new TriggerManagerState());
+        TriggerManagerState state = triggerManagerViewModel.getState();
+
+        if (manager != null) {
+            // 2. Loop through loaded Entities
+            for (Trigger t : manager.getTriggers()) {
+                String event = t.getEvent().getEventLabel();
+                Map<String, String> params = t.getEvent().getEventParameters();
+
+                // Convert Conditions to Scripts
+                List<String> conditions = new ArrayList<>();
+                for (Condition c : t.getConditions()) {
+                    conditions.add(c.format());
+                }
+
+                // Convert Actions to Scripts
+                List<String> actions = new ArrayList<>();
+                for (Action a : t.getActions()) {
+                    actions.add(a.format());
+                }
+
+                // 3. Add to View State
+                state.addTrigger(event, params, conditions, actions);
+            }
+        }
+
+        // 4. Trigger UI Refresh
+        triggerManagerViewModel.firePropertyChange();
         refresh();
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        refresh();
+        TriggerManagerState state = (TriggerManagerState) evt.getNewValue();
+
+        if (state.getErrorMessage() != null) {
+            JOptionPane.showMessageDialog(this,
+                    state.getErrorMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+
+            state.setErrorMessage(null);
+        } else {
+            refresh();
+            // NEW: Trigger the callback whenever state changes
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
+        }
     }
 
+    // ... (Keep the rest of the file: refresh(), methods, etc.) ...
     private void refresh() {
         triggerListPanel.removeAll();
 
-        TriggerManagerState state = viewModel.getState();
+        TriggerManagerState state = triggerManagerViewModel.getState();
         for (int i = 0; i < state.getTriggerCount(); i++) {
-            // Direct constructor call as requested
-            TriggerPanel panel = new TriggerPanel(i, viewModel, triggerUseCaseFactory);
-
-            // Prevent horizontal stretching issues in BoxLayout
+            TriggerPanel panel = new TriggerPanel(i, triggerManagerViewModel,
+                    conditionEditorViewModel, actionEditorViewModel, triggerUseCaseFactory);
             panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
 
             triggerListPanel.add(panel);
@@ -89,42 +152,8 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         repaint();
     }
 
-    // --- Example Integration (Main method to show it works) ---
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ignored) {}
-
-        SwingUtilities.invokeLater(() -> {
-            JFrame homeView = new JFrame("Properties Panel Mockup");
-            homeView.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            homeView.setSize(400, 600);
-            homeView.setLayout(new BorderLayout());
-
-            // --- Mock Properties Panel (The one that actually scrolls) ---
-            JPanel propertiesPanelContent = new JPanel();
-            propertiesPanelContent.setLayout(new BoxLayout(propertiesPanelContent, BoxLayout.Y_AXIS));
-            propertiesPanelContent.setBackground(new Color(40, 40, 40));
-
-            // Add some mock content above
-            propertiesPanelContent.add(new JLabel("<html><font color='white'>General Object Settings...</font></html>"));
-            propertiesPanelContent.add(Box.createVerticalStrut(20));
-
-            // Add the Trigger Manager (your refactored component)
-            TriggerManagerPanel triggerManager = new TriggerManagerPanel();
-            triggerManager.setAlignmentX(Component.LEFT_ALIGNMENT); // Critical for BoxLayout stacking
-            propertiesPanelContent.add(triggerManager);
-
-            // Add filler content below to force scrolling on the parent
-            propertiesPanelContent.add(Box.createVerticalStrut(30));
-            propertiesPanelContent.add(new JLabel("<html><font color='white'>More data below...</font></html>"));
-            propertiesPanelContent.add(Box.createVerticalStrut(800)); // Forces scrollbar to appear
-
-            // The scroll pane now wraps the Properties Panel content
-            JScrollPane scrollPane = new JScrollPane(propertiesPanelContent);
-            scrollPane.getViewport().setBackground(new Color(40, 40, 40));
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-
-            homeView.add(scrollPane, BorderLayout.CENTER);
-            homeView.setVisible(true);
-        });
-    }
+    public String getSelectedEvent() { return null; }
+    public String getSelectedKey() { return null; }
+    public java.util.List<String> getConditionTexts() { return java.util.List.of(); }
+    public java.util.List<String> getActionTexts() { return java.util.List.of(); }
 }

@@ -2,9 +2,12 @@ package entity.scripting.event;
 
 import java.util.Arrays;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class OnKeyPressEvent extends Event{
     public static final String EVENT_TYPE = "On Key Press";
+
+    @JsonIgnore
     public static final List<String> REQUIRED_PARAMETERS = List.of("Key");
 
     public OnKeyPressEvent() {
@@ -15,6 +18,7 @@ public class OnKeyPressEvent extends Event{
         return EVENT_TYPE;
     }
 
+    @JsonIgnore
     @Override
     public boolean isRequiredParameter(String key){
         return REQUIRED_PARAMETERS.contains(key);

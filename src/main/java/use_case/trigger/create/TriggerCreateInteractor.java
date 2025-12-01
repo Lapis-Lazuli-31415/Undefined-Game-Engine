@@ -3,6 +3,7 @@ package use_case.trigger.create;
 import entity.GameObject;
 import entity.scripting.Trigger;
 import entity.scripting.event.EmptyEvent;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 import java.util.ArrayList;
@@ -17,14 +18,20 @@ public class TriggerCreateInteractor implements ConditionCreateInputBoundary {
 
     @Override
     public void execute(){
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
-        Trigger trigger = new Trigger(new EmptyEvent(), true);
-        gameObject.getTriggerManager().addTrigger(trigger);
+        if (gameObject == null) {
 
-        TriggerCreateOutputData outputData = new TriggerCreateOutputData(EmptyEvent.EVENT_TYPE);
-        triggerCreatePresenter.prepareSuccessView(outputData);
+            triggerCreatePresenter.prepareFailureView("No GameObject selected");
 
+        } else {
+
+            Trigger trigger = new Trigger(new EmptyEvent(), true);
+            gameObject.getTriggerManager().addTrigger(trigger);
+
+            TriggerCreateOutputData outputData = new TriggerCreateOutputData(EmptyEvent.EVENT_TYPE);
+            triggerCreatePresenter.prepareSuccessView(outputData);
+
+        }
     }
 }
