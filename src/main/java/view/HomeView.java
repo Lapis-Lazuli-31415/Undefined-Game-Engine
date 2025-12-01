@@ -36,7 +36,7 @@ import interface_adapter.variable.update.UpdateVariableController;
 import interface_adapter.variable.get.GetAllVariablesController;
 import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.LocalVariableViewModel;
-import use_case.Sprites.Import.ImportSpriteInteractor;
+
 
 import entity.SpriteRenderer;
 import entity.scripting.Trigger;
@@ -835,275 +835,303 @@ public class HomeView extends javax.swing.JFrame {
 //        if (editorState == null) {
 //            return null;
 //        }
-//        return editorState.getCurrentScene();
-        return createTestScene();
+        return editorState.getCurrentScene();
+//        return createTestScene();
     }
-private Scene createTestScene() {
-    Scene scene = Scene.create("DragonTamingDemo");
+//private Scene createTestScene() {
+//    Scene scene = Scene.create("DragonTamingDemo");
+//    // ========== LOAD IMAGES ==========
+//    entity.Image keyImage = loadDemoImage("/Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/src/main/resources/demo_assets/key.png");
+//    entity.Image chestImage = loadDemoImage("/Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/src/main/resources/demo_assets/chest.png");
+//    entity.Image dragonImage = loadDemoImage("/Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/src/main/resources/demo_assets/dragon.png");
+//    // ========== 1. KEY 🔑 ==========
+//    Transform keyTransform = new Transform(
+//        new Vector<>(Arrays.asList(-200.0, -80.0)),
+//        0f,
+//        new Vector<>(Arrays.asList(0.1, 0.1))
+//    );
+//
+//    SpriteRenderer keySprite = new SpriteRenderer(keyImage, true);
+//    TriggerManager keyTriggerManager = new TriggerManager();
+//
+//    GameObject key = new GameObject(
+//            "Key",
+//            "Key",
+//            true,
+//            new Environment(),
+//            keyTransform,
+//            keySprite,
+//            keyTriggerManager
+//    );
+//
+//    // Trigger: Click to pick up key
+//    Trigger keyClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+//
+//    keyClickTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+//            "Key",
+//            new entity.scripting.expression.value.BooleanValue(false)
+//    ));
+//
+//    entity.scripting.expression.variable.BooleanVariable hasKeyVar =
+//        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
+//    keyClickTrigger.addAction(
+//        new entity.scripting.action.BooleanVariableAssignmentAction(
+//            hasKeyVar,
+//            new entity.scripting.expression.value.BooleanValue(true)
+//        )
+//    );
+//
+//    key.getTriggerManager().addTrigger(keyClickTrigger);
+//    scene.addGameObject(key);
+//
+//    // ========== 2. CHEST 📦 ==========
+//    Transform chestTransform = new Transform(
+//        new Vector<>(Arrays.asList(0.0, -80.0)),
+//        0f,
+//        new Vector<>(Arrays.asList(0.1, 0.1))
+//    );
+//
+//    SpriteRenderer chestSprite = new SpriteRenderer(chestImage, true);
+//    TriggerManager chestTriggerManager = new TriggerManager();
+//
+//    GameObject chest = new GameObject(
+//            "Chest",
+//            "Chest",
+//            true,
+//            new Environment(),
+//            chestTransform,
+//            chestSprite,
+//            chestTriggerManager
+//    );
+//
+//    Trigger openChestTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+//
+//    entity.scripting.expression.variable.BooleanVariable keyCheck =
+//        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
+//    entity.scripting.condition.BooleanComparisonCondition keyCondition =
+//        new entity.scripting.condition.BooleanComparisonCondition(
+//            keyCheck,
+//            new entity.scripting.expression.value.BooleanValue(true)
+//        );
+//    openChestTrigger.addCondition(keyCondition);
+//
+//    openChestTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+//            "Chest",
+//            new entity.scripting.expression.value.BooleanValue(false)
+//    ));
+//
+//    entity.scripting.expression.variable.BooleanVariable tamingSkillVar =
+//        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
+//    openChestTrigger.addAction(
+//        new entity.scripting.action.BooleanVariableAssignmentAction(
+//            tamingSkillVar,
+//            new entity.scripting.expression.value.BooleanValue(true)
+//        )
+//    );
+//
+//    entity.scripting.expression.variable.NumericVariable skillPointsVar =
+//        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
+//    openChestTrigger.addAction(
+//        new entity.scripting.action.NumericVariableAssignmentAction(
+//            skillPointsVar,
+//            new entity.scripting.expression.value.NumericValue(100.0)
+//        )
+//    );
+//
+//    chest.getTriggerManager().addTrigger(openChestTrigger);
+//    scene.addGameObject(chest);
+//
+//    // ========== 3. DRAGON 🐉 ==========
+//    Transform dragonTransform = new Transform(
+//        new Vector<>(Arrays.asList(180.0, 80.0)),
+//        -15f,
+//        new Vector<>(Arrays.asList(0.5, 0.5))
+//    );
+//
+//    SpriteRenderer dragonSprite = new SpriteRenderer(dragonImage, true);
+//    TriggerManager dragonTriggerManager = new TriggerManager();
+//
+//    GameObject dragon = new GameObject(
+//            "Dragon",
+//            "Dragon",
+//            true,
+//            new Environment(),
+//            dragonTransform,
+//            dragonSprite,
+//            dragonTriggerManager
+//    );
+//
+//    // Trigger 1: Click Dragon - TAME IT
+//    Trigger tameDragonTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+//
+//    entity.scripting.expression.variable.BooleanVariable tamingSkillCheck =
+//        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
+//    entity.scripting.condition.BooleanComparisonCondition tamingCondition =
+//        new entity.scripting.condition.BooleanComparisonCondition(
+//            tamingSkillCheck,
+//            new entity.scripting.expression.value.BooleanValue(true)
+//        );
+//    tameDragonTrigger.addCondition(tamingCondition);
+//
+//    tameDragonTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.NumericValue(0.0),
+//            new entity.scripting.expression.value.NumericValue(0.0)
+//    ));
+//
+//    entity.scripting.expression.variable.BooleanVariable tamedVar =
+//        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
+//    tameDragonTrigger.addAction(
+//        new entity.scripting.action.BooleanVariableAssignmentAction(
+//            tamedVar,
+//            new entity.scripting.expression.value.BooleanValue(true)
+//        )
+//    );
+//
+//    dragon.getTriggerManager().addTrigger(tameDragonTrigger);
+//
+//    // Trigger 2: Press W - FLY UP
+//    entity.scripting.event.OnKeyPressEvent flyUpEvent = new entity.scripting.event.OnKeyPressEvent();
+//    flyUpEvent.addEventParameter("Key", "W");
+//
+//    Trigger flyUpTrigger = new Trigger(flyUpEvent, true);
+//
+//    entity.scripting.expression.variable.BooleanVariable tamedCheck =
+//        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
+//    entity.scripting.condition.BooleanComparisonCondition tamedCondition =
+//        new entity.scripting.condition.BooleanComparisonCondition(
+//            tamedCheck,
+//            new entity.scripting.expression.value.BooleanValue(true)
+//        );
+//    flyUpTrigger.addCondition(tamedCondition);
+//
+//    flyUpTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.NumericValue(0.0),
+//            new entity.scripting.expression.value.NumericValue(-150.0)
+//    ));
+//
+//    dragon.getTriggerManager().addTrigger(flyUpTrigger);
+//
+//    // Trigger 3: Press S - FLY DOWN
+//    entity.scripting.event.OnKeyPressEvent flyDownEvent = new entity.scripting.event.OnKeyPressEvent();
+//    flyDownEvent.addEventParameter("Key", "S");
+//
+//    Trigger flyDownTrigger = new Trigger(flyDownEvent, true);
+//    flyDownTrigger.addCondition(tamedCondition);
+//
+//    flyDownTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.NumericValue(0.0),
+//            new entity.scripting.expression.value.NumericValue(80.0)
+//    ));
+//
+//    dragon.getTriggerManager().addTrigger(flyDownTrigger);
+//
+//    // Trigger 4: Press A - FLY LEFT (advanced)
+//    entity.scripting.event.OnKeyPressEvent flyLeftEvent = new entity.scripting.event.OnKeyPressEvent();
+//    flyLeftEvent.addEventParameter("Key", "A");
+//
+//    Trigger flyLeftTrigger = new Trigger(flyLeftEvent, true);
+//    flyLeftTrigger.addCondition(tamedCondition);
+//
+//    entity.scripting.expression.variable.NumericVariable skillCheck =
+//        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
+//    entity.scripting.condition.NumericComparisonCondition skillCondition =
+//        new entity.scripting.condition.NumericComparisonCondition(
+//            skillCheck,
+//            ">",
+//            new entity.scripting.expression.value.NumericValue(50.0)
+//        );
+//    flyLeftTrigger.addCondition(skillCondition);
+//
+//    flyLeftTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.NumericValue(-200.0),
+//            new entity.scripting.expression.value.NumericValue(0.0)
+//    ));
+//
+//    dragon.getTriggerManager().addTrigger(flyLeftTrigger);
+//
+//    // Trigger 5: Press D - RELEASE
+//    entity.scripting.event.OnKeyPressEvent releaseEvent = new entity.scripting.event.OnKeyPressEvent();
+//    releaseEvent.addEventParameter("Key", "D");
+//
+//    Trigger releaseTrigger = new Trigger(releaseEvent, true);
+//    releaseTrigger.addCondition(tamedCondition);
+//
+//    releaseTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.NumericValue(0.0),
+//            new entity.scripting.expression.value.NumericValue(-250.0)
+//    ));
+//
+//    releaseTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.BooleanValue(false)
+//    ));
+//
+//    dragon.getTriggerManager().addTrigger(releaseTrigger);
+//
+//    // Trigger 6: Press R - RESET
+//    entity.scripting.event.OnKeyPressEvent resetEvent = new entity.scripting.event.OnKeyPressEvent();
+//    resetEvent.addEventParameter("Key", "R");
+//
+//    Trigger resetTrigger = new Trigger(resetEvent, true);
+//
+//    resetTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.NumericValue(180.0),
+//            new entity.scripting.expression.value.NumericValue(80.0)
+//    ));
+//
+//    resetTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+//            "Dragon",
+//            new entity.scripting.expression.value.BooleanValue(true)
+//    ));
+//
+//    dragon.getTriggerManager().addTrigger(resetTrigger);
+//
+//    scene.addGameObject(dragon);
+//
+//    // Print guide
+//    System.out.println("\n╔════════════════════════════════════════════════════════════╗");
+//    System.out.println("║           🐉 DRAGON TAMING ADVENTURE 🐉                   ║");
+//    System.out.println("╚════════════════════════════════════════════════════════════╝");
+//    System.out.println("\n🎮 QUEST: Tame the Wild Dragon!");
+//    System.out.println("\n📍 STEP 1: Click Key 🔑 → Pick it up");
+//    System.out.println("📍 STEP 2: Click Chest 📦 → Learn taming skill (requires key)");
+//    System.out.println("📍 STEP 3: Click Dragon 🐉 → Tame it (requires skill)");
+//    System.out.println("📍 STEP 4: Press W/S/A → Control dragon");
+//    System.out.println("📍 STEP 5: Press D → Release dragon\n");
+//
+//    return scene;
+//}
+/**
+     * Load an image for demo scene
+     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
+     */
+    private entity.Image loadDemoImage(String path) {
+        try {
+            java.nio.file.Path imagePath = java.nio.file.Paths.get(path);
 
-    // ========== 1. KEY 🔑 ==========
-    Transform keyTransform = new Transform(
-        new Vector<>(Arrays.asList(-200.0, -80.0)),
-        0f,
-        new Vector<>(Arrays.asList(1.2, 1.2))
-    );
+            // Check if file exists
+            if (!imagePath.toFile().exists()) {
+                System.err.println("❌ Image not found: " + path);
+                return null;
+            }
 
-    SpriteRenderer keySprite = new SpriteRenderer(null, true);
-    TriggerManager keyTriggerManager = new TriggerManager();
+            // Use Image constructor that takes Path
+            entity.Image image = new entity.Image(imagePath);
+            System.out.println("✓ Loaded image: " + path);
+            return image;
 
-    GameObject key = new GameObject(
-            "Key",
-            "Key",
-            true,
-            new Environment(),
-            keyTransform,
-            keySprite,
-            keyTriggerManager
-    );
-
-    // Trigger: Click to pick up key
-    Trigger keyClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
-
-    keyClickTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-            "Key",
-            new entity.scripting.expression.value.BooleanValue(false)
-    ));
-
-    entity.scripting.expression.variable.BooleanVariable hasKeyVar =
-        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
-    keyClickTrigger.addAction(
-        new entity.scripting.action.BooleanVariableAssignmentAction(
-            hasKeyVar,
-            new entity.scripting.expression.value.BooleanValue(true)
-        )
-    );
-
-    key.getTriggerManager().addTrigger(keyClickTrigger);
-    scene.addGameObject(key);
-
-    // ========== 2. CHEST 📦 ==========
-    Transform chestTransform = new Transform(
-        new Vector<>(Arrays.asList(0.0, -80.0)),
-        0f,
-        new Vector<>(Arrays.asList(1.8, 1.8))
-    );
-
-    SpriteRenderer chestSprite = new SpriteRenderer(null, true);
-    TriggerManager chestTriggerManager = new TriggerManager();
-
-    GameObject chest = new GameObject(
-            "Chest",
-            "Chest",
-            true,
-            new Environment(),
-            chestTransform,
-            chestSprite,
-            chestTriggerManager
-    );
-
-    Trigger openChestTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
-
-    entity.scripting.expression.variable.BooleanVariable keyCheck =
-        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
-    entity.scripting.condition.BooleanComparisonCondition keyCondition =
-        new entity.scripting.condition.BooleanComparisonCondition(
-            keyCheck,
-            new entity.scripting.expression.value.BooleanValue(true)
-        );
-    openChestTrigger.addCondition(keyCondition);
-
-    openChestTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-            "Chest",
-            new entity.scripting.expression.value.BooleanValue(false)
-    ));
-
-    entity.scripting.expression.variable.BooleanVariable tamingSkillVar =
-        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
-    openChestTrigger.addAction(
-        new entity.scripting.action.BooleanVariableAssignmentAction(
-            tamingSkillVar,
-            new entity.scripting.expression.value.BooleanValue(true)
-        )
-    );
-
-    entity.scripting.expression.variable.NumericVariable skillPointsVar =
-        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
-    openChestTrigger.addAction(
-        new entity.scripting.action.NumericVariableAssignmentAction(
-            skillPointsVar,
-            new entity.scripting.expression.value.NumericValue(100.0)
-        )
-    );
-
-    chest.getTriggerManager().addTrigger(openChestTrigger);
-    scene.addGameObject(chest);
-
-    // ========== 3. DRAGON 🐉 ==========
-    Transform dragonTransform = new Transform(
-        new Vector<>(Arrays.asList(180.0, 80.0)),
-        -15f,
-        new Vector<>(Arrays.asList(2.5, 2.5))
-    );
-
-    SpriteRenderer dragonSprite = new SpriteRenderer(null, true);
-    TriggerManager dragonTriggerManager = new TriggerManager();
-
-    GameObject dragon = new GameObject(
-            "Dragon",
-            "Dragon",
-            true,
-            new Environment(),
-            dragonTransform,
-            dragonSprite,
-            dragonTriggerManager
-    );
-
-    // Trigger 1: Click Dragon - TAME IT
-    Trigger tameDragonTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
-
-    entity.scripting.expression.variable.BooleanVariable tamingSkillCheck =
-        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
-    entity.scripting.condition.BooleanComparisonCondition tamingCondition =
-        new entity.scripting.condition.BooleanComparisonCondition(
-            tamingSkillCheck,
-            new entity.scripting.expression.value.BooleanValue(true)
-        );
-    tameDragonTrigger.addCondition(tamingCondition);
-
-    tameDragonTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-            "Dragon",
-            new entity.scripting.expression.value.NumericValue(0.0),
-            new entity.scripting.expression.value.NumericValue(0.0)
-    ));
-
-    entity.scripting.expression.variable.BooleanVariable tamedVar =
-        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
-    tameDragonTrigger.addAction(
-        new entity.scripting.action.BooleanVariableAssignmentAction(
-            tamedVar,
-            new entity.scripting.expression.value.BooleanValue(true)
-        )
-    );
-
-    dragon.getTriggerManager().addTrigger(tameDragonTrigger);
-
-    // Trigger 2: Press W - FLY UP
-    entity.scripting.event.OnKeyPressEvent flyUpEvent = new entity.scripting.event.OnKeyPressEvent();
-    flyUpEvent.addEventParameter("Key", "W");
-
-    Trigger flyUpTrigger = new Trigger(flyUpEvent, true);
-
-    entity.scripting.expression.variable.BooleanVariable tamedCheck =
-        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
-    entity.scripting.condition.BooleanComparisonCondition tamedCondition =
-        new entity.scripting.condition.BooleanComparisonCondition(
-            tamedCheck,
-            new entity.scripting.expression.value.BooleanValue(true)
-        );
-    flyUpTrigger.addCondition(tamedCondition);
-
-    flyUpTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-            "Dragon",
-            new entity.scripting.expression.value.NumericValue(0.0),
-            new entity.scripting.expression.value.NumericValue(-150.0)
-    ));
-
-    dragon.getTriggerManager().addTrigger(flyUpTrigger);
-
-    // Trigger 3: Press S - FLY DOWN
-    entity.scripting.event.OnKeyPressEvent flyDownEvent = new entity.scripting.event.OnKeyPressEvent();
-    flyDownEvent.addEventParameter("Key", "S");
-
-    Trigger flyDownTrigger = new Trigger(flyDownEvent, true);
-    flyDownTrigger.addCondition(tamedCondition);
-
-    flyDownTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-            "Dragon",
-            new entity.scripting.expression.value.NumericValue(0.0),
-            new entity.scripting.expression.value.NumericValue(80.0)
-    ));
-
-    dragon.getTriggerManager().addTrigger(flyDownTrigger);
-
-    // Trigger 4: Press A - FLY LEFT (advanced)
-    entity.scripting.event.OnKeyPressEvent flyLeftEvent = new entity.scripting.event.OnKeyPressEvent();
-    flyLeftEvent.addEventParameter("Key", "A");
-
-    Trigger flyLeftTrigger = new Trigger(flyLeftEvent, true);
-    flyLeftTrigger.addCondition(tamedCondition);
-
-    entity.scripting.expression.variable.NumericVariable skillCheck =
-        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
-    entity.scripting.condition.NumericComparisonCondition skillCondition =
-        new entity.scripting.condition.NumericComparisonCondition(
-            skillCheck,
-            ">",
-            new entity.scripting.expression.value.NumericValue(50.0)
-        );
-    flyLeftTrigger.addCondition(skillCondition);
-
-    flyLeftTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-            "Dragon",
-            new entity.scripting.expression.value.NumericValue(-200.0),
-            new entity.scripting.expression.value.NumericValue(0.0)
-    ));
-
-    dragon.getTriggerManager().addTrigger(flyLeftTrigger);
-
-    // Trigger 5: Press D - RELEASE
-    entity.scripting.event.OnKeyPressEvent releaseEvent = new entity.scripting.event.OnKeyPressEvent();
-    releaseEvent.addEventParameter("Key", "D");
-
-    Trigger releaseTrigger = new Trigger(releaseEvent, true);
-    releaseTrigger.addCondition(tamedCondition);
-
-    releaseTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-            "Dragon",
-            new entity.scripting.expression.value.NumericValue(0.0),
-            new entity.scripting.expression.value.NumericValue(-250.0)
-    ));
-
-    releaseTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-            "Dragon",
-            new entity.scripting.expression.value.BooleanValue(false)
-    ));
-
-    dragon.getTriggerManager().addTrigger(releaseTrigger);
-
-    // Trigger 6: Press R - RESET
-    entity.scripting.event.OnKeyPressEvent resetEvent = new entity.scripting.event.OnKeyPressEvent();
-    resetEvent.addEventParameter("Key", "R");
-
-    Trigger resetTrigger = new Trigger(resetEvent, true);
-
-    resetTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-            "Dragon",
-            new entity.scripting.expression.value.NumericValue(180.0),
-            new entity.scripting.expression.value.NumericValue(80.0)
-    ));
-
-    resetTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-            "Dragon",
-            new entity.scripting.expression.value.BooleanValue(true)
-    ));
-
-    dragon.getTriggerManager().addTrigger(resetTrigger);
-
-    scene.addGameObject(dragon);
-
-    // Print guide
-    System.out.println("\n╔════════════════════════════════════════════════════════════╗");
-    System.out.println("║           🐉 DRAGON TAMING ADVENTURE 🐉                   ║");
-    System.out.println("╚════════════════════════════════════════════════════════════╝");
-    System.out.println("\n🎮 QUEST: Tame the Wild Dragon!");
-    System.out.println("\n📍 STEP 1: Click Key 🔑 → Pick it up");
-    System.out.println("📍 STEP 2: Click Chest 📦 → Learn taming skill (requires key)");
-    System.out.println("📍 STEP 3: Click Dragon 🐉 → Tame it (requires skill)");
-    System.out.println("📍 STEP 4: Press W/S/A → Control dragon");
-    System.out.println("📍 STEP 5: Press D → Release dragon\n");
-
-    return scene;
-}
+        } catch (Exception e) {
+            System.err.println("❌ Failed to load image: " + path);
+            e.printStackTrace();
+            return null;
+        }
+    }
     /**
      * Create global environment for triggers
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature

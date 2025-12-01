@@ -38,6 +38,7 @@ public class GameCanvas extends JPanel {
     private boolean showBoundingBoxes = false;
     private boolean useButtonMode = false;  // Default: use sprite mode
     private InputManager inputManager;
+    private Scene scene;
 
     /**
      * Constructor.
@@ -75,20 +76,28 @@ public class GameCanvas extends JPanel {
      *
      * @param gameObjects List of game objects
      */
+    /**
+     * Set game objects to display.
+     *
+     * @param gameObjects List of game objects
+     */
     public void setGameObjects(ArrayList<GameObject> gameObjects) {
         this.gameObjects = gameObjects;
 
-        // Don't create UI buttons here anymore - they will be in the status panel
-        // Clear any existing buttons
+        // Button mode setup...
         for (JButton btn : uiButtons.values()) {
             remove(btn);
         }
         uiButtons.clear();
         clickListeners.clear();
 
-        // But still create click listeners for button mode
         if (useButtonMode) {
-            for (GameObject obj : gameObjects) {
+            // ✅ 使用 scene 如果可用，否则用 gameObjects
+            ArrayList<GameObject> objsToProcess = (scene != null)
+                    ? new ArrayList<>(scene.getGameObjects())
+                    : gameObjects;
+
+            for (GameObject obj : objsToProcess) {
                 if (!obj.isActive()) continue;
                 if (hasOnClickEvent(obj)) {
                     createClickListener(obj);
@@ -314,12 +323,17 @@ public class GameCanvas extends JPanel {
      * @param g2d Graphics2D context
      */
     private void renderGameObjects(Graphics2D g2d) {
+        // ✅ 使用 scene 而不是 gameObjects！
+        if (scene == null || scene.getGameObjects() == null) {
+            return;
+        }
+
         // Create a copy and sort by zIndex
-        ArrayList<GameObject> sortedObjects = new ArrayList<>(gameObjects);
+        ArrayList<GameObject> sortedObjects = new ArrayList<>(scene.getGameObjects());  // ✅ 从scene获取
         sortedObjects.sort((a, b) -> {
             int zA = getZIndex(a);
             int zB = getZIndex(b);
-            return Integer.compare(zA, zB);  // Lower zIndex first (behind)
+            return Integer.compare(zA, zB);
         });
 
         for (GameObject obj : sortedObjects) {
@@ -592,12 +606,7 @@ public class GameCanvas extends JPanel {
      * @return SpriteRenderer or null if not found
      */
     private SpriteRenderer getSpriteRenderer(GameObject obj) {
-        for (Property property : obj.getProperties()) {
-            if (property instanceof SpriteRenderer) {
-                return (SpriteRenderer) property;
-            }
-        }
-        return null;
+            return obj.getSpriteRenderer();
     }
 
     /**
@@ -618,6 +627,17 @@ public class GameCanvas extends JPanel {
         }
     }
 
+    /**
+     * Set the scene to render
+     */
+    public void setScene(Scene scene) {
+        this.scene = scene;
+        repaint();  // ✅ This works because GameCanvas extends JPanel
+    }
+
+    public Scene getScene() {
+        return this.scene;
+    }
     /**
      * Dispose of canvas resources.
      */

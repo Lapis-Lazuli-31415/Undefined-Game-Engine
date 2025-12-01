@@ -35,6 +35,7 @@ public class GameObject {
         this.spriteRenderer = spriteRenderer;
         this.triggerManager = triggerManager;
         this.environments = environment;
+        this.properties = new ArrayList<>();
     }
 
     @com.fasterxml.jackson.annotation.JsonCreator
@@ -50,6 +51,7 @@ public class GameObject {
         this.environments = environments;
         this.transform = transform;
         this.triggerManager = triggerManager;
+        this.properties = new ArrayList<>();
     }
 
     // --- Basic getters/setters ---
@@ -145,7 +147,7 @@ public class GameObject {
 
         // Copy environment
         Environment copiedEnvironment = (this.environments != null) ? this.environments.copy() : new Environment();
-
+        SpriteRenderer copiedSpriteRenderer = (this.spriteRenderer != null) ? this.spriteRenderer.copy() : null;
         // Copy trigger manager
         TriggerManager copiedTriggerManager = (this.triggerManager != null)
                 ? this.triggerManager.copy()

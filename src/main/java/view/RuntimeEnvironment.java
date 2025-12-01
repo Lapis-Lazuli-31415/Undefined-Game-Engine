@@ -67,7 +67,7 @@ public class RuntimeEnvironment {
         this.triggerExecutor = new TriggerExecutionInteractor(presenter);
 
         canvas.setGlobalEnvironment(globalEnvironment);
-
+        canvas.setScene(scene);
         System.out.println("RuntimeEnvironment created");
     }
 

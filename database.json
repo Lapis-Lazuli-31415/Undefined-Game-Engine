@@ -1,0 +1,96 @@
+{
+  "id" : "proj-1",
+  "name" : "My Game Project",
+  "global_environment" : {
+    "variables" : { }
+  },
+  "assets" : [ {
+    "id" : "a1858f41-9eae-411c-b4ca-63ccd106df76",
+    "localpath" : "file:///Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/uploads/Screenshot%202025-11-26%20at%204.18.55%E2%80%AFPM.png",
+    "name" : "Screenshot 2025-11-26 at 4.18.55 PM.png"
+  }, {
+    "id" : "9a28b0a6-946f-4693-86e6-b0ec8d047ab8",
+    "localpath" : "file:///Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/uploads/Weixin%20Image_2025-10-30_230306_509.png",
+    "name" : "Weixin Image_2025-10-30_230306_509.png"
+  }, {
+    "id" : "f8a98508-3a94-4416-b4a7-33aa80ebdd71",
+    "localpath" : "file:///Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/uploads/Screenshot%202025-11-29%20at%205.35.56%E2%80%AFPM.png",
+    "name" : "Screenshot 2025-11-29 at 5.35.56 PM.png"
+  }, {
+    "id" : "8f2a0619-df68-450c-8dcc-2f03186038e5",
+    "localpath" : "file:///Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/uploads/Screenshot%202025-11-23%20at%208.45.26%E2%80%AFPM.png",
+    "name" : "Screenshot 2025-11-23 at 8.45.26 PM.png"
+  } ],
+  "scenes" : [ {
+    "id" : "072ce39b-21f8-41eb-8aca-1ead3300c7a1",
+    "name" : "Default Scene",
+    "game_objects" : [ {
+      "id" : "demo-1",
+      "name" : "Demo Sprite",
+      "active" : true,
+      "environment" : {
+        "variables" : { }
+      },
+      "transform" : {
+        "x" : 0.0,
+        "y" : 0.0,
+        "rotation" : 0.0,
+        "scale_x" : 1.0,
+        "scale_y" : 1.0
+      },
+      "trigger_manager" : {
+        "triggers" : [ ]
+      },
+      "properties" : [ ],
+      "sprite_renderer" : null
+    }, {
+      "id" : "37f62f78-67f8-41ef-b3ea-f520c960bf27",
+      "name" : "Weixin Image_2025-10-30_230306_509.png",
+      "active" : true,
+      "environment" : {
+        "variables" : { }
+      },
+      "transform" : {
+        "x" : 0.0,
+        "y" : 0.0,
+        "rotation" : 0.0,
+        "scale_x" : 1.0,
+        "scale_y" : 1.0
+      },
+      "trigger_manager" : {
+        "triggers" : [ ]
+      },
+      "properties" : [ ],
+      "sprite_renderer" : {
+        "type" : "SpriteRenderer",
+        "visible" : true,
+        "opacity" : 100,
+        "zindex" : 0
+      }
+    }, {
+      "id" : "ee456f52-1797-401d-b0aa-faccbd9b2865",
+      "name" : "Weixin Image_2025-10-30_230306_509.png",
+      "active" : true,
+      "environment" : {
+        "variables" : { }
+      },
+      "transform" : {
+        "x" : 0.0,
+        "y" : 0.0,
+        "rotation" : 0.0,
+        "scale_x" : 1.0,
+        "scale_y" : 1.0
+      },
+      "trigger_manager" : {
+        "triggers" : [ ]
+      },
+      "properties" : [ ],
+      "sprite_renderer" : {
+        "type" : "SpriteRenderer",
+        "visible" : true,
+        "opacity" : 100,
+        "zindex" : 0
+      }
+    } ]
+  } ]
+}
