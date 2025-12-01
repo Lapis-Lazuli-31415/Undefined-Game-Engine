@@ -20,7 +20,7 @@ public class SelectGameObjectPresenter implements SelectGameObjectOutputBoundary
 
     @Override
     public void gameObjectSelected(Scene scene, GameObject gameObject) {
-        EditorState.setCurrentScene(scene);           // ensure scene synced
+        EditorState.getSceneRepository().setCurrentScene(scene);         // ensure scene synced
         EditorState.setCurrentGameObject(gameObject); // store actual entity
         listener.onGameObjectSelected(scene, gameObject);
     }

@@ -9,6 +9,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import entity.GameObject;
 import entity.Transform;
+import interface_adapter.EditorState;
 import interface_adapter.add_scene.AddSceneController;
 import interface_adapter.add_scene.AddScenePresenter;
 import interface_adapter.list_scenes.ListScenesPresenter;
@@ -250,6 +251,7 @@ public class HomeView extends javax.swing.JFrame {
         transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
         var sceneRepo = new InMemorySceneRepository();
+        EditorState.init(sceneRepo);
 
         // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);
@@ -266,7 +268,6 @@ public class HomeView extends javax.swing.JFrame {
         gameComponentsPanel = new JPanel();
         gameComponentsPanel.setLayout(new BorderLayout());
         gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
-        gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
 
         // Repository
         addScenePresenter = new AddScenePresenter();
@@ -337,8 +338,7 @@ public class HomeView extends javax.swing.JFrame {
         tabBar.setPreferredSize(new Dimension(0, 35));
         tabBar.setBackground(new Color(60, 60, 60));
 
-        JLabel tabLabel = new JLabel("   Start");
-        tabLabel.setForeground(Color.WHITE);
+
 
 //        JButton addTabButton = new JButton("+");
 //        addTabButton.setPreferredSize(new Dimension(45, 35));
@@ -363,7 +363,7 @@ public class HomeView extends javax.swing.JFrame {
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
 
-        tabBar.add(tabLabel, BorderLayout.WEST);
+
 //      tabBar.add(addTabButton, BorderLayout.CENTER);
         tabBar.add(rightTabControls, BorderLayout.EAST);
 

@@ -26,7 +26,6 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     private GameObject selectedObject;
     private Runnable onSelectionChangeCallback;
     private Runnable onSceneModifiedCallback;
-    private Scene currentScene;
 
     public ScenePanel(TransformViewModel viewModel) {
         this.viewModel = viewModel;
@@ -50,7 +49,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     public void setScene(Scene scene) {
-        this.currentScene = scene;
+        EditorState.getSceneRepository().setCurrentScene(scene);
 
         // 1. Remove all visual sprites
         this.removeAll();
@@ -88,7 +87,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             gameObject.setTransform(transform);
             gameObject.addProperty(spriteRenderer);
 
-            currentScene.addGameObject(gameObject);
+            EditorState.getSceneRepository().getCurrentScene().addGameObject(gameObject);
 
             // notify UI that the scene changed (gameobject added)
             if (onSceneModifiedCallback != null) {
@@ -102,7 +101,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             selectObject(gameObject);
 
             // log for debugging
-            System.out.println("[ScenePanel] Added sprite: " + name + " (Total objects: " + currentScene.getGameObjects().size() + ")");
+            System.out.println("[ScenePanel] Added sprite: " + name + " (Total objects: " + EditorState.getSceneRepository().getCurrentScene().getGameObjects().size() + ")");
             repaint();
         }
         catch (Exception ex) {
@@ -130,10 +129,10 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private GameObject findGameObjectByImage(entity.Image image) {
-        if (currentScene.getGameObjects() == null) {
+        if (EditorState.getSceneRepository().getCurrentScene().getGameObjects() == null) {
             return null;
         }
-        for (GameObject obj : currentScene.getGameObjects()) {
+        for (GameObject obj : EditorState.getSceneRepository().getCurrentScene().getGameObjects()) {
             SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
             if (spriteRenderer != null && spriteRenderer.getSprite() == image) {
                 return obj;
@@ -155,11 +154,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     private void handleMouseClick(int mouseX, int mouseY) {
-        if (currentScene == null) {
+        if (EditorState.getSceneRepository().getCurrentScene() == null) {
             return;
         }
-        for (int i = currentScene.getGameObjects().size() - 1; i >= 0; i--) {
-            GameObject obj = currentScene.getGameObjects().get(i);
+        for (int i = EditorState.getSceneRepository().getCurrentScene().getGameObjects().size() - 1; i >= 0; i--) {
+            GameObject obj = EditorState.getSceneRepository().getCurrentScene().getGameObjects().get(i);
             if (isPointInObject(mouseX, mouseY, obj)) {
                 selectObject(obj);
                 repaint();
@@ -210,11 +209,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (currentScene == null) {
+        if (EditorState.getSceneRepository().getCurrentScene() == null) {
             return;
         }
 
-        if (currentScene.getGameObjects() == null) {
+        if (EditorState.getSceneRepository().getCurrentScene().getGameObjects() == null) {
             return;
         }
 
@@ -224,7 +223,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             int panelH = getHeight();
 
             // almost same as the old implementation, but i refactored it into separate methods
-            for (GameObject obj : currentScene.getGameObjects()) {
+            for (GameObject obj : EditorState.getSceneRepository().getCurrentScene().getGameObjects()) {
                 renderGameObject(g2, obj, panelW, panelH);
             }
 
