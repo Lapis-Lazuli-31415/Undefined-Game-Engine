@@ -30,51 +30,6 @@ public class TriggerExecutionInteractor implements TriggerExecutionInputBoundary
         this.outputBoundary = outputBoundary;
     }
 
-//    @Override
-//    public void execute(TriggerExecutionInputData inputData) {
-//        Trigger trigger = inputData.getTrigger();
-//        GameObject obj = inputData.getGameObject();
-//        Environment globalEnv = inputData.getGlobalEnvironment();
-//        Scene scene = inputData.getScene();
-//
-//        try {
-//            // Get local environment from GameObject
-//            Environment localEnv = (obj != null) ? obj.getEnvironment() : new Environment();
-//            if (localEnv == null) {
-//                localEnv = new Environment();
-//            }
-//
-//            // Check all conditions
-//            boolean allConditionsMet = checkConditions(trigger, globalEnv, localEnv);
-//
-//            String objName = (obj != null) ? obj.getName() : "Unknown";
-//            String eventName = trigger.getEvent().getClass().getSimpleName();
-//
-//            if (allConditionsMet) {
-//                // Execute all actions
-//                int actionsExecuted = executeActions(trigger, globalEnv, localEnv, scene);
-//                TriggerExecutionOutputData outputData = new TriggerExecutionOutputData(
-//                        objName,
-//                        eventName,
-//                        true,
-//                        actionsExecuted
-//                );
-//                outputBoundary.presentSuccess(outputData);
-//            } else {
-//                // Conditions not met
-//                TriggerExecutionOutputData outputData = new TriggerExecutionOutputData(
-//                        objName,
-//                        eventName,
-//                        false,
-//                        0
-//                );
-//                outputBoundary.presentConditionsNotMet(outputData);
-//            }
-//
-//        } catch (Exception e) {
-//            outputBoundary.presentError("Error executing trigger: " + e.getMessage());
-//        }
-//    }
 @Override
 public void execute(TriggerExecutionInputData inputData) {
     Trigger trigger = inputData.getTrigger();
@@ -82,7 +37,7 @@ public void execute(TriggerExecutionInputData inputData) {
     Environment globalEnvironment = inputData.getGlobalEnvironment();
     Scene scene = inputData.getScene();
 
-    System.out.println("\n🎯 TriggerExecutor.execute() called");
+
     System.out.println("   GameObject: " + (gameObject != null ? gameObject.getName() : "null"));
     System.out.println("   Event: " + trigger.getEvent().getClass().getSimpleName());
 
@@ -104,31 +59,25 @@ public void execute(TriggerExecutionInputData inputData) {
                 break;
             }
         } catch (Exception e) {
-            System.err.println("❌ Condition evaluation failed: " + e.getMessage());
             allConditionsMet = false;
             break;
         }
     }
 
     if (!allConditionsMet) {
-        System.out.println("   ⚠️  Conditions not met, skipping actions");
         return;
     }
 
     // Execute all actions with 3 parameters
     List<Action> actions = trigger.getActions();
-    System.out.println("   ✓ All conditions met! Executing " + actions.size() + " actions...");
 
     int actionCount = 0;
 
     for (Action action : actions) {
-        System.out.println("      Action: " + action.getClass().getSimpleName());
         try {
             action.execute(globalEnvironment, localEnvironment, scene);
-            System.out.println("         ✓ Executed successfully");
             actionCount++;
         } catch (Exception e) {
-            System.err.println("         ❌ Action execution failed: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -136,7 +85,6 @@ public void execute(TriggerExecutionInputData inputData) {
     if (actionCount > 0) {
         String eventType = trigger.getEvent().getClass().getSimpleName();
         String objectName = (gameObject != null) ? gameObject.getName() : "Unknown";
-        System.out.println("   ✅ Executed: " + eventType + " on " + objectName + " (" + actionCount + " actions)\n");
     }
 }
 
@@ -155,7 +103,6 @@ public void execute(TriggerExecutionInputData inputData) {
                     return false;
                 }
             } catch (Exception e) {
-                System.err.println("Error evaluating condition: " + e.getMessage());
                 return false;
             }
         }
