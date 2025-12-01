@@ -28,4 +28,8 @@ public class OnKeyPressEvent extends Event{
     public List<String> getRequiredParameters() {
         return REQUIRED_PARAMETERS;
     }
+
+    public String getKey() {
+        return getEventParameter("Key");
+    }
 }

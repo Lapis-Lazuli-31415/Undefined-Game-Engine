@@ -105,4 +105,23 @@ public class Trigger {
     public void setActive(boolean active) {
         this.active = active;
     }
+    // --- Copy method for preview isolation ---
+
+    /**
+     * Create a copy of this Trigger.
+     * Event, Conditions, and Actions are shared (they define behavior, not state).
+     *
+     * @return A new Trigger with copied state
+     */
+    public Trigger copy() {
+        Trigger copy = new Trigger(this.event, this.active);
+        for (Condition c : this.conditions) {
+            copy.addCondition(c);
+        }
+        for (Action a : this.actions) {
+            copy.addAction(a);
+        }
+        return copy;
+    }
+}
 }

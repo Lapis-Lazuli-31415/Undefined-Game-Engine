@@ -87,6 +87,23 @@ public class GameObject {
         this.transform = transform;
     }
 
+    /**
+     * Get the SpriteRenderer property from this GameObject.
+     *
+     * @return SpriteRenderer if found, null otherwise
+     */
+    public SpriteRenderer getSpriteRenderer() {
+        for (Property property : properties) {
+            if (property instanceof SpriteRenderer) {
+                return (SpriteRenderer) property;
+            }
+        }
+        return null;
+    }
+
+    public void setSpriteRenderer(SpriteRenderer spriteRenderer) {
+        // TODO: implement
+    }
 
     public TriggerManager getTriggerManager() {
         return triggerManager;
@@ -102,6 +119,63 @@ public class GameObject {
 
     public void setSpriteRenderer(SpriteRenderer spriteRenderer) {
         this.spriteRenderer = spriteRenderer;
+    }
+
+
+    // --- Property helpers ---
+
+    public List<Property> getProperties() {
+        return new ArrayList<>(properties);
+    }
+
+    public void addProperty(Property property) {
+        // If your Property has a key, you can de-duplicate by key:
+        properties.add(property);
+    }
+
+    public void removeProperty(Property property) {
+        properties.remove(property);
+    }
+
+// --- Copy method for preview isolation ---
+
+    /**
+     * Create a deep copy of this GameObject.
+     *
+     * @return A new GameObject with copied state
+     */
+    public GameObject copy() {
+        // Copy properties
+        ArrayList<Property> copiedProperties = new ArrayList<>();
+        for (Property prop : this.properties) {
+            if (prop instanceof SpriteRenderer) {
+                copiedProperties.add(((SpriteRenderer) prop).copy());
+            } else {
+                copiedProperties.add(prop);
+            }
+        }
+
+        // Copy transform
+        Transform copiedTransform = (this.transform != null) ? this.transform.copy() : null;
+
+        // Copy environment
+        Environment copiedEnvironment = (this.environments != null) ? this.environments.copy() : new Environment();
+
+        // Copy trigger manager
+        TriggerManager copiedTriggerManager = (this.triggerManager != null)
+                ? this.triggerManager.copy()
+                : new TriggerManager();
+
+        return new GameObject(
+                this.id,
+                this.name,
+                this.active,
+                copiedEnvironment,        // Environment
+                copiedTransform,          // Transform
+                copiedSpriteRenderer,     // SpriteRenderer
+                copiedTriggerManager      // TriggerManager
+                
+        );
     }
 
 }

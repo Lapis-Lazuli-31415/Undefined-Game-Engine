@@ -4,6 +4,12 @@ import entity.Scene;
 import entity.GameObject;
 import use_case.component_management.SceneRepository;
 
+/**
+ * Global editor state management.
+ * Utility class with static methods only - not meant to be instantiated.
+ *
+ * @author Wanru Cheng
+ */
 public class EditorState {
 
     private static String currentSceneName;

@@ -1,6 +1,5 @@
 # Undefined-Game-Engine
 **Note: JDK Version 17**
-
 ## Summary
 Undefined is a 2D Game Engine built in Java, designed to allow users to create, edit, and play games.
 ## How to Run Game
