@@ -494,7 +494,7 @@ public class GameCanvas extends JPanel {
         int centerY = (panelH - drawH) / 2;
 
         int drawX = centerX + (int) transform.getX();
-        int drawY = centerY + (int) transform.getY();
+        int drawY = centerY - (int) transform.getY();
 
         // Support rotation (same as ScenePanel)
         Graphics2D g2Copy = (Graphics2D) g2d.create();

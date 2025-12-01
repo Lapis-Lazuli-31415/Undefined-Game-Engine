@@ -51,12 +51,6 @@ public class PropertiesPanel extends JPanel {
         add(Box.createVerticalGlue());
     }
 
-    public void loadTriggerManager(entity.scripting.TriggerManager manager) {
-        if (triggerManagerSection != null) {
-            triggerManagerSection.loadTriggerManager(manager);
-        }
-    }
-
     public void setAutoSaveCallback(Runnable autoSaveCallback) {
         // Pass callback to Trigger Manager
         triggerManagerSection.setOnChangeCallback(autoSaveCallback);

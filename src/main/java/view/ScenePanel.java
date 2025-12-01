@@ -55,6 +55,11 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         this.currentScene = scene;
         EditorState.setCurrentScene(currentScene);
         repaint();
+        for (GameObject gameObject : scene.getGameObjects()) {
+            System.out.println(gameObject.getName());
+//            System.out.println(gameObject.getSpriteRenderer().getZIndex());
+        }
+        System.out.println("ScenePanel setScene");
     }
 
     // NEW: Callback for Auto-Save
@@ -142,6 +147,8 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             for (Action action : trigger.getActions()) {
                 actions.add(action.getActionType());
             }
+            System.out.println(conditions);
+            System.out.println(actions);
 
             state.addTrigger(event, eventParameters, conditions, actions);
         }
