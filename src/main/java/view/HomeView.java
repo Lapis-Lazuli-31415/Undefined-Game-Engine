@@ -249,8 +249,11 @@ public class HomeView extends javax.swing.JFrame {
         // Use app-layer factory to wire up use case
         transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
+        var sceneRepo = new InMemorySceneRepository();
+
         // Hook up ScenePanel to viewModel (Observer)
         scenePanel = new ScenePanel(transformViewModel);
+        scenePanel.setScene(sceneRepo.getCurrentScene());
 
         transformController.updateTransform(
                 transform.getX(),
@@ -266,7 +269,6 @@ public class HomeView extends javax.swing.JFrame {
         gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
 
         // Repository
-        var sceneRepo = new InMemorySceneRepository();
         addScenePresenter = new AddScenePresenter();
         var addSceneInteractor = new AddSceneInteractor(
                 sceneRepo,
@@ -285,6 +287,11 @@ public class HomeView extends javax.swing.JFrame {
         var selectScenePresenter = new SelectScenePresenter(null);
         var selectGameObjectPresenter = new SelectGameObjectPresenter(null);
 
+        // 6. Connect presenter listeners (for selection feedback)
+        addScenePresenter.setListener(gameComponents);
+        selectScenePresenter.setListener(gameComponents);
+        selectGameObjectPresenter.setListener(gameComponents);
+
         // 4. Create interactors
         var listScenesInteractor =
                 new ListScenesInteractor(sceneRepo, listScenesPresenter);
@@ -296,18 +303,12 @@ public class HomeView extends javax.swing.JFrame {
                 new SelectGameObjectInteractor(sceneRepo, selectGameObjectPresenter);
 
 
-
         // 5. Now pass the interactors into the panel
         gameComponents.setInteractors(
                 listScenesInteractor,
                 selectSceneInteractor,
                 selectGameObjectInteractor
         );
-
-        // 6. Connect presenter listeners (for selection feedback)
-        addScenePresenter.setListener(gameComponents);
-        selectScenePresenter.setListener(gameComponents);
-        selectGameObjectPresenter.setListener(gameComponents);
 
         // 7. Add panel to UI
         gameComponentsPanel.add(gameComponents, BorderLayout.CENTER);
@@ -531,12 +532,14 @@ public class HomeView extends javax.swing.JFrame {
                 if (scenePanel != null) {
                     scenePanel.addOrSelectSprite(image);
 
-                    // ensure the GameComponents list refreshes so the new GO appears under the scene node
-                    if (listScenesUseCase != null) {
-                        listScenesUseCase.listScenes();
-                    } else if (gameComponents != null) {
-                        // fallback: ask the panel to refresh
-                        gameComponents.refreshScenes();
+                    try {
+                        if (listScenesUseCase != null) {
+                            listScenesUseCase.listScenes();
+                        } else if (gameComponents != null) {
+                            gameComponents.refreshScenes();
+                        }
+                    } catch (Exception ex) {
+                        System.err.println("[HomeView] refresh after addSprite failed: " + ex.getMessage());
                     }
                 }
             }

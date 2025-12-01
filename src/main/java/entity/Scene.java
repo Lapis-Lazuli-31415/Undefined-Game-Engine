@@ -32,7 +32,7 @@ public class Scene {
         if (gameObjects == null) {
             gameObjects = new ArrayList<>();
         }
-        return gameObjects;
+        return this.gameObjects;
     }
 
 

@@ -19,7 +19,7 @@ public class SelectScenePresenter implements SelectSceneOutputBoundary {
 
     @Override
     public void sceneSelected(Scene scene) {
-        EditorState.setCurrentScene(scene);   // store actual entity
+        EditorState.setCurrentScene(scene);// store actual entity
         listener.onSceneChange(scene);
     }
 

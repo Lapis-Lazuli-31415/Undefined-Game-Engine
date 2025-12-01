@@ -17,9 +17,9 @@ public class InMemorySceneRepository implements SceneRepository {
     private Scene currentScene;
 
     public InMemorySceneRepository() {
-        Scene defaultScene = new Scene(UUID.randomUUID(), "Default Scene", null);
+        Scene defaultScene = new Scene(UUID.randomUUID(), "Default Scene", new ArrayList<>());
         scenes.add(defaultScene);
-        currentScene = defaultScene;
+        this.currentScene = defaultScene;
     }
 
     @Override

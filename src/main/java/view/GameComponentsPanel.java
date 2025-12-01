@@ -169,6 +169,9 @@ public class GameComponentsPanel extends JPanel
     @Override
     public void onSceneChange(Scene scene) {
         scenePanel.setScene(scene);
+        System.out.println("Switched to scene: " + scene.getName());
+        System.out.println("Scene has GO count: " + scene.getGameObjects().size());
+
 
         DefaultMutableTreeNode sceneNode = findSceneNode(scene.getName());
         if (sceneNode != null) {

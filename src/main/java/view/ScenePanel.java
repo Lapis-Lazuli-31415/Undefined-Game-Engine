@@ -1,9 +1,11 @@
 package view;
 
+import data_access.InMemorySceneRepository;
 import entity.GameObject;
 import entity.Scene;
 import entity.SpriteRenderer;
 import entity.Transform;
+import interface_adapter.EditorState;
 import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
 
