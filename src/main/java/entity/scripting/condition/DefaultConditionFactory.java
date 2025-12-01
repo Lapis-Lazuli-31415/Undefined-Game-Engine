@@ -1,10 +1,5 @@
 package entity.scripting.condition;
 
-import entity.scripting.event.EmptyEvent;
-import entity.scripting.event.Event;
-import entity.scripting.event.OnClickEvent;
-import entity.scripting.event.OnKeyPressEvent;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +9,9 @@ public class DefaultConditionFactory implements ConditionFactory{
     private final Map<String, Supplier<Condition>> registry = new LinkedHashMap<>();
 
     public DefaultConditionFactory() {
-        registry.put(EmptyCondition.EVENT_TYPE, EmptyCondition::new);
-        registry.put(NumericComparisonCondition.EVENT_TYPE, NumericComparisonCondition::new);
-        registry.put(BooleanComparisonCondition.EVENT_TYPE, BooleanComparisonCondition::new);
+        registry.put(EmptyCondition.CONDITION_TYPE, EmptyCondition::new);
+        registry.put(NumericComparisonCondition.CONDITION_TYPE, NumericComparisonCondition::new);
+        registry.put(BooleanComparisonCondition.CONDITION_TYPE, BooleanComparisonCondition::new);
     }
 
     @Override

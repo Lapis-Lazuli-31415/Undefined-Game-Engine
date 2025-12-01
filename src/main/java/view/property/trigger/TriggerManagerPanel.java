@@ -1,6 +1,9 @@
 package view.property.trigger;
 
 import app.use_case_factory.TriggerUseCaseFactory;
+import entity.scripting.Trigger;
+import entity.scripting.action.Action;
+import entity.scripting.condition.Condition;
 import interface_adapter.trigger.TriggerManagerState;
 import interface_adapter.trigger.TriggerManagerViewModel;
 import interface_adapter.trigger.action.ActionEditorViewModel;
@@ -12,6 +15,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class TriggerManagerPanel extends JPanel implements PropertyChangeListener {
 
@@ -26,9 +32,9 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
     // NEW: Callback for auto-save
     private Runnable onChangeCallback;
 
-    public TriggerManagerPanel() {
+    public TriggerManagerPanel(TriggerManagerViewModel triggerManagerViewModel) {
         // ... (Keep existing constructor logic exactly as is until the listeners setup) ...
-        triggerManagerViewModel = new TriggerManagerViewModel();
+        this.triggerManagerViewModel = triggerManagerViewModel;
         conditionEditorViewModel = new ConditionEditorViewModel();
         actionEditorViewModel = new ActionEditorViewModel();
         triggerUseCaseFactory = new TriggerUseCaseFactory(triggerManagerViewModel,
@@ -74,12 +80,57 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         this.onChangeCallback = callback;
     }
 
+    // load data from the Entity to the UI
+    public void loadTriggerManager(entity.scripting.TriggerManager manager) {
+        // 1. Reset the View Model to a clean state
+        triggerManagerViewModel.setState(new TriggerManagerState());
+        TriggerManagerState state = triggerManagerViewModel.getState();
+
+        if (manager != null) {
+            // 2. Loop through loaded Entities
+            for (Trigger t : manager.getTriggers()) {
+                String event = t.getEvent().getEventLabel();
+                Map<String, String> params = t.getEvent().getEventParameters();
+
+                // Convert Conditions to Scripts
+                List<String> conditions = new ArrayList<>();
+                for (Condition c : t.getConditions()) {
+                    conditions.add(c.format());
+                }
+
+                // Convert Actions to Scripts
+                List<String> actions = new ArrayList<>();
+                for (Action a : t.getActions()) {
+                    actions.add(a.format());
+                }
+
+                // 3. Add to View State
+                state.addTrigger(event, params, conditions, actions);
+            }
+        }
+
+        // 4. Trigger UI Refresh
+        triggerManagerViewModel.firePropertyChange();
+        refresh();
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        refresh();
-        // NEW: Trigger the callback whenever state changes
-        if (onChangeCallback != null) {
-            onChangeCallback.run();
+        TriggerManagerState state = (TriggerManagerState) evt.getNewValue();
+
+        if (state.getErrorMessage() != null) {
+            JOptionPane.showMessageDialog(this,
+                    state.getErrorMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+
+            state.setErrorMessage(null);
+        } else {
+            refresh();
+            // NEW: Trigger the callback whenever state changes
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
         }
     }
 

@@ -37,16 +37,14 @@ public class SpriteRendererSectionPanel extends JPanel {
         imageField.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
         imageField.setEditable(false);
 
-        browseButton = new JButton("...");
-        browseButton.setMargin(new Insets(0, 4, 0, 4));
+        browseButton = PropertyPanelUtility.createEditButton();
         browseButton.addActionListener(e -> openSpritePickerDialog());
 
-        JPanel row = new JPanel();
+        JPanel row = new JPanel(new BorderLayout(4, 0));
         row.setOpaque(false);
-        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-        row.add(imageField);
-        row.add(Box.createHorizontalStrut(4));
-        row.add(browseButton);
+
+        row.add(imageField, BorderLayout.CENTER);
+        row.add(browseButton, BorderLayout.EAST);
 
         panel.add(row, gbc);
 

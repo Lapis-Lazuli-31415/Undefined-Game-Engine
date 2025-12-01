@@ -7,7 +7,8 @@ import entity.scripting.error.ParseSyntaxException;
 public class EmptyAction extends Action{
     public static final String ACTION_TYPE = "Empty";
 
-    public static String getEventType() {
+    @Override
+    public String getActionType() {
         return ACTION_TYPE;
     }
 

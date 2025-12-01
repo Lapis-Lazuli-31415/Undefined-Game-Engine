@@ -40,7 +40,10 @@ public class Scene {
     }
 
     public List<GameObject> getGameObjects() {
-        return gameObjects;
+        if (gameObjects == null) {
+            gameObjects = new ArrayList<>();
+        }
+        return this.gameObjects;
     }
 
 
@@ -58,6 +61,13 @@ public class Scene {
             return false;
         }
         return gameObjects.contains(gameObject);
+    }
+
+    public void addGameObject(GameObject gameObject) {
+        if (gameObjects == null) {
+            gameObjects = new ArrayList<>();
+        }
+        gameObjects.add(gameObject);
     }
 
     public GameObject getGameObjectByName(String name) {

@@ -3,6 +3,7 @@ package use_case.trigger.action.change;
 import entity.GameObject;
 import entity.scripting.action.Action;
 import entity.scripting.action.ActionFactory;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 public class ActionChangeInteractor implements ActionChangeInputBoundary {
@@ -17,8 +18,8 @@ public class ActionChangeInteractor implements ActionChangeInputBoundary {
 
     @Override
     public void execute(ActionChangeInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         Action action = actionFactory.create(inputData.getAction());
 

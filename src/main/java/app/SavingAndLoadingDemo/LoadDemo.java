@@ -1,4 +1,4 @@
-package app;
+package app.SavingAndLoadingDemo;
 
 import data_access.saving.JsonProjectDataAccess;
 import entity.GameObject;

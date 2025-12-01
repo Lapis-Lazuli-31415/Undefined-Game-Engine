@@ -21,4 +21,5 @@ public abstract class Condition {
     public abstract boolean evaluate(Environment globalEnvironment, Environment localEnvironment) throws Exception;
     public abstract Condition parse(String string) throws ParseSyntaxException;
     public abstract String format();
+    public abstract String getConditionType();
 }

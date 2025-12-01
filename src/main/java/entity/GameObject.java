@@ -18,46 +18,32 @@ public class GameObject {
     private final String id;
     private String name;
     private boolean active;
-    private ArrayList<Property> properties;
     private Environment environments;
     private Transform transform;
-    private TriggerManager triggerManager;
     private SpriteRenderer spriteRenderer;
+    private TriggerManager triggerManager;
 
-    public GameObject(String id,
-                      String name,
-                      boolean active,
-                      ArrayList<Property> properties,
-                      Environment environments,
-                      SpriteRenderer spriteRenderer) {
-        this.id =id;
-        this.name=name;
-        this.active=active;
-        this.triggerManager = new TriggerManager();
-        this.spriteRenderer=spriteRenderer;
-
-        // keep signature, but handle null safely
-        if (properties != null) {
-            this.properties = properties;
-        } else {
-            this.properties = new ArrayList<>();
-        }
-
-        this.environments=environments;
+    public GameObject(String id, String name, boolean active, Environment environment, Transform transform,
+                      SpriteRenderer spriteRenderer, TriggerManager triggerManager) {
+        this.id = id;
+        this.name = name;
+        this.active = active;
+        this.transform = transform;
+        this.spriteRenderer = spriteRenderer;
+        this.triggerManager = triggerManager;
+        this.environments = environment;
     }
 
     @com.fasterxml.jackson.annotation.JsonCreator
     public GameObject(@com.fasterxml.jackson.annotation.JsonProperty("id") String id,
                       @com.fasterxml.jackson.annotation.JsonProperty("name") String name,
                       @com.fasterxml.jackson.annotation.JsonProperty("active") boolean active,
-                      @com.fasterxml.jackson.annotation.JsonProperty("properties") ArrayList<Property> properties,
                       @com.fasterxml.jackson.annotation.JsonProperty("environment") Environment environments, // Map "environment" key to this param
                       @com.fasterxml.jackson.annotation.JsonProperty("transform") Transform transform,
                       @com.fasterxml.jackson.annotation.JsonProperty("trigger_manager") TriggerManager triggerManager) {
         this.id = id;
         this.name = name;
         this.active = active;
-        this.properties = (properties != null) ? properties : new ArrayList<>();
         this.environments = environments;
         this.transform = transform;
         this.triggerManager = triggerManager;
@@ -184,10 +170,11 @@ public class GameObject {
                 this.id,
                 this.name,
                 this.active,
-                copiedProperties,
-                copiedEnvironment,
-                copiedTransform,
-                copiedTriggerManager
+                copiedEnvironment,        // Environment
+                copiedTransform,          // Transform
+                copiedSpriteRenderer,     // SpriteRenderer
+                copiedTriggerManager      // TriggerManager
+                
         );
     }
 

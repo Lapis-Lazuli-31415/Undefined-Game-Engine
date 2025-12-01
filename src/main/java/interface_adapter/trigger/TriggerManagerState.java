@@ -7,9 +7,18 @@ import java.util.Objects;
 
 public class TriggerManagerState {
     private final List<TriggerState> triggers;
+    private String errorMessage = null;
 
     public TriggerManagerState() {
         triggers = new ArrayList<>();
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String error) {
+        this.errorMessage = error;
     }
 
     public int getTriggerCount() {
@@ -96,6 +105,10 @@ public class TriggerManagerState {
 
     public List<String> getTriggerActions(int index){
         return triggers.get(index).getActions();
+    }
+
+    public void clear() {
+        triggers.clear();
     }
 
     private static class TriggerState {

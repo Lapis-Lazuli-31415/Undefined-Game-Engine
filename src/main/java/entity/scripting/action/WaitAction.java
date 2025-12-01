@@ -27,7 +27,8 @@ public class WaitAction extends Action{
         return secondsExpression;
     }
 
-    public static String getEventType() {
+    @Override
+    public String getActionType() {
         return ACTION_TYPE;
     }
 

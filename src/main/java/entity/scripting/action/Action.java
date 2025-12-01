@@ -24,4 +24,5 @@ public abstract class Action {
                                  Scene scene) throws Exception;
     public abstract Action parse(String string) throws ParseSyntaxException;
     public abstract String format();
+    public abstract String getActionType();
 }

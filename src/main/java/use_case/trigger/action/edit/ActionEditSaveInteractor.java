@@ -3,6 +3,7 @@ package use_case.trigger.action.edit;
 import entity.GameObject;
 import entity.scripting.action.Action;
 import entity.scripting.error.ParseSyntaxException;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 public class ActionEditSaveInteractor implements ActionEditSaveInputBoundary {
@@ -14,8 +15,8 @@ public class ActionEditSaveInteractor implements ActionEditSaveInputBoundary {
 
     @Override
     public void execute(ActionEditSaveInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int triggerIndex = inputData.getTriggerIndex();
         int actionIndex = inputData.getActionIndex();

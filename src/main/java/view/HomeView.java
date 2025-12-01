@@ -12,6 +12,14 @@ import javax.swing.*;
 import entity.GameObject;
 import entity.Scene;
 import entity.Transform;
+import javax.swing.tree.DefaultTreeModel;
+
+import entity.GameObject;
+import entity.Transform;
+import interface_adapter.EditorState;
+import interface_adapter.add_scene.AddSceneController;
+import interface_adapter.add_scene.AddScenePresenter;
+import interface_adapter.list_scenes.ListScenesPresenter;
 import entity.*;
 import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
@@ -23,6 +31,7 @@ import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import app.VariableUseCaseFactory;
+import interface_adapter.trigger.TriggerManagerViewModel;
 import interface_adapter.variable.delete.DeleteVariableController;
 import interface_adapter.variable.update.UpdateVariableController;
 import interface_adapter.variable.get.GetAllVariablesController;
@@ -41,6 +50,19 @@ import interface_adapter.saving.SaveProjectController;
 import interface_adapter.saving.SaveProjectPresenter;
 import interface_adapter.saving.SaveProjectViewModel;
 import interface_adapter.saving.SaveProjectState;
+import view.util.PropertyPanelUtility;
+
+import use_case.component_management.add_scene.AddSceneInteractor;
+import view.GameComponentsPanel;
+import data_access.InMemorySceneRepository;
+
+import use_case.component_management.list_scenes.ListScenesInteractor;
+import use_case.component_management.select_scene.SelectSceneInteractor;
+import use_case.component_management.select_game_object.SelectGameObjectInteractor;
+
+import interface_adapter.select_scene.SelectScenePresenter;
+import interface_adapter.select_game_object.SelectGameObjectPresenter;
+
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -48,6 +70,10 @@ public class HomeView extends javax.swing.JFrame {
     private JPanel leftSidebar;
     private JPanel assetsPanel;
     private JPanel gameComponentsPanel;
+    private AddScenePresenter addScenePresenter;
+    private GameComponentsPanel gameComponents;
+    // for refreshing the tree when game objects change
+    private use_case.component_management.list_scenes.ListScenesInputBoundary listScenesUseCase;
     private JPanel centerPanel;
     private JPanel propertiesPanel;
 
@@ -75,6 +101,9 @@ public class HomeView extends javax.swing.JFrame {
     private interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController;
     private interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
     private ImportSpriteFromUnsplashView unsplashView;
+
+    // trigger manager
+    private TriggerManagerViewModel triggerManagerViewModel;
 
     // variable management
     private GlobalVariableViewModel globalVariableViewModel;
@@ -178,6 +207,9 @@ public class HomeView extends javax.swing.JFrame {
             this.unsplashView = new ImportSpriteFromUnsplashView(unsplashViewModel, unsplashController);
         }
 
+        // Trigger Manager Set up
+        triggerManagerViewModel = new TriggerManagerViewModel();
+
         initComponents();
         setupAssetLibListener();
         setupImportSpriteListener();
@@ -185,7 +217,7 @@ public class HomeView extends javax.swing.JFrame {
 
     private GameObject createDefaultGameObject() {
         return new GameObject(
-                "demo-1", "Demo Sprite", true, new ArrayList<>(), null,
+                "demo-1", "Demo Sprite", true, null,
                 new Transform(new Vector<>(Arrays.asList(0.0, 0.0)), 0f, new Vector<>(Arrays.asList(1.0, 1.0))),
                 new TriggerManager()
         );
@@ -320,8 +352,7 @@ public class HomeView extends javax.swing.JFrame {
         JLabel spritesLabel = new JLabel("Sprites");
         spritesLabel.setForeground(Color.WHITE);
 
-        spritesAddButton = new JButton("+");
-        spritesAddButton.setMargin(new Insets(0, 4, 0, 4));
+        spritesAddButton = PropertyPanelUtility.createAddButton();
         spritesAddButton.addActionListener(e -> openSpriteImportMenu());
 
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
@@ -338,11 +369,122 @@ public class HomeView extends javax.swing.JFrame {
         assetsPanel.add(spritesScroll);
         assetsPanel.add(Box.createVerticalStrut(8));
 
+//        // ---- AUDIO SCROLL PANEL ---- remove for now, might add back later
+//        JPanel audioHeader = new JPanel(new BorderLayout());
+//        audioHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+//        audioHeader.setOpaque(false);
+//
+//        JLabel audioLabel = new JLabel("Audio");
+//        audioLabel.setForeground(Color.WHITE);
+//
+//        JButton audioAddButton = new JButton("+");
+//        audioAddButton.setMargin(new Insets(0, 4, 0, 4));
+//
+//        audioHeader.add(audioLabel, BorderLayout.WEST);
+//        audioHeader.add(audioAddButton, BorderLayout.EAST);
+//
+//        JPanel audioContent = new JPanel();
+//        audioContent.setLayout(new BoxLayout(audioContent, BoxLayout.Y_AXIS));
+//        audioContent.setBackground(new Color(70, 70, 70));
+//
+//        JScrollPane audioScroll = new JScrollPane(audioContent);
+//        audioScroll.setPreferredSize(new Dimension(180, 140));
+//
+//        assetsPanel.add(audioHeader);
+//        assetsPanel.add(audioScroll);
+
+        // ====== DEMO ENTITY + LAYERS WIRING ======
+        java.util.Vector<Double> pos = new java.util.Vector<>();
+        pos.add(0.0); // x
+        pos.add(0.0); // y
+
+        java.util.Vector<Double> scale = new java.util.Vector<>();
+        scale.add(1.0); // scaleX
+        scale.add(1.0); // scaleY
+
+        Transform transform = new Transform(pos, 0f, scale);
+
+        DEMO_OBJECT.setTransform(transform);
+
+        // Create view model
+        transformViewModel = new TransformViewModel();
+
+        // Use app-layer factory to wire up use case
+        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
+
+        var sceneRepo = new InMemorySceneRepository();
+        EditorState.init(sceneRepo);
+
+        // Hook up ScenePanel to viewModel (Observer)
+        scenePanel = new ScenePanel(transformViewModel);
+        scenePanel.setScene(sceneRepo.getCurrentScene());
+
+        transformController.updateTransform(
+                transform.getX(),
+                transform.getY(),
+                transform.getScaleX(),
+                transform.getRotation()
+        );
+
         // ====== Game Components PANEL ======
         gameComponentsPanel = new JPanel();
         gameComponentsPanel.setLayout(new BorderLayout());
         gameComponentsPanel.setBorder(BorderFactory.createTitledBorder("Game Components"));
-        gameComponentsPanel.add(new JTextField("Search Components"), BorderLayout.NORTH);
+
+        // Repository
+        addScenePresenter = new AddScenePresenter();
+        var addSceneInteractor = new AddSceneInteractor(
+                sceneRepo,
+                addScenePresenter
+        );
+        var addSceneController = new AddSceneController(addSceneInteractor);
+
+        // 1. Create the GameComponentsPanel FIRST so the JTree + TreeModel exist
+        gameComponents = new GameComponentsPanel(null, null, null, addScenePresenter, addSceneController, scenePanel);  // no interactors yet
+
+        // 2. Now retrieve the tree model needed by the ListScenesPresenter
+        DefaultTreeModel treeModel = gameComponents.getTreeModel();
+
+        // 3. Create presenters with the REAL model
+        var listScenesPresenter = new ListScenesPresenter(treeModel);
+        var selectScenePresenter = new SelectScenePresenter(null);
+        var selectGameObjectPresenter = new SelectGameObjectPresenter(null);
+
+        // 6. Connect presenter listeners (for selection feedback)
+        addScenePresenter.setListener(gameComponents);
+        selectScenePresenter.setListener(gameComponents);
+        selectGameObjectPresenter.setListener(gameComponents);
+
+        // 4. Create interactors
+        var listScenesInteractor =
+                new ListScenesInteractor(sceneRepo, listScenesPresenter);
+
+        var selectSceneInteractor =
+                new SelectSceneInteractor(sceneRepo, selectScenePresenter);
+
+        var selectGameObjectInteractor =
+                new SelectGameObjectInteractor(sceneRepo, selectGameObjectPresenter);
+
+
+        // 5. Now pass the interactors into the panel
+        gameComponents.setInteractors(
+                listScenesInteractor,
+                selectSceneInteractor,
+                selectGameObjectInteractor
+        );
+
+        // 7. Add panel to UI
+        gameComponentsPanel.add(gameComponents, BorderLayout.CENTER);
+        JButton addSceneButton = new JButton("+ Add Scene");
+        addSceneButton.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog(this, "Scene Name:");
+            if (name != null && !name.isBlank()) {
+                addSceneController.addScene(name.trim());
+            }
+        });
+        gameComponentsPanel.add(addSceneButton, BorderLayout.SOUTH);
+
+
 
         // ====== Assemble Sidebar ======
         leftSidebar.add(assetsPanel);
@@ -358,8 +500,7 @@ public class HomeView extends javax.swing.JFrame {
         tabBar.setPreferredSize(new Dimension(0, 35));
         tabBar.setBackground(new Color(60, 60, 60));
 
-        JLabel tabLabel = new JLabel("   Start");
-        tabLabel.setForeground(Color.WHITE);
+
 
         JPanel rightTabControls = new JPanel();
         rightTabControls.setOpaque(false);
@@ -368,7 +509,6 @@ public class HomeView extends javax.swing.JFrame {
         // --- SAVE STATUS LABEL ---
         saveStatusLabel = new JLabel("✔");
         saveStatusLabel.setForeground(new Color(100, 255, 100)); // Bright Green
-        saveStatusLabel.setFont(new Font("Arial", Font.BOLD, 12));
         saveStatusLabel.setVisible(false);
         rightTabControls.add(saveStatusLabel);
 
@@ -392,41 +532,21 @@ public class HomeView extends javax.swing.JFrame {
         rightTabControls.add(playButton);
         rightTabControls.add(stopButton);
 
-        tabBar.add(tabLabel, BorderLayout.WEST);
+
+//      tabBar.add(addTabButton, BorderLayout.CENTER);
         tabBar.add(rightTabControls, BorderLayout.EAST);
 
         // ====== RIGHT PROPERTIES PANEL ======
-        propertiesPanel = new PropertiesPanel();
+        propertiesPanel = new PropertiesPanel(triggerManagerViewModel);
 
         JScrollPane propertiesScroll = new JScrollPane(propertiesPanel);
         propertiesScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         propertiesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         propertiesScroll.getVerticalScrollBar().setUnitIncrement(16);
         propertiesScroll.getViewport().setBackground(new Color(45, 45, 45));
-        propertiesScroll.setBorder(null);
+        propertiesScroll.setBorder(null); // keep the nice "Properties" border from the inner panel
 
-        // ====== ENTITY + LAYERS WIRING ======
-        Transform transform = DEMO_OBJECT.getTransform();
-        if (transform == null) {
-            java.util.Vector<Double> pos = new java.util.Vector<>(); pos.add(0.0); pos.add(0.0);
-            java.util.Vector<Double> scale = new java.util.Vector<>(); scale.add(1.0); scale.add(1.0);
-            transform = new Transform(pos, 0f, scale);
-            DEMO_OBJECT.setTransform(transform);
-        }
 
-        transformViewModel = new TransformViewModel();
-        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
-
-        scenePanel = new ScenePanel(transformViewModel);
-        scenePanel.setScene(currentScene);
-        scenePanel.setOnSceneChangeCallback(() -> triggerAutoSave());
-
-        transformController.updateTransform(
-                transform.getX(),
-                transform.getY(),
-                transform.getScaleX(),
-                transform.getRotation()
-        );
 
         centerPanel.add(tabBar, BorderLayout.NORTH);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
@@ -435,7 +555,7 @@ public class HomeView extends javax.swing.JFrame {
 
         // Wiring Properties Panel
         if (propertiesPanel instanceof PropertiesPanel props) {
-            props.bind(
+            props.bindTransform(
                     transformViewModel,
                     transformController,
                     () -> {
@@ -444,6 +564,11 @@ public class HomeView extends javax.swing.JFrame {
                     }
             );
             props.setAutoSaveCallback(() -> triggerAutoSave());
+
+            if (DEMO_OBJECT != null && DEMO_OBJECT.getTriggerManager() != null) {
+                System.out.println("Loading triggers for: " + DEMO_OBJECT.getName());
+                props.loadTriggerManager(DEMO_OBJECT.getTriggerManager());
+            }
         }
 
         // rewire variables when selection changes
@@ -459,6 +584,9 @@ public class HomeView extends javax.swing.JFrame {
                     scenePanel.repaint();
                     triggerAutoSave();
                 });
+                if (selectedObject.getTriggerManager() != null) {
+                    props.loadTriggerManager(selectedObject.getTriggerManager());
+                }
             }
         });
 
@@ -582,6 +710,16 @@ public class HomeView extends javax.swing.JFrame {
                 System.out.println("Selected sprite: " + image.getName());
                 if (scenePanel != null) {
                     scenePanel.addOrSelectSprite(image);
+
+                    try {
+                        if (listScenesUseCase != null) {
+                            listScenesUseCase.listScenes();
+                        } else if (gameComponents != null) {
+                            gameComponents.refreshScenes();
+                        }
+                    } catch (Exception ex) {
+                        System.err.println("[HomeView] refresh after addSprite failed: " + ex.getMessage());
+                    }
                 }
             }
         });
@@ -813,324 +951,272 @@ public class HomeView extends javax.swing.JFrame {
 //        return editorState.getCurrentScene();
         return createTestScene();
     }
-    /**
-     * Create an interactive demo scene with CONDITIONS.
-     *
-     * GAME CONCEPT: Unlock & Tame Dragon!
-     * 1. Click Key → Obtain key (unlock power)
-     * 2. Click Chest → Unlock and learn taming skill
-     * 3. Click Dragon → Tame it
-     * 4. Use WASD → Control dragon flight
-     *
-     * Demonstrates ALL condition types with engaging dragon-taming gameplay!
-     *
-     * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
-     */
-    private Scene createTestScene() {
-        Scene scene = Scene.create("DragonTamingDemo");
+private Scene createTestScene() {
+    Scene scene = Scene.create("DragonTamingDemo");
 
-// ========== 1. KEY - The Unlock Item 🔑 ==========
-        GameObject key = new GameObject(
-                "Key",
-                "Key",
-                true,
-                new ArrayList<>(),
-                new Environment()
+    // ========== 1. KEY 🔑 ==========
+    Transform keyTransform = new Transform(
+        new Vector<>(Arrays.asList(-200.0, -80.0)),
+        0f,
+        new Vector<>(Arrays.asList(1.2, 1.2))
+    );
+    
+    SpriteRenderer keySprite = new SpriteRenderer(null, true);
+    TriggerManager keyTriggerManager = new TriggerManager();
+    
+    GameObject key = new GameObject(
+            "Key",
+            "Key",
+            true,
+            new Environment(),
+            keyTransform,
+            keySprite,
+            keyTriggerManager
+    );
+
+    // Trigger: Click to pick up key
+    Trigger keyClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+
+    keyClickTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+            "Key",
+            new entity.scripting.expression.value.BooleanValue(false)
+    ));
+
+    entity.scripting.expression.variable.BooleanVariable hasKeyVar = 
+        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
+    keyClickTrigger.addAction(
+        new entity.scripting.action.BooleanVariableAssignmentAction(
+            hasKeyVar,
+            new entity.scripting.expression.value.BooleanValue(true)
+        )
+    );
+
+    key.getTriggerManager().addTrigger(keyClickTrigger);
+    scene.addGameObject(key);
+
+    // ========== 2. CHEST 📦 ==========
+    Transform chestTransform = new Transform(
+        new Vector<>(Arrays.asList(0.0, -80.0)),
+        0f,
+        new Vector<>(Arrays.asList(1.8, 1.8))
+    );
+    
+    SpriteRenderer chestSprite = new SpriteRenderer(null, true);
+    TriggerManager chestTriggerManager = new TriggerManager();
+    
+    GameObject chest = new GameObject(
+            "Chest",
+            "Chest",
+            true,
+            new Environment(),
+            chestTransform,
+            chestSprite,
+            chestTriggerManager
+    );
+
+    Trigger openChestTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+
+    entity.scripting.expression.variable.BooleanVariable keyCheck = 
+        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
+    entity.scripting.condition.BooleanComparisonCondition keyCondition = 
+        new entity.scripting.condition.BooleanComparisonCondition(
+            keyCheck,
+            new entity.scripting.expression.value.BooleanValue(true)
         );
+    openChestTrigger.addCondition(keyCondition);
 
-        Vector<Double> keyPos = new Vector<>(Arrays.asList(-200.0, -80.0));
-        Vector<Double> keyScale = new Vector<>(Arrays.asList(1.2, 1.2));
-        key.setTransform(new Transform(keyPos, 0f, keyScale));
+    openChestTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+            "Chest",
+            new entity.scripting.expression.value.BooleanValue(false)
+    ));
 
-        SpriteRenderer keySprite = new SpriteRenderer(null, true);
-        key.addProperty(keySprite);
+    entity.scripting.expression.variable.BooleanVariable tamingSkillVar = 
+        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
+    openChestTrigger.addAction(
+        new entity.scripting.action.BooleanVariableAssignmentAction(
+            tamingSkillVar,
+            new entity.scripting.expression.value.BooleanValue(true)
+        )
+    );
 
-// Trigger: Click to pick up key
-        Trigger keyClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+    entity.scripting.expression.variable.NumericVariable skillPointsVar = 
+        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
+    openChestTrigger.addAction(
+        new entity.scripting.action.NumericVariableAssignmentAction(
+            skillPointsVar,
+            new entity.scripting.expression.value.NumericValue(100.0)
+        )
+    );
 
-// Action 1: Key disappears when picked up
-        keyClickTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-                "Key",
-                new entity.scripting.expression.value.BooleanValue(false)
-        ));
+    chest.getTriggerManager().addTrigger(openChestTrigger);
+    scene.addGameObject(chest);
 
-// Action 2: Set hasKey variable
-        entity.scripting.expression.variable.BooleanVariable hasKeyVar =
-                new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
-        keyClickTrigger.addAction(
-                new entity.scripting.action.BooleanVariableAssignmentAction(
-                        hasKeyVar,
-                        new entity.scripting.expression.value.BooleanValue(true)
-                )
+    // ========== 3. DRAGON 🐉 ==========
+    Transform dragonTransform = new Transform(
+        new Vector<>(Arrays.asList(180.0, 80.0)),
+        -15f,
+        new Vector<>(Arrays.asList(2.5, 2.5))
+    );
+    
+    SpriteRenderer dragonSprite = new SpriteRenderer(null, true);
+    TriggerManager dragonTriggerManager = new TriggerManager();
+    
+    GameObject dragon = new GameObject(
+            "Dragon",
+            "Dragon",
+            true,
+            new Environment(),
+            dragonTransform,
+            dragonSprite,
+            dragonTriggerManager
+    );
+
+    // Trigger 1: Click Dragon - TAME IT
+    Trigger tameDragonTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+
+    entity.scripting.expression.variable.BooleanVariable tamingSkillCheck = 
+        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
+    entity.scripting.condition.BooleanComparisonCondition tamingCondition = 
+        new entity.scripting.condition.BooleanComparisonCondition(
+            tamingSkillCheck,
+            new entity.scripting.expression.value.BooleanValue(true)
         );
+    tameDragonTrigger.addCondition(tamingCondition);
 
-        key.getTriggerManager().addTrigger(keyClickTrigger);
-        scene.addGameObject(key);
+    tameDragonTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+            "Dragon",
+            new entity.scripting.expression.value.NumericValue(0.0),
+            new entity.scripting.expression.value.NumericValue(0.0)
+    ));
 
-// ========== 2. CHEST - The Skill Container 📦 ==========
-        GameObject chest = new GameObject(
-                "Chest",
-                "Chest",
-                true,
-                new ArrayList<>(),
-                new Environment()
+    entity.scripting.expression.variable.BooleanVariable tamedVar = 
+        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
+    tameDragonTrigger.addAction(
+        new entity.scripting.action.BooleanVariableAssignmentAction(
+            tamedVar,
+            new entity.scripting.expression.value.BooleanValue(true)
+        )
+    );
+
+    dragon.getTriggerManager().addTrigger(tameDragonTrigger);
+
+    // Trigger 2: Press W - FLY UP
+    entity.scripting.event.OnKeyPressEvent flyUpEvent = new entity.scripting.event.OnKeyPressEvent();
+    flyUpEvent.addEventParameter("Key", "W");
+
+    Trigger flyUpTrigger = new Trigger(flyUpEvent, true);
+
+    entity.scripting.expression.variable.BooleanVariable tamedCheck = 
+        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
+    entity.scripting.condition.BooleanComparisonCondition tamedCondition = 
+        new entity.scripting.condition.BooleanComparisonCondition(
+            tamedCheck,
+            new entity.scripting.expression.value.BooleanValue(true)
         );
+    flyUpTrigger.addCondition(tamedCondition);
 
-        Vector<Double> chestPos = new Vector<>(Arrays.asList(0.0, -80.0));
-        Vector<Double> chestScale = new Vector<>(Arrays.asList(1.8, 1.8));
-        chest.setTransform(new Transform(chestPos, 0f, chestScale));
+    flyUpTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+            "Dragon",
+            new entity.scripting.expression.value.NumericValue(0.0),
+            new entity.scripting.expression.value.NumericValue(-150.0)
+    ));
 
-        SpriteRenderer chestSprite = new SpriteRenderer(null, true);
-        chest.addProperty(chestSprite);
+    dragon.getTriggerManager().addTrigger(flyUpTrigger);
 
-// Trigger: Click to open chest
-        Trigger openChestTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+    // Trigger 3: Press S - FLY DOWN
+    entity.scripting.event.OnKeyPressEvent flyDownEvent = new entity.scripting.event.OnKeyPressEvent();
+    flyDownEvent.addEventParameter("Key", "S");
 
-// CONDITION: BooleanComparison (hasKey == true)
-        entity.scripting.expression.variable.BooleanVariable keyCheck =
-                new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
-        entity.scripting.condition.BooleanComparisonCondition keyCondition =
-                new entity.scripting.condition.BooleanComparisonCondition(
-                        keyCheck,
-                        new entity.scripting.expression.value.BooleanValue(true)
-                );
-        openChestTrigger.addCondition(keyCondition);
+    Trigger flyDownTrigger = new Trigger(flyDownEvent, true);
+    flyDownTrigger.addCondition(tamedCondition);
 
-// Action 1: Chest disappears when opened (consumed)
-        openChestTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-                "Chest",
-                new entity.scripting.expression.value.BooleanValue(false)
-        ));
+    flyDownTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+            "Dragon",
+            new entity.scripting.expression.value.NumericValue(0.0),
+            new entity.scripting.expression.value.NumericValue(80.0)
+    ));
 
-// Action 2: Learn taming skill!
-        entity.scripting.expression.variable.BooleanVariable tamingSkillVar =
-                new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
-        openChestTrigger.addAction(
-                new entity.scripting.action.BooleanVariableAssignmentAction(
-                        tamingSkillVar,
-                        new entity.scripting.expression.value.BooleanValue(true)
-                )
+    dragon.getTriggerManager().addTrigger(flyDownTrigger);
+
+    // Trigger 4: Press A - FLY LEFT (advanced)
+    entity.scripting.event.OnKeyPressEvent flyLeftEvent = new entity.scripting.event.OnKeyPressEvent();
+    flyLeftEvent.addEventParameter("Key", "A");
+
+    Trigger flyLeftTrigger = new Trigger(flyLeftEvent, true);
+    flyLeftTrigger.addCondition(tamedCondition);
+
+    entity.scripting.expression.variable.NumericVariable skillCheck = 
+        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
+    entity.scripting.condition.NumericComparisonCondition skillCondition = 
+        new entity.scripting.condition.NumericComparisonCondition(
+            skillCheck,
+            ">",
+            new entity.scripting.expression.value.NumericValue(50.0)
         );
+    flyLeftTrigger.addCondition(skillCondition);
 
-// Action 3: Gain skill points
-        entity.scripting.expression.variable.NumericVariable skillPointsVar =
-                new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
-        openChestTrigger.addAction(
-                new entity.scripting.action.NumericVariableAssignmentAction(
-                        skillPointsVar,
-                        new entity.scripting.expression.value.NumericValue(100.0)
-                )
-        );
+    flyLeftTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+            "Dragon",
+            new entity.scripting.expression.value.NumericValue(-200.0),
+            new entity.scripting.expression.value.NumericValue(0.0)
+    ));
 
-        chest.getTriggerManager().addTrigger(openChestTrigger);
-        scene.addGameObject(chest);
-        // ========== 3. DRAGON - The Majestic Beast 🐉 ==========
-        GameObject dragon = new GameObject(
-                "Dragon",
-                "Dragon",
-                true,
-                new ArrayList<>(),
-                new Environment()
-        );
+    dragon.getTriggerManager().addTrigger(flyLeftTrigger);
 
-        Vector<Double> dragonPos = new Vector<>(Arrays.asList(180.0, 80.0));
-        Vector<Double> dragonScale = new Vector<>(Arrays.asList(2.5, 2.5));
-        dragon.setTransform(new Transform(dragonPos, -15f, dragonScale));
+    // Trigger 5: Press D - RELEASE
+    entity.scripting.event.OnKeyPressEvent releaseEvent = new entity.scripting.event.OnKeyPressEvent();
+    releaseEvent.addEventParameter("Key", "D");
 
-        SpriteRenderer dragonSprite = new SpriteRenderer(null, true);
-        dragon.addProperty(dragonSprite);
+    Trigger releaseTrigger = new Trigger(releaseEvent, true);
+    releaseTrigger.addCondition(tamedCondition);
 
-        // Trigger 1: Click Dragon - TAME IT!
-        Trigger tameDragonTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
+    releaseTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+            "Dragon",
+            new entity.scripting.expression.value.NumericValue(0.0),
+            new entity.scripting.expression.value.NumericValue(-250.0)
+    ));
 
-        // CONDITION: BooleanComparison (tamingSkillLearned == true)
-        entity.scripting.expression.variable.BooleanVariable tamingSkillCheck =
-                new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
-        entity.scripting.condition.BooleanComparisonCondition tamingCondition =
-                new entity.scripting.condition.BooleanComparisonCondition(
-                        tamingSkillCheck,
-                        new entity.scripting.expression.value.BooleanValue(true)
-                );
-        tameDragonTrigger.addCondition(tamingCondition);
+    releaseTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+            "Dragon",
+            new entity.scripting.expression.value.BooleanValue(false)
+    ));
 
-        // Dragon moves to center (showing trust)
-        tameDragonTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-                "Dragon",
-                new entity.scripting.expression.value.NumericValue(0.0),
-                new entity.scripting.expression.value.NumericValue(0.0)
-        ));
+    dragon.getTriggerManager().addTrigger(releaseTrigger);
 
-        // Mark as tamed
-        entity.scripting.expression.variable.BooleanVariable tamedVar =
-                new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
-        tameDragonTrigger.addAction(
-                new entity.scripting.action.BooleanVariableAssignmentAction(
-                        tamedVar,
-                        new entity.scripting.expression.value.BooleanValue(true)
-                )
-        );
+    // Trigger 6: Press R - RESET
+    entity.scripting.event.OnKeyPressEvent resetEvent = new entity.scripting.event.OnKeyPressEvent();
+    resetEvent.addEventParameter("Key", "R");
 
-        dragon.getTriggerManager().addTrigger(tameDragonTrigger);
+    Trigger resetTrigger = new Trigger(resetEvent, true);
 
-        // Trigger 2: Press W - Command Dragon to FLY UP
-        entity.scripting.event.OnKeyPressEvent flyUpEvent = new entity.scripting.event.OnKeyPressEvent();
-        flyUpEvent.addEventParameter("Key", "W");
+    resetTrigger.addAction(new entity.scripting.action.ChangePositionAction(
+            "Dragon",
+            new entity.scripting.expression.value.NumericValue(180.0),
+            new entity.scripting.expression.value.NumericValue(80.0)
+    ));
 
-        Trigger flyUpTrigger = new Trigger(flyUpEvent, true);
+    resetTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
+            "Dragon",
+            new entity.scripting.expression.value.BooleanValue(true)
+    ));
 
-        // CONDITION: dragonTamed == true
-        entity.scripting.expression.variable.BooleanVariable tamedCheck =
-                new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
-        entity.scripting.condition.BooleanComparisonCondition tamedCondition =
-                new entity.scripting.condition.BooleanComparisonCondition(
-                        tamedCheck,
-                        new entity.scripting.expression.value.BooleanValue(true)
-                );
-        flyUpTrigger.addCondition(tamedCondition);
+    dragon.getTriggerManager().addTrigger(resetTrigger);
 
-        flyUpTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-                "Dragon",
-                new entity.scripting.expression.value.NumericValue(0.0),
-                new entity.scripting.expression.value.NumericValue(-150.0)
-        ));
+    scene.addGameObject(dragon);
 
-        dragon.getTriggerManager().addTrigger(flyUpTrigger);
+    // Print guide
+    System.out.println("\n╔════════════════════════════════════════════════════════════╗");
+    System.out.println("║           🐉 DRAGON TAMING ADVENTURE 🐉                   ║");
+    System.out.println("╚════════════════════════════════════════════════════════════╝");
+    System.out.println("\n🎮 QUEST: Tame the Wild Dragon!");
+    System.out.println("\n📍 STEP 1: Click Key 🔑 → Pick it up");
+    System.out.println("📍 STEP 2: Click Chest 📦 → Learn taming skill (requires key)");
+    System.out.println("📍 STEP 3: Click Dragon 🐉 → Tame it (requires skill)");
+    System.out.println("📍 STEP 4: Press W/S/A → Control dragon");
+    System.out.println("📍 STEP 5: Press D → Release dragon\n");
 
-        // Trigger 3: Press S - Command Dragon to FLY DOWN
-        entity.scripting.event.OnKeyPressEvent flyDownEvent = new entity.scripting.event.OnKeyPressEvent();
-        flyDownEvent.addEventParameter("Key", "S");
-
-        Trigger flyDownTrigger = new Trigger(flyDownEvent, true);
-        flyDownTrigger.addCondition(tamedCondition);
-
-        flyDownTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-                "Dragon",
-                new entity.scripting.expression.value.NumericValue(0.0),
-                new entity.scripting.expression.value.NumericValue(80.0)
-        ));
-
-        dragon.getTriggerManager().addTrigger(flyDownTrigger);
-
-        // Trigger 4: Press A - Command Dragon to FLY LEFT
-        entity.scripting.event.OnKeyPressEvent flyLeftEvent = new entity.scripting.event.OnKeyPressEvent();
-        flyLeftEvent.addEventParameter("Key", "A");
-
-        Trigger flyLeftTrigger = new Trigger(flyLeftEvent, true);
-        flyLeftTrigger.addCondition(tamedCondition);
-
-        // CONDITION 2: skillPoints > 50 (advanced control)
-        entity.scripting.expression.variable.NumericVariable skillCheck =
-                new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
-        entity.scripting.condition.NumericComparisonCondition skillCondition =
-                new entity.scripting.condition.NumericComparisonCondition(
-                        skillCheck,
-                        ">",
-                        new entity.scripting.expression.value.NumericValue(50.0)
-                );
-        flyLeftTrigger.addCondition(skillCondition);
-
-        flyLeftTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-                "Dragon",
-                new entity.scripting.expression.value.NumericValue(-200.0),
-                new entity.scripting.expression.value.NumericValue(0.0)
-        ));
-
-        dragon.getTriggerManager().addTrigger(flyLeftTrigger);
-
-        // Trigger 5: Press D - RELEASE Dragon
-        entity.scripting.event.OnKeyPressEvent releaseEvent = new entity.scripting.event.OnKeyPressEvent();
-        releaseEvent.addEventParameter("Key", "D");
-
-        Trigger releaseTrigger = new Trigger(releaseEvent, true);
-        releaseTrigger.addCondition(tamedCondition);
-
-        releaseTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-                "Dragon",
-                new entity.scripting.expression.value.NumericValue(0.0),
-                new entity.scripting.expression.value.NumericValue(-250.0)
-        ));
-
-        releaseTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-                "Dragon",
-                new entity.scripting.expression.value.BooleanValue(false)
-        ));
-
-        dragon.getTriggerManager().addTrigger(releaseTrigger);
-
-        // Trigger 6: Press R - RESET
-        entity.scripting.event.OnKeyPressEvent resetEvent = new entity.scripting.event.OnKeyPressEvent();
-        resetEvent.addEventParameter("Key", "R");
-
-        Trigger resetTrigger = new Trigger(resetEvent, true);
-
-        resetTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-                "Dragon",
-                new entity.scripting.expression.value.NumericValue(180.0),
-                new entity.scripting.expression.value.NumericValue(80.0)
-        ));
-
-        resetTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-                "Dragon",
-                new entity.scripting.expression.value.BooleanValue(true)
-        ));
-
-        dragon.getTriggerManager().addTrigger(resetTrigger);
-
-        scene.addGameObject(dragon);
-
-        // Print guide
-        System.out.println("\n╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║           🐉 DRAGON TAMING ADVENTURE 🐉                   ║");
-        System.out.println("╚════════════════════════════════════════════════════════════╝");
-        System.out.println("\n🎮 QUEST: Tame the Wild Dragon!");
-
-        System.out.println("\n📍 STEP 1: Find the Key 🔑");
-        System.out.println("  🔑 Key (Left)");
-        System.out.println("     → CLICK: Pick up key");
-        System.out.println("     ✓ No conditions - Always available");
-
-        System.out.println("\n📍 STEP 2: Open the Treasure Chest 📦");
-        System.out.println("  📦 Chest (Center)");
-        System.out.println("     → CLICK: Unlock chest → Learn taming skill!");
-        System.out.println("     ⚠️  CONDITION: BooleanComparison (hasKey == true)");
-        System.out.println("     ❌ LOCKED until you pick up the Key!");
-
-        System.out.println("\n📍 STEP 3: Tame & Control the Dragon 🐉");
-        System.out.println("  🐉 Dragon (Right) - Wild and majestic!");
-        System.out.println();
-        System.out.println("     → CLICK: Tame dragon (it comes to you!)");
-        System.out.println("     ⚠️  CONDITION: BooleanComparison (tamingSkillLearned == true)");
-        System.out.println("     ❌ LOCKED until you open Chest!");
-        System.out.println();
-        System.out.println("     → Press W: Command FLY UP");
-        System.out.println("     ⚠️  CONDITION: BooleanComparison (dragonTamed == true)");
-        System.out.println();
-        System.out.println("     → Press S: Command FLY DOWN");
-        System.out.println("     ⚠️  CONDITION: BooleanComparison (dragonTamed == true)");
-        System.out.println();
-        System.out.println("     → Press A: Command FLY LEFT (advanced)");
-        System.out.println("     ⚠️  CONDITION 1: BooleanComparison (dragonTamed == true)");
-        System.out.println("     ⚠️  CONDITION 2: NumericComparison (skillPoints > 50)");
-        System.out.println("     ❌ Requires both taming AND sufficient skill!");
-        System.out.println();
-        System.out.println("     → Press D: RELEASE dragon (set it free)");
-        System.out.println("     ⚠️  CONDITION: BooleanComparison (dragonTamed == true)");
-        System.out.println();
-        System.out.println("     → Press R: RESET demo");
-        System.out.println("     ✓ No conditions - Always works");
-
-        System.out.println("\n════════════════════════════════════════════════════════════");
-        System.out.println("🎯 WINNING SEQUENCE:");
-        System.out.println("  1️⃣  Click Key → pick it up");
-        System.out.println("  2️⃣  Click Chest → unlock & learn taming skill");
-        System.out.println("  3️⃣  Click Dragon → tame it (dragon comes to center)");
-        System.out.println("  4️⃣  Press W/S → control dragon flight");
-        System.out.println("  5️⃣  Press A → advanced flight control");
-        System.out.println("  6️⃣  Press D → release dragon to freedom 🎉");
-        System.out.println("════════════════════════════════════════════════════════════");
-
-        return scene;
-    }
+    return scene;
+}
     /**
      * Create global environment for triggers
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
