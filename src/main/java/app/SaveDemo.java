@@ -90,7 +90,6 @@ public class SaveDemo {
 
         // asset library list
         AssetLib assetLib = new AssetLib();
-        ArrayList<Property> properties = new ArrayList<>();
         SpriteRenderer bearRenderer = null;
 
         // Load Sprite from 'uploads'
@@ -116,15 +115,16 @@ public class SaveDemo {
             bearRenderer = null;
         }
 
-        // 3. Create GameObject
-        // Pass 'bearRenderer' as the last argument
+        // 3. Create TriggerManager
+        TriggerManager triggerManager = new TriggerManager();
+
+        // 4. Create GameObject
         GameObject bear = new GameObject(
-                "obj-bear", "Bear", true, properties, bearEnv, bearRenderer
+                "obj-bear", "Bear", true, bearEnv, transform, bearRenderer, triggerManager
         );
         bear.setTransform(transform);
 
-        // 4. Create and Attach TriggerManager
-        TriggerManager triggerManager = new TriggerManager();
+
 
         // Create a sample Trigger: On Click -> If Health > 0 -> Wait 1.0s
         Trigger clickTrigger = new Trigger(new OnClickEvent(), true);
@@ -140,7 +140,6 @@ public class SaveDemo {
         clickTrigger.addAction(new WaitAction(new NumericValue(1.0)));
 
         triggerManager.addTrigger(clickTrigger);
-        bear.setTriggerManager(triggerManager);
 
         // scene
         ArrayList<GameObject> objects = new ArrayList<>();

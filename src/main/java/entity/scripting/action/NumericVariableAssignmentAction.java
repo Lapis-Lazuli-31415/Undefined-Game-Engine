@@ -25,7 +25,8 @@ public class NumericVariableAssignmentAction extends Action{
         this(new NumericVariable("_", false), new NumericValue(0));
     }
 
-    public static String getEventType() {
+    @Override
+    public String getActionType() {
         return ACTION_TYPE;
     }
 

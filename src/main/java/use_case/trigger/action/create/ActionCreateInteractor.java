@@ -4,6 +4,7 @@ import entity.GameObject;
 import entity.scripting.action.Action;
 import entity.scripting.action.ActionFactory;
 import entity.scripting.action.EmptyAction;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 public class ActionCreateInteractor implements ActionCreateInputBoundary {
@@ -16,8 +17,8 @@ public class ActionCreateInteractor implements ActionCreateInputBoundary {
 
     @Override
     public void execute(ActionCreateInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int triggerIndex = inputData.getTriggerIndex();
 

@@ -14,6 +14,7 @@ import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
 import app.TransformUseCaseFactory;
 import app.VariableUseCaseFactory;
+import interface_adapter.trigger.TriggerManagerViewModel;
 import interface_adapter.variable.delete.DeleteVariableController;
 import interface_adapter.variable.update.UpdateVariableController;
 import interface_adapter.variable.get.GetAllVariablesController;
@@ -27,6 +28,7 @@ import interface_adapter.saving.SaveProjectController;
 import interface_adapter.saving.SaveProjectPresenter;
 import interface_adapter.saving.SaveProjectViewModel;
 import interface_adapter.saving.SaveProjectState;
+import view.util.PropertyPanelUtility;
 
 public class HomeView extends javax.swing.JFrame {
 
@@ -61,6 +63,9 @@ public class HomeView extends javax.swing.JFrame {
     private interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController;
     private interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
     private ImportSpriteFromUnsplashView unsplashView;
+
+    // trigger manager
+    private TriggerManagerViewModel triggerManagerViewModel;
 
     // variable management
     private GlobalVariableViewModel globalVariableViewModel;
@@ -157,6 +162,9 @@ public class HomeView extends javax.swing.JFrame {
             this.unsplashView = new ImportSpriteFromUnsplashView(unsplashViewModel, unsplashController);
         }
 
+        // Trigger Manager Set up
+        triggerManagerViewModel = new TriggerManagerViewModel();
+
         initComponents();
         setupAssetLibListener();
         setupImportSpriteListener();
@@ -164,7 +172,7 @@ public class HomeView extends javax.swing.JFrame {
 
     private GameObject createDefaultGameObject() {
         return new GameObject(
-                "demo-1", "Demo Sprite", true, new ArrayList<>(), null,
+                "demo-1", "Demo Sprite", true, null,
                 new Transform(new Vector<>(Arrays.asList(0.0, 0.0)), 0f, new Vector<>(Arrays.asList(1.0, 1.0))),
                 new TriggerManager()
         );
@@ -300,8 +308,7 @@ public class HomeView extends javax.swing.JFrame {
         JLabel spritesLabel = new JLabel("Sprites");
         spritesLabel.setForeground(Color.WHITE);
 
-        spritesAddButton = new JButton("+");
-        spritesAddButton.setMargin(new Insets(0, 4, 0, 4));
+        spritesAddButton = PropertyPanelUtility.createAddButton();
         spritesAddButton.addActionListener(e -> openSpriteImportMenu());
 
         spritesHeader.add(spritesLabel, BorderLayout.WEST);
@@ -348,7 +355,6 @@ public class HomeView extends javax.swing.JFrame {
         // --- SAVE STATUS LABEL ---
         saveStatusLabel = new JLabel("✔");
         saveStatusLabel.setForeground(new Color(100, 255, 100)); // Bright Green
-        saveStatusLabel.setFont(new Font("Arial", Font.BOLD, 12));
         saveStatusLabel.setVisible(false);
         rightTabControls.add(saveStatusLabel);
 
@@ -373,7 +379,7 @@ public class HomeView extends javax.swing.JFrame {
         tabBar.add(rightTabControls, BorderLayout.EAST);
 
         // ====== RIGHT PROPERTIES PANEL ======
-        propertiesPanel = new PropertiesPanel();
+        propertiesPanel = new PropertiesPanel(triggerManagerViewModel);
 
         JScrollPane propertiesScroll = new JScrollPane(propertiesPanel);
         propertiesScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -394,7 +400,7 @@ public class HomeView extends javax.swing.JFrame {
         transformViewModel = new TransformViewModel();
         transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
-        scenePanel = new ScenePanel(transformViewModel);
+        scenePanel = new ScenePanel(transformViewModel, triggerManagerViewModel);
         scenePanel.setScene(currentScene);
         scenePanel.setOnSceneChangeCallback(() -> triggerAutoSave());
 
@@ -412,7 +418,7 @@ public class HomeView extends javax.swing.JFrame {
 
         // Wiring Properties Panel
         if (propertiesPanel instanceof PropertiesPanel props) {
-            props.bind(
+            props.bindTransform(
                     transformViewModel,
                     transformController,
                     () -> {

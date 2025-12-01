@@ -2,14 +2,13 @@ package entity.scripting.condition;
 
 import entity.scripting.environment.Environment;
 import entity.scripting.error.ParseSyntaxException;
-import entity.scripting.expression.AndExpression;
 import entity.scripting.expression.BooleanExpression;
 import entity.scripting.expression.Expression;
 import entity.scripting.expression.ExpressionFactory;
 import entity.scripting.expression.value.BooleanValue;
 
 public class BooleanComparisonCondition extends Condition {
-    public static final String EVENT_TYPE = "Boolean Comparison";
+    public static final String CONDITION_TYPE = "Boolean Comparison";
     private BooleanExpression left;
     private BooleanExpression right;
 
@@ -38,8 +37,9 @@ public class BooleanComparisonCondition extends Condition {
         return right;
     }
 
-    public static String getEventType() {
-        return EVENT_TYPE;
+    @Override
+    public String getConditionType() {
+        return CONDITION_TYPE;
     }
 
     @Override

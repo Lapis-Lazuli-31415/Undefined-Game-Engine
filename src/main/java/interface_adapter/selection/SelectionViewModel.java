@@ -12,12 +12,6 @@ public class SelectionViewModel extends ViewModel<SelectionState> {
         this.state = new SelectionState();
     }
 
-    @Override
-    public SelectionState getState() {
-        return state;
-    }
-
-
     public void setSelection(String id, String name) {
         state.setSelectedObjectId(id);
         state.setSelectedObjectName(name);

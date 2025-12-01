@@ -7,6 +7,7 @@ import java.awt.*;
 
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
+import interface_adapter.trigger.TriggerManagerViewModel;
 import interface_adapter.variable.LocalVariableViewModel;
 import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.update.UpdateVariableController;
@@ -18,10 +19,10 @@ public class PropertiesPanel extends JPanel {
     // Section panels
     private final TransformSectionPanel transformSection;
     private final SpriteRendererSectionPanel spriteRendererSection;
-    private final TriggerManagerPanel triggerManagerPanel;
+    private final TriggerManagerPanel triggerManagerSection;
     private final VariableSectionPanel variableSection;
 
-    public PropertiesPanel() {
+    public PropertiesPanel(TriggerManagerViewModel triggerManagerViewModel) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(45, 45, 45));
 
@@ -35,7 +36,7 @@ public class PropertiesPanel extends JPanel {
         // Initialize section panels
         transformSection = new TransformSectionPanel();
         spriteRendererSection = new SpriteRendererSectionPanel();
-        triggerManagerPanel = new TriggerManagerPanel();
+        triggerManagerSection = new TriggerManagerPanel(triggerManagerViewModel);
         variableSection = new VariableSectionPanel();
 
         // Add sections
@@ -44,7 +45,7 @@ public class PropertiesPanel extends JPanel {
         add(Box.createVerticalStrut(20));
         add(spriteRendererSection);
         add(Box.createVerticalStrut(20));
-        add(triggerManagerPanel);
+        add(triggerManagerSection);
         add(Box.createVerticalStrut(20));
         add(variableSection);
         add(Box.createVerticalGlue());
@@ -52,7 +53,7 @@ public class PropertiesPanel extends JPanel {
 
     public void setAutoSaveCallback(Runnable autoSaveCallback) {
         // Pass callback to Trigger Manager
-        triggerManagerPanel.setOnChangeCallback(autoSaveCallback);
+        triggerManagerSection.setOnChangeCallback(autoSaveCallback);
 
         // Pass callback to Variable Section
         variableSection.setOnChangeCallback(autoSaveCallback);
@@ -74,9 +75,9 @@ public class PropertiesPanel extends JPanel {
         );
     }
 
-    public void bind(TransformViewModel viewModel,
-                     TransformController controller,
-                     Runnable onChangeCallback) {
+    public void bindTransform(TransformViewModel viewModel,
+                              TransformController controller,
+                              Runnable onChangeCallback) {
         transformSection.bind(viewModel, controller, onChangeCallback);
     }
 
@@ -103,19 +104,19 @@ public class PropertiesPanel extends JPanel {
     }
 
     public String getSelectedEvent() {
-        return triggerManagerPanel.getSelectedEvent();
+        return triggerManagerSection.getSelectedEvent();
     }
 
     public String getSelectedKey() {
-        return triggerManagerPanel.getSelectedKey();
+        return triggerManagerSection.getSelectedKey();
     }
 
     public java.util.List<String> getConditionTexts() {
-        return triggerManagerPanel.getConditionTexts();
+        return triggerManagerSection.getConditionTexts();
     }
 
     public java.util.List<String> getActionTexts() {
-        return triggerManagerPanel.getActionTexts();
+        return triggerManagerSection.getActionTexts();
     }
 
     @Override

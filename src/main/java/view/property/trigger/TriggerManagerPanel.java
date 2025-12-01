@@ -26,9 +26,9 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
     // NEW: Callback for auto-save
     private Runnable onChangeCallback;
 
-    public TriggerManagerPanel() {
+    public TriggerManagerPanel(TriggerManagerViewModel triggerManagerViewModel) {
         // ... (Keep existing constructor logic exactly as is until the listeners setup) ...
-        triggerManagerViewModel = new TriggerManagerViewModel();
+        this.triggerManagerViewModel = triggerManagerViewModel;
         conditionEditorViewModel = new ConditionEditorViewModel();
         actionEditorViewModel = new ActionEditorViewModel();
         triggerUseCaseFactory = new TriggerUseCaseFactory(triggerManagerViewModel,
@@ -76,10 +76,21 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        refresh();
-        // NEW: Trigger the callback whenever state changes
-        if (onChangeCallback != null) {
-            onChangeCallback.run();
+        TriggerManagerState state = (TriggerManagerState) evt.getNewValue();
+
+        if (state.getErrorMessage() != null) {
+            JOptionPane.showMessageDialog(this,
+                    state.getErrorMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+
+            state.setErrorMessage(null);
+        } else {
+            refresh();
+            // NEW: Trigger the callback whenever state changes
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
         }
     }
 
