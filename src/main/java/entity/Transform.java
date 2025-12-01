@@ -92,4 +92,22 @@ public class Transform {
     public void setRotation(float rotation) {
         this.rotation = rotation;
     }
+    // --- Copy method for preview isolation ---
+
+    /**
+     * Create a deep copy of this Transform.
+     *
+     * @return A new Transform with copied position, rotation, and scale
+     */
+    public Transform copy() {
+        Vector<Double> copiedPosition = new Vector<>();
+        copiedPosition.add(this.position.get(0));
+        copiedPosition.add(this.position.get(1));
+
+        Vector<Double> copiedScale = new Vector<>();
+        copiedScale.add(this.scale.get(0));
+        copiedScale.add(this.scale.get(1));
+
+        return new Transform(copiedPosition, this.rotation, copiedScale);
+    }
 }

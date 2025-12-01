@@ -40,4 +40,18 @@ public class TriggerManager {
     public void deleteTrigger(int index){
         triggers.remove(index);
     }
+    // --- Copy method for preview isolation ---
+
+    /**
+     * Create a deep copy of this TriggerManager.
+     *
+     * @return A new TriggerManager with copied triggers
+     */
+    public TriggerManager copy() {
+        TriggerManager copy = new TriggerManager();
+        for (Trigger trigger : this.triggers) {
+            copy.addTrigger(trigger.copy());
+        }
+        return copy;
+    }
 }

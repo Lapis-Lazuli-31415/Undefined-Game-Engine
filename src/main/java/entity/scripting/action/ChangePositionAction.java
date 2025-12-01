@@ -78,7 +78,7 @@ public class ChangePositionAction extends Action{
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Action parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 3;
 
@@ -103,6 +103,7 @@ public class ChangePositionAction extends Action{
             this.x = (NumericExpression) xResult;
             this.y = (NumericExpression) yResult;
         }
+        return null;
     }
 
     @Override

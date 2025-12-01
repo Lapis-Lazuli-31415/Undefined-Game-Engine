@@ -59,10 +59,11 @@ public class NumericVariableAssignmentAction extends Action{
         } else {
             Assign.assign(localEnvironment, variable, value);
         }
+        System.out.println("Assigned " + value + " to variable " + variable.getName());
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Action parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 2;
 
@@ -85,6 +86,7 @@ public class NumericVariableAssignmentAction extends Action{
             this.variable = (NumericVariable) variableResult;
             this.expression = (NumericExpression) expressionResult;
         }
+        return null;
     }
 
     @Override

@@ -63,6 +63,7 @@ public class NumericComparisonCondition extends Condition{
         double leftValue = left.evaluate(globalEnvironment, localEnvironment);
         double rightValue = right.evaluate(globalEnvironment, localEnvironment);
 
+        System.out.println("Comparing " + leftValue + " " + comparator + " " + rightValue);
         return switch (comparator) {
             case ">" -> leftValue > rightValue;
             case "=" -> leftValue == rightValue;
@@ -75,7 +76,7 @@ public class NumericComparisonCondition extends Condition{
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Condition parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 3;
 
@@ -103,6 +104,7 @@ public class NumericComparisonCondition extends Condition{
             this.comparator = comparator;
             this.right = (NumericExpression) rightResult;
         }
+        return null;
     }
 
     private static boolean isValidComparator(String comparator) {
