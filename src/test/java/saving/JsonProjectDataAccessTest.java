@@ -222,9 +222,8 @@ class JsonProjectDataAccessTest {
         tm.addTrigger(trigger);
 
         // Assembly
-        GameObject hero = new GameObject("obj-1", "Hero", true, new ArrayList<>(), localEnv, null);
-        hero.setTransform(transform);
-        hero.setTriggerManager(tm);
+        GameObject hero = new GameObject("obj-1", "Hero",
+                true, localEnv, transform, null, tm);
 
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(hero);

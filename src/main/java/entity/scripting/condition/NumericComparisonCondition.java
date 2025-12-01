@@ -6,13 +6,12 @@ import entity.scripting.error.ParseSyntaxException;
 import entity.scripting.expression.Expression;
 import entity.scripting.expression.ExpressionFactory;
 import entity.scripting.expression.NumericExpression;
-import entity.scripting.expression.SimpleArithmeticOperation;
 import entity.scripting.expression.value.NumericValue;
 
 import java.util.Set;
 
 public class NumericComparisonCondition extends Condition{
-    public static final String EVENT_TYPE = "Numeric Comparison";
+    public static final String CONDITION_TYPE = "Numeric Comparison";
 
     private NumericExpression left;
     private String comparator;
@@ -54,8 +53,9 @@ public class NumericComparisonCondition extends Condition{
         this.right = right;
     }
 
-    public static String getEventType() {
-        return EVENT_TYPE;
+    @Override
+    public String getConditionType() {
+        return CONDITION_TYPE;
     }
 
     @Override

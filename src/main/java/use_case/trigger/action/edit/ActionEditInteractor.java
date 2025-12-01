@@ -2,6 +2,7 @@ package use_case.trigger.action.edit;
 
 import entity.GameObject;
 import entity.scripting.action.Action;
+import interface_adapter.EditorState;
 import use_case.trigger.action.edit.ActionEditInputData;
 import use_case.trigger.action.edit.ActionEditOutputBoundary;
 import use_case.trigger.action.edit.ActionEditOutputData;
@@ -16,8 +17,8 @@ public class ActionEditInteractor implements ActionEditInputBoundary{
 
     @Override
     public void execute(ActionEditInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int triggerIndex = inputData.getTriggerIndex();
         int actionIndex = inputData.getActionIndex();

@@ -3,6 +3,7 @@ package use_case.trigger.condition.edit;
 import entity.GameObject;
 import entity.scripting.condition.Condition;
 import entity.scripting.error.ParseSyntaxException;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 import java.text.ParseException;
@@ -16,8 +17,8 @@ public class ConditionEditSaveInteractor implements ConditionEditSaveInputBounda
 
     @Override
     public void execute(ConditionEditSaveInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int triggerIndex = inputData.getTriggerIndex();
         int conditionIndex = inputData.getConditionIndex();

@@ -1,6 +1,9 @@
 package view.property.trigger;
 
 import app.use_case_factory.TriggerUseCaseFactory;
+import entity.scripting.Trigger;
+import entity.scripting.action.Action;
+import entity.scripting.condition.Condition;
 import interface_adapter.trigger.TriggerManagerState;
 import interface_adapter.trigger.TriggerManagerViewModel;
 import interface_adapter.trigger.action.ActionEditorViewModel;
@@ -8,19 +11,13 @@ import interface_adapter.trigger.condition.ConditionEditorViewModel;
 import interface_adapter.trigger.create.TriggerCreateController;
 import view.util.PropertyPanelUtility;
 
-// --- Imports for Entity conversion ---
-import entity.scripting.Trigger;
-import entity.scripting.condition.Condition;
-import entity.scripting.action.Action;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-// -------------------------------------
-
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class TriggerManagerPanel extends JPanel implements PropertyChangeListener {
 
@@ -32,10 +29,12 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
 
     private final JPanel triggerListPanel;
 
+    // NEW: Callback for auto-save
     private Runnable onChangeCallback;
 
-    public TriggerManagerPanel() {
-        triggerManagerViewModel = new TriggerManagerViewModel();
+    public TriggerManagerPanel(TriggerManagerViewModel triggerManagerViewModel) {
+        // ... (Keep existing constructor logic exactly as is until the listeners setup) ...
+        this.triggerManagerViewModel = triggerManagerViewModel;
         conditionEditorViewModel = new ConditionEditorViewModel();
         actionEditorViewModel = new ActionEditorViewModel();
         triggerUseCaseFactory = new TriggerUseCaseFactory(triggerManagerViewModel,
@@ -76,6 +75,7 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         refresh();
     }
 
+    // NEW: Setter for the callback
     public void setOnChangeCallback(Runnable callback) {
         this.onChangeCallback = callback;
     }
@@ -113,16 +113,28 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         triggerManagerViewModel.firePropertyChange();
         refresh();
     }
-    // -------------------------------------------------------------
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        refresh();
-        if (onChangeCallback != null) {
-            onChangeCallback.run();
+        TriggerManagerState state = (TriggerManagerState) evt.getNewValue();
+
+        if (state.getErrorMessage() != null) {
+            JOptionPane.showMessageDialog(this,
+                    state.getErrorMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+
+            state.setErrorMessage(null);
+        } else {
+            refresh();
+            // NEW: Trigger the callback whenever state changes
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
         }
     }
 
+    // ... (Keep the rest of the file: refresh(), methods, etc.) ...
     private void refresh() {
         triggerListPanel.removeAll();
 

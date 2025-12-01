@@ -5,6 +5,7 @@ import entity.scripting.Trigger;
 import entity.scripting.event.DefaultEventFactory;
 import entity.scripting.event.Event;
 import entity.scripting.event.EventFactory;
+import interface_adapter.EditorState;
 import use_case.trigger.event.change.EventChangeInputData;
 import use_case.trigger.event.change.EventChangeOutputBoundary;
 import use_case.trigger.event.change.EventChangeOutputData;
@@ -19,8 +20,8 @@ public class EventParameterChangeInteractor implements EventParameterChangeInput
 
     @Override
     public void execute(EventParameterChangeInputData inputData){
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int index = inputData.getIndex();
         Trigger trigger = gameObject.getTriggerManager().getTrigger(index);

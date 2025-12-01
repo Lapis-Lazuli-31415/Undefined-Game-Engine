@@ -4,8 +4,16 @@ import entity.GameObject;
 import entity.Scene; // Import Scene
 import entity.SpriteRenderer;
 import entity.Transform;
+import entity.scripting.Trigger;
+import entity.scripting.TriggerManager;
+import entity.scripting.action.Action;
+import entity.scripting.condition.Condition;
+import entity.scripting.environment.Environment;
+import interface_adapter.EditorState;
 import interface_adapter.transform.TransformState;
 import interface_adapter.transform.TransformViewModel;
+import interface_adapter.trigger.TriggerManagerState;
+import interface_adapter.trigger.TriggerManagerViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,26 +21,26 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
-import java.util.Vector;
 
 public class ScenePanel extends JPanel implements PropertyChangeListener {
 
-    private final TransformViewModel viewModel;
+    private final TransformViewModel transformViewModel;
+    private final TriggerManagerViewModel triggerManagerViewModel;
     private Scene currentScene;
     private GameObject selectedObject;
     private Runnable onSelectionChangeCallback;
     private Runnable onSceneChangeCallback; // Callback for auto-save
 
-    public ScenePanel(TransformViewModel viewModel) {
-        this.viewModel = viewModel;
+    public ScenePanel(TransformViewModel transformViewModel, TriggerManagerViewModel triggerManagerViewModel) {
+        this.transformViewModel = transformViewModel;
+        this.triggerManagerViewModel = triggerManagerViewModel;
         this.selectedObject = null;
 
         setBackground(new Color(35, 35, 35));
 
-        this.viewModel.addPropertyChangeListener(this);
+        this.transformViewModel.addPropertyChangeListener(this);
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -70,9 +78,10 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
 
             Transform transform = new Transform(position, 0f, scale);
             SpriteRenderer spriteRenderer = new SpriteRenderer(image, true);
+            TriggerManager triggerManager = new TriggerManager();
 
-            GameObject gameObject = new GameObject(id, name, true, new ArrayList<>(), null, spriteRenderer);
-            gameObject.setTransform(transform);
+            GameObject gameObject = new GameObject(id, name, true,
+                    new Environment(), transform, spriteRenderer, triggerManager);
 
             currentScene.getGameObjects().add(gameObject);
 
@@ -93,21 +102,50 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     }
 
     public void selectObject(GameObject gameObject) {
+        EditorState.setCurrentGameObject(gameObject);
         this.selectedObject = gameObject;
         if (gameObject != null && gameObject.getTransform() != null) {
             Transform transform = gameObject.getTransform();
 
-            viewModel.getState().setX(transform.getX());
-            viewModel.getState().setY(transform.getY());
-            viewModel.getState().setRotation(transform.getRotation());
-            viewModel.getState().setScale(transform.getScaleX() * 100.0); // Assuming uniform scale
+            transformViewModel.getState().setX(transform.getX());
+            transformViewModel.getState().setY(transform.getY());
+            transformViewModel.getState().setRotation(transform.getRotation());
+            transformViewModel.getState().setScale(transform.getScaleX() * 100.0); // Assuming uniform scale
 
-            viewModel.firePropertyChange();
+            transformViewModel.firePropertyChange();
+
+            selectObjectUpdateTriggerManager(gameObject);
         }
 
         if (onSelectionChangeCallback != null) {
             onSelectionChangeCallback.run();
         }
+    }
+
+    private void selectObjectUpdateTriggerManager(GameObject gameObject){
+
+        TriggerManagerState state = triggerManagerViewModel.getState();
+        state.clear();
+
+        for (Trigger trigger : gameObject.getTriggerManager().getTriggers()) {
+
+            String event = trigger.getEvent().getEventLabel();
+            Map<String, String> eventParameters = trigger.getEvent().getEventParameters();
+
+            List<String> conditions = new ArrayList<>();
+            for (Condition condition : trigger.getConditions()) {
+                conditions.add(condition.getConditionType());
+            }
+
+            List<String> actions = new ArrayList<>();
+            for (Action action : trigger.getActions()) {
+                actions.add(action.getActionType());
+            }
+
+            state.addTrigger(event, eventParameters, conditions, actions);
+        }
+
+        triggerManagerViewModel.firePropertyChange();
     }
 
     public void setOnSelectionChangeCallback(Runnable callback) {
@@ -272,7 +310,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     private void updateSelectedObjectTransform() {
         if (selectedObject == null || selectedObject.getTransform() == null) return;
 
-        TransformState state = viewModel.getState();
+        TransformState state = transformViewModel.getState();
         Transform transform = selectedObject.getTransform();
 
         transform.setX(state.getX());
