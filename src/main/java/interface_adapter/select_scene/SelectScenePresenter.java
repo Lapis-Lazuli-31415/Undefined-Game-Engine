@@ -6,16 +6,20 @@ import use_case.component_management.select_scene.SelectSceneOutputBoundary;
 
 public class SelectScenePresenter implements SelectSceneOutputBoundary {
 
-    private final SceneSelectionListener listener;
+    private SceneSelectionListener listener;
 
     public SelectScenePresenter(
                                 SceneSelectionListener listener) {
         this.listener = listener;
     }
 
+    public void setListener(SceneSelectionListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     public void sceneSelected(Scene scene) {
-        EditorState.setCurrentScene(scene);   // store actual entity
+        EditorState.getSceneRepository().setCurrentScene(scene);// store actual entity
         listener.onSceneChange(scene);
     }
 
