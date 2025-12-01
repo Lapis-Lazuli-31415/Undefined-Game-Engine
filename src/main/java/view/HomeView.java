@@ -111,10 +111,6 @@ public class HomeView extends javax.swing.JFrame {
     private EditorState editorState;
 // ===== END ADDED BY CHENG =====
 
-    public static GameObject getDemoGameObject() {
-        return DEMO_OBJECT;
-    }
-
     public HomeView(
             interface_adapter.assets.AssetLibViewModel assetLibViewModel,
             interface_adapter.sprites.ImportSpriteController importSpriteController,
@@ -160,10 +156,6 @@ public class HomeView extends javax.swing.JFrame {
             this.assetLibViewModel.setState(this.currentProject.getAssets());
 
             if (!this.currentScene.getGameObjects().isEmpty()) {
-                for (GameObject gameObject : this.currentScene.getGameObjects()) {
-                    System.out.println(gameObject.getName());
-                    System.out.println("2");
-                }
                 DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
                 System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
             } else {
@@ -306,7 +298,6 @@ public class HomeView extends javax.swing.JFrame {
         // ====== MENU BAR ======
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(new JMenu("Project"));
-        menuBar.add(new JMenu("Scene"));
         menuBar.add(new JMenu("Save"));
         menuBar.add(new JMenu("Help"));
         setJMenuBar(menuBar);
