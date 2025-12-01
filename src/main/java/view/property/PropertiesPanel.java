@@ -52,8 +52,8 @@ public class PropertiesPanel extends JPanel {
     }
 
     public void loadTriggerManager(entity.scripting.TriggerManager manager) {
-        if (triggerManagerPanel != null) {
-            triggerManagerPanel.loadTriggerManager(manager);
+        if (triggerManagerSection != null) {
+            triggerManagerSection.loadTriggerManager(manager);
         }
     }
 
