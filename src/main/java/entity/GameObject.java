@@ -105,6 +105,8 @@ public class GameObject {
     public void setSpriteRenderer(SpriteRenderer spriteRenderer) {
         this.spriteRenderer = spriteRenderer;
     }
+
+
     // --- Property helpers ---
 
     public List<Property> getProperties() {
@@ -153,10 +155,11 @@ public class GameObject {
                 this.id,
                 this.name,
                 this.active,
-                copiedProperties,
-                copiedEnvironment,
-                copiedTransform,
-                copiedTriggerManager
+                copiedEnvironment,        // Environment
+                copiedTransform,          // Transform
+                copiedSpriteRenderer,     // SpriteRenderer
+                copiedTriggerManager      // TriggerManager
+
         );
     }
 

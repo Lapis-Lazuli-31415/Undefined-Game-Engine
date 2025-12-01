@@ -2,32 +2,30 @@ package interface_adapter;
 
 import entity.Scene;
 import entity.GameObject;
-import use_case.component_management.SceneRepository;
 
+/**
+ * Global editor state management.
+ * Utility class with static methods only - not meant to be instantiated.
+ *
+ * @author Wanru Cheng
+ */
 public class EditorState {
 
-    private static String currentSceneName;
+    private static Scene currentScene;
     private static GameObject currentGameObject;
-    private static SceneRepository sceneRepository;
 
-    public static void init(SceneRepository repository) {
-        sceneRepository = repository;
-    }
-
-    public static String getCurrentSceneName() {
-        return currentSceneName;
-    }
-
-    public static void setCurrentSceneName(String name) {
-        currentSceneName = name;
-    }
-
+    // --- Scene getters/setters ---
     public static Scene getCurrentScene() {
-        return sceneRepository.getSceneByName(currentSceneName);
+        return currentScene;
     }
 
-    public static SceneRepository getSceneRepository() {
-        return sceneRepository;
+    public static void setCurrentScene(Scene scene) {
+        currentScene = scene;
+
+        // Optional: clear selected game object if it doesn't belong to the new scene
+        if (currentGameObject != null && (scene == null || !scene.hasGameObject(currentGameObject))) {
+            currentGameObject = null;
+        }
     }
 
     // --- GameObject getters/setters ---
@@ -37,6 +35,12 @@ public class EditorState {
 
     public static void setCurrentGameObject(GameObject gameObject) {
         currentGameObject = gameObject;
+    }
+
+    // --- Convenience reset method ---
+    public static void reset() {
+        currentScene = null;
+        currentGameObject = null;
     }
 }
 
