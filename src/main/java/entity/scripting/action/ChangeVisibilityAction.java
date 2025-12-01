@@ -3,14 +3,12 @@ package entity.scripting.action;
 import entity.GameObject;
 import entity.Scene;
 import entity.SpriteRenderer;
-import entity.Transform;
 import entity.scripting.environment.Environment;
 import entity.scripting.error.GameObjectException;
 import entity.scripting.error.ParseSyntaxException;
 import entity.scripting.expression.BooleanExpression;
 import entity.scripting.expression.Expression;
 import entity.scripting.expression.ExpressionFactory;
-import entity.scripting.expression.NumericExpression;
 import entity.scripting.expression.value.BooleanValue;
 
 public class ChangeVisibilityAction extends Action{
@@ -68,7 +66,7 @@ public class ChangeVisibilityAction extends Action{
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Action parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 2;
 
@@ -89,6 +87,7 @@ public class ChangeVisibilityAction extends Action{
             this.gameObjectName = gameObjectName;
             this.visibility = (BooleanExpression) visibilityResult;
         }
+        return null;
     }
 
     @Override

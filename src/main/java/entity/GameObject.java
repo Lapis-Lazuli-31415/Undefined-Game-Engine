@@ -10,7 +10,9 @@ import java.util.List;
 
 /**
  * GameObject is the basic entity in the scene.
- * It has an id, name, active flag, properties, spriterenderer, and belongs to an Environment.
+ * It has an id, name, active flag, properties, and belongs to an Environment.
+ *
+ * No UI / JavaFX imports here.
  */
 
 public class GameObject {
@@ -18,6 +20,7 @@ public class GameObject {
     private final String id;
     private String name;
     private boolean active;
+    private ArrayList<Property> properties;
     private Environment environments;
     private Transform transform;
     private SpriteRenderer spriteRenderer;
@@ -32,6 +35,7 @@ public class GameObject {
         this.spriteRenderer = spriteRenderer;
         this.triggerManager = triggerManager;
         this.environments = environment;
+        this.properties = new ArrayList<>();
     }
 
     @com.fasterxml.jackson.annotation.JsonCreator
@@ -47,6 +51,7 @@ public class GameObject {
         this.environments = environments;
         this.transform = transform;
         this.triggerManager = triggerManager;
+        this.properties = new ArrayList<>();
     }
 
     // --- Basic getters/setters ---
@@ -95,13 +100,69 @@ public class GameObject {
     public void setTriggerManager(TriggerManager triggerManager) {
         this.triggerManager = triggerManager;
     }
-
     public SpriteRenderer getSpriteRenderer() {
         return spriteRenderer;
     }
 
     public void setSpriteRenderer(SpriteRenderer spriteRenderer) {
         this.spriteRenderer = spriteRenderer;
+    }
+
+
+    // --- Property helpers ---
+
+    public List<Property> getProperties() {
+        return new ArrayList<>(properties);
+    }
+
+    public void addProperty(Property property) {
+        // If your Property has a key, you can de-duplicate by key:
+        properties.add(property);
+    }
+
+    public void removeProperty(Property property) {
+        properties.remove(property);
+    }
+
+// --- Copy method for preview isolation ---
+
+    /**
+     * Create a deep copy of this GameObject.
+     *
+     * @return A new GameObject with copied state
+     */
+    public GameObject copy() {
+        // Copy properties
+        ArrayList<Property> copiedProperties = new ArrayList<>();
+        for (Property prop : this.properties) {
+            if (prop instanceof SpriteRenderer) {
+                copiedProperties.add(((SpriteRenderer) prop).copy());
+            } else {
+                copiedProperties.add(prop);
+            }
+        }
+
+        // Copy transform
+        Transform copiedTransform = (this.transform != null) ? this.transform.copy() : null;
+
+        // Copy environment
+        Environment copiedEnvironment = (this.environments != null) ? this.environments.copy() : new Environment();
+        SpriteRenderer copiedSpriteRenderer = (this.spriteRenderer != null) ? this.spriteRenderer.copy() : null;
+        // Copy trigger manager
+        TriggerManager copiedTriggerManager = (this.triggerManager != null)
+                ? this.triggerManager.copy()
+                : new TriggerManager();
+
+        return new GameObject(
+                this.id,
+                this.name,
+                this.active,
+                copiedEnvironment,        // Environment
+                copiedTransform,          // Transform
+                copiedSpriteRenderer,     // SpriteRenderer
+                copiedTriggerManager      // TriggerManager
+
+        );
     }
 
 }

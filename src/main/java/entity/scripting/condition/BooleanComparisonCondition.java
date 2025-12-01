@@ -51,7 +51,7 @@ public class BooleanComparisonCondition extends Condition {
     }
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Condition parse(String string) throws ParseSyntaxException {
         String[] parts = string.split(";");
         final int requiredLength = 2;
 
@@ -74,6 +74,7 @@ public class BooleanComparisonCondition extends Condition {
             this.left = (BooleanExpression) leftResult;
             this.right = (BooleanExpression) rightResult;
         }
+        return null;
     }
 
     @Override

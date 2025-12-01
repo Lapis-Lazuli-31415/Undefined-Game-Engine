@@ -16,10 +16,11 @@ public class EmptyAction extends Action{
     public void execute(Environment globalEnvironment, Environment localEnvironment, Scene scene){}
 
     @Override
-    public void parse(String string) throws ParseSyntaxException {
+    public Action parse(String string) throws ParseSyntaxException {
         if (string != null && !string.isEmpty()) {
             throw new ParseSyntaxException("Invalid Syntax: Empty Action expects empty string");
         }
+        return null;
     }
 
     @Override
