@@ -66,8 +66,9 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         if (currentScene == null) return; // Guard clause
 
         try {
+            final int lastDotIndex = image.getName().lastIndexOf('.');
             final String id = UUID.randomUUID().toString();
-            final String name = image.getName();
+            final String name = image.getName().substring(0, lastDotIndex);
 
             Vector<Double> position = new Vector<>();
             position.add(0.0);
@@ -80,7 +81,6 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             Transform transform = new Transform(position, 0f, scale);
             SpriteRenderer spriteRenderer = new SpriteRenderer(image, true);
             TriggerManager triggerManager = new TriggerManager();
-
             GameObject gameObject = new GameObject(id, name, true,
                     new Environment(), transform, spriteRenderer, triggerManager);
 
@@ -244,11 +244,42 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
 
             if (selectedObject != null) {
                 updateSelectedObjectTransform();
+                drawEditingIndicator(g2, panelW, panelH);
             }
         }
         finally {
             g2.dispose();
         }
+    }
+
+    private void drawEditingIndicator(Graphics2D g2, int panelW, int panelH) {
+        if (selectedObject == null) return;
+
+        String objectName = selectedObject.getName();
+        String text = "Editing: " + objectName;
+
+        Font font = new Font("PLAIN", Font.BOLD, 12);
+        g2.setFont(font);
+        FontMetrics metrics = g2.getFontMetrics(font);
+
+        int textWidth = metrics.stringWidth(text);
+        int textHeight = metrics.getHeight();
+
+        int padding = 5;
+        int boxWidth = textWidth + padding * 2;
+        int boxHeight = textHeight + padding * 2;
+
+        // top right corner of scene
+        int boxX = panelW - boxWidth;
+        int boxY = 0;
+
+        g2.setColor(new Color(60, 60, 60, 255));
+        g2.fillRect(boxX, boxY, boxWidth, boxHeight);
+
+        g2.setColor(Color.WHITE);
+        int textX = boxX + padding;
+        int textY = boxY + padding + metrics.getAscent();
+        g2.drawString(text, textX, textY);
     }
 
     private void renderGameObject(Graphics2D g2, GameObject obj, int panelW, int panelH) {
