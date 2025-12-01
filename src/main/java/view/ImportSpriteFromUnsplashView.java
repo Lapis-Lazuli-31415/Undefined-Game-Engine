@@ -1,8 +1,8 @@
 package view;
 
-import interface_adapter.Sprites.ImportSpriteFromUnsplashController;
-import interface_adapter.Sprites.ImportSpriteFromUnsplashState;
-import interface_adapter.Sprites.ImportSpriteFromUnsplashViewModel;
+import interface_adapter.sprites.ImportSpriteFromUnsplashController;
+import interface_adapter.sprites.ImportSpriteFromUnsplashState;
+import interface_adapter.sprites.ImportSpriteFromUnsplashViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -191,10 +191,6 @@ public class ImportSpriteFromUnsplashView extends JPanel implements PropertyChan
                         JOptionPane.ERROR_MESSAGE);
             }
         }
-    }
-
-    public String getViewName() {       // TODO: remove i think
-        return "importSpriteFromUnsplash";
     }
 }
 

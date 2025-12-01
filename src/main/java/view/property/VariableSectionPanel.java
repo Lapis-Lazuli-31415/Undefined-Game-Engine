@@ -12,8 +12,8 @@ import view.util.PropertyPanelUtility;
 import interface_adapter.variable.LocalVariableViewModel;
 import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.VariableState;
-import interface_adapter.variable.UpdateVariableController;
-import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.update.UpdateVariableController;
+import interface_adapter.variable.delete.DeleteVariableController;
 import use_case.variable.factory.DefaultVariableFactoryRegistry;
 
 import use_case.variable.factory.VariableFactory;
@@ -39,6 +39,9 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
     // Factory registry so we can discover types
     private final DefaultVariableFactoryRegistry factoryRegistry;
 
+    // Callback for Auto-Save
+    private Runnable onChangeCallback;
+
     public VariableSectionPanel() {
         this.factoryRegistry = new DefaultVariableFactoryRegistry();
 
@@ -60,6 +63,9 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
         add(container, BorderLayout.CENTER);
     }
 
+    public void setOnChangeCallback(Runnable callback) {
+        this.onChangeCallback = callback;
+    }
 
     private JPanel createLocalVariableSection() {
         JPanel panel = PropertyPanelUtility.createSectionPanel("Local Variables");
@@ -452,6 +458,11 @@ public class VariableSectionPanel extends JPanel implements PropertyChangeListen
                 SwingUtilities.invokeLater(this::syncLocalFromViewModel);
             } else if (source == globalVariableViewModel) {
                 SwingUtilities.invokeLater(this::syncGlobalFromViewModel);
+            }
+
+            // Trigger Auto-Save!
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
             }
         }
     }

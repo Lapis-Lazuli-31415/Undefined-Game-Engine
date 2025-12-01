@@ -26,6 +26,11 @@ public class ChangeVisibilityAction extends Action{
         this("_", new BooleanValue(false));
     }
 
+    @Override
+    public String getActionType() {
+        return ACTION_TYPE;
+    }
+
     public String getGameObjectName() {
         return gameObjectName;
     }

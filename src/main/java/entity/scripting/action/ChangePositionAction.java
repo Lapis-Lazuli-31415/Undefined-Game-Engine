@@ -28,6 +28,11 @@ public class ChangePositionAction extends Action{
         this("_", new NumericValue(0), new NumericValue(0));
     }
 
+    @Override
+    public String getActionType() {
+        return ACTION_TYPE;
+    }
+
     public String getGameObjectName() {
         return gameObjectName;
     }

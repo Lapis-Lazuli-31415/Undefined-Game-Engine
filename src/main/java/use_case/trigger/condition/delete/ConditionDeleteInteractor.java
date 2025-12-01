@@ -1,6 +1,7 @@
 package use_case.trigger.condition.delete;
 
 import entity.GameObject;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 public class ConditionDeleteInteractor implements ConditionDeleteInputBoundary {
@@ -12,8 +13,8 @@ public class ConditionDeleteInteractor implements ConditionDeleteInputBoundary {
 
     @Override
     public void execute(ConditionDeleteInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int triggerIndex = inputData.getTriggerIndex();
         int conditionIndex = inputData.getConditionIndex();

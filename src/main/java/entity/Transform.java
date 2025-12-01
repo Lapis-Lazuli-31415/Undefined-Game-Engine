@@ -1,24 +1,45 @@
 package entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Vector;
 
 /**
  * Transform represents the spatial info of a GameObject:
  * position (x, y), rotation, and scale (scaleX, scaleY).
- *
- * This is in the Entity layer and must not depend on JavaFX.
  */
-
 public class Transform {
 
     private final Vector<Double> position;   // position[0] = x, position[1] = y
     private float rotation;
     private final Vector<Double> scale;
 
+    // Standard constructor
     public Transform(Vector<Double> position, float rotation, Vector<Double> scale) {
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
+    }
+
+    // JSON Constructor for Jackson
+    // This takes the flat JSON fields (x, y, etc.) and rebuilds the Vectors.
+    @JsonCreator
+    public Transform(@JsonProperty("x") double x,
+                     @JsonProperty("y") double y,
+                     @JsonProperty("rotation") float rotation,
+                     @JsonProperty("scale_x") double scaleX,
+                     @JsonProperty("scale_y") double scaleY) {
+        this.position = new Vector<>();
+        this.position.add(x);
+        this.position.add(y);
+
+        this.rotation = rotation;
+
+        this.scale = new Vector<>();
+        this.scale.add(scaleX);
+        this.scale.add(scaleY);
     }
 
     // --- Position access ---

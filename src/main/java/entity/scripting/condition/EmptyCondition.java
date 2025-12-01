@@ -4,10 +4,11 @@ import entity.scripting.environment.Environment;
 import entity.scripting.error.ParseSyntaxException;
 
 public class EmptyCondition extends Condition{
-    public static final String EVENT_TYPE = "Empty";
+    public static final String CONDITION_TYPE = "Empty";
 
-    public static String getEventType() {
-        return EVENT_TYPE;
+    @Override
+    public String getConditionType() {
+        return CONDITION_TYPE;
     }
 
     @Override

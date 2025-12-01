@@ -7,4 +7,6 @@ public interface SceneRepository {
     List<Scene> getAllScenes();
     Scene getSceneByName(String name);
     void saveScene(Scene scene);
+    void setCurrentScene(Scene scene);
+    Scene getCurrentScene();
 }

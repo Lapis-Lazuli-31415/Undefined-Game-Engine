@@ -4,7 +4,7 @@ import data_access.FileSystemSpriteDataAccessObject;
 import entity.AssetLib;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import use_case.Sprites.Import.*;
+import use_case.sprites.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

@@ -7,23 +7,22 @@ import java.awt.*;
 
 import interface_adapter.transform.TransformViewModel;
 import interface_adapter.transform.TransformController;
+import interface_adapter.trigger.TriggerManagerViewModel;
 import interface_adapter.variable.LocalVariableViewModel;
 import interface_adapter.variable.GlobalVariableViewModel;
-import interface_adapter.variable.UpdateVariableController;
-import interface_adapter.variable.DeleteVariableController;
+import interface_adapter.variable.update.UpdateVariableController;
+import interface_adapter.variable.delete.DeleteVariableController;
 import view.property.trigger.TriggerManagerPanel;
 
 public class PropertiesPanel extends JPanel {
 
-    // Sprite renderer
-    private JTextField imageField;
-
     // Section panels
     private final TransformSectionPanel transformSection;
-    private final TriggerManagerPanel triggerManagerPanel;
+    private final SpriteRendererSectionPanel spriteRendererSection;
+    private final TriggerManagerPanel triggerManagerSection;
     private final VariableSectionPanel variableSection;
 
-    public PropertiesPanel() {
+    public PropertiesPanel(TriggerManagerViewModel triggerManagerViewModel) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(45, 45, 45));
 
@@ -36,49 +35,36 @@ public class PropertiesPanel extends JPanel {
 
         // Initialize section panels
         transformSection = new TransformSectionPanel();
-        triggerManagerPanel = new TriggerManagerPanel();
+        spriteRendererSection = new SpriteRendererSectionPanel();
+        triggerManagerSection = new TriggerManagerPanel(triggerManagerViewModel);
         variableSection = new VariableSectionPanel();
 
         // Add sections
         add(Box.createVerticalStrut(10));
         add(transformSection);
         add(Box.createVerticalStrut(20));
-        add(createSpriteRendererSection());
+        add(spriteRendererSection);
         add(Box.createVerticalStrut(20));
-        add(triggerManagerPanel);
+        add(triggerManagerSection);
         add(Box.createVerticalStrut(20));
         add(variableSection);
         add(Box.createVerticalGlue());
     }
 
-    private JPanel createSpriteRendererSection() {
-        JPanel panel = createSectionPanel("Sprite Renderer");
-        GridBagConstraints gbc = baseGbc();
+    public void loadTriggerManager(entity.scripting.TriggerManager manager) {
+        if (triggerManagerSection != null) {
+            triggerManagerSection.loadTriggerManager(manager);
+        }
+    }
 
-        JLabel imgLabel = createFieldLabel("Image:");
-        panel.add(imgLabel, gbc);
+    public void setAutoSaveCallback(Runnable autoSaveCallback) {
+        // Pass callback to Trigger Manager
+        triggerManagerSection.setOnChangeCallback(autoSaveCallback);
 
-        gbc.gridx = 1;
-        imageField = new JTextField("bear.png");
-        imageField.setBackground(new Color(60, 60, 60));
-        imageField.setForeground(Color.WHITE);
-        imageField.setCaretColor(Color.WHITE);
-        imageField.setBorder(BorderFactory.createLineBorder(new Color(90, 90, 90)));
-        imageField.setEditable(false);
+        // Pass callback to Variable Section
+        variableSection.setOnChangeCallback(autoSaveCallback);
 
-        JButton browseButton = new JButton("...");
-        browseButton.setMargin(new Insets(0, 4, 0, 4));
-
-        JPanel row = new JPanel();
-        row.setOpaque(false);
-        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-        row.add(imageField);
-        row.add(Box.createHorizontalStrut(4));
-        row.add(browseButton);
-
-        panel.add(row, gbc);
-
-        return panel;
+        // Note: Transform callback is passed in the .bind() method separately
     }
 
     // ---------- helper UI methods ----------
@@ -95,39 +81,18 @@ public class PropertiesPanel extends JPanel {
         );
     }
 
-    private JPanel createSectionPanel(String title) {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setOpaque(false);
-        panel.setBorder(makeSectionBorder(title));
-        return panel;
-    }
-
-    private GridBagConstraints baseGbc() {
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 2, 2, 2);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        return gbc;
-    }
-
-    private JLabel createFieldLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setForeground(Color.WHITE);
-        label.setFont(label.getFont().deriveFont(Font.PLAIN, 11f));
-        return label;
-    }
-
-
-    public void bind(TransformViewModel viewModel,
-                     TransformController controller,
-                     Runnable onChangeCallback) {
+    public void bindTransform(TransformViewModel viewModel,
+                              TransformController controller,
+                              Runnable onChangeCallback) {
         transformSection.bind(viewModel, controller, onChangeCallback);
     }
 
-    // NEW: Separate setters for local and global ViewModels
+    public void bindSpriteRenderer(entity.GameObject gameObject,
+                                   interface_adapter.assets.AssetLibViewModel assetLibViewModel,
+                                   Runnable onChangeCallback) {
+        spriteRendererSection.bind(gameObject, assetLibViewModel, onChangeCallback);
+    }
+
     public void setLocalVariableViewModel(LocalVariableViewModel viewModel) {
         variableSection.setLocalVariableViewModel(viewModel);
     }
@@ -145,25 +110,25 @@ public class PropertiesPanel extends JPanel {
     }
 
     public String getSelectedEvent() {
-        return null;
+        return triggerManagerSection.getSelectedEvent();
     }
 
     public String getSelectedKey() {
-        return null;
+        return triggerManagerSection.getSelectedKey();
     }
 
     public java.util.List<String> getConditionTexts() {
-        return java.util.List.of();
+        return triggerManagerSection.getConditionTexts();
     }
 
     public java.util.List<String> getActionTexts() {
-        return java.util.List.of();
+        return triggerManagerSection.getActionTexts();
     }
 
     @Override
     public Dimension getPreferredSize() {
         Dimension naturalSize = super.getPreferredSize();
 
-        return new Dimension(300, naturalSize.height);
+        return new Dimension(290, naturalSize.height);
     }
 }

@@ -2,6 +2,7 @@ package use_case.trigger.condition.edit;
 
 import entity.GameObject;
 import entity.scripting.condition.Condition;
+import interface_adapter.EditorState;
 import use_case.trigger.condition.delete.ConditionDeleteOutputData;
 import view.HomeView;
 
@@ -14,8 +15,8 @@ public class ConditionEditInteractor implements ConditionEditInputBoundary{
 
     @Override
     public void execute(ConditionEditInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         int triggerIndex = inputData.getTriggerIndex();
         int conditionIndex = inputData.getConditionIndex();

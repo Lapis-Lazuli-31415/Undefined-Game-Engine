@@ -1,6 +1,7 @@
 package use_case.trigger.action.delete;
 
 import entity.GameObject;
+import interface_adapter.EditorState;
 import view.HomeView;
 
 public class ActionDeleteInteractor implements ActionDeleteInputBoundary {
@@ -13,8 +14,8 @@ public class ActionDeleteInteractor implements ActionDeleteInputBoundary {
 
     @Override
     public void execute(ActionDeleteInputData inputData) {
-        // TODO: Connect to the current editing GameObject
-        GameObject gameObject = HomeView.getDemoGameObject();
+
+        GameObject gameObject = EditorState.getCurrentGameObject();
 
         gameObject.getTriggerManager().getTrigger(inputData.getTriggerIndex()).deleteAction(inputData.getActionIndex());
 

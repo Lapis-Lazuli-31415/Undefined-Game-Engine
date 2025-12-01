@@ -8,7 +8,7 @@ import entity.scripting.expression.ExpressionFactory;
 import entity.scripting.expression.value.BooleanValue;
 
 public class BooleanComparisonCondition extends Condition {
-    public static final String EVENT_TYPE = "Boolean Comparison";
+    public static final String CONDITION_TYPE = "Boolean Comparison";
     private BooleanExpression left;
     private BooleanExpression right;
 
@@ -29,8 +29,17 @@ public class BooleanComparisonCondition extends Condition {
         this.right = right;
     }
 
-    public static String getEventType() {
-        return EVENT_TYPE;
+    public BooleanExpression getLeft() {
+        return left;
+    }
+
+    public BooleanExpression getRight() {
+        return right;
+    }
+
+    @Override
+    public String getConditionType() {
+        return CONDITION_TYPE;
     }
 
     @Override

@@ -1,51 +1,62 @@
 package entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import entity.scripting.environment.Environment;
-
 import java.util.ArrayList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-
-@JsonPropertyOrder({ "id", "name", "global_environment", "assets", "scenes" }) // force the order of keys in database.json
+// force the order of keys in database.json
+@JsonPropertyOrder({ "id", "name", "global_environment", "assets", "scenes" })
 public class Project {
 
-    private final String id;
-    private final String name;
-    private final ArrayList<Scene> scenes;
-    private final AssetLib assets;
-    private final GameController gameController;
+    private String id;
+    private String name;
+    private ArrayList<Scene> scenes;
+    private AssetLib assets;
+    private GameController gameController;
 
+    // JSON Constructor (Used by Jackson when loading)
+    // Takes 'global_environment' and wraps it in a new GameController
+    @JsonCreator
+    public Project(@JsonProperty("id") String id,
+                   @JsonProperty("name") String name,
+                   @JsonProperty("scenes") ArrayList<Scene> scenes,
+                   @JsonProperty("assets") AssetLib assets,
+                   @JsonProperty("global_environment") Environment globalEnv) {
+        this.id = id;
+        this.name = name;
+        this.scenes = scenes;
+        this.assets = assets;
+        this.gameController = new GameController(globalEnv != null ? globalEnv : new Environment());
+    }
+
+    // Manual Constructor
+    // Takes an existing GameController directly
     public Project(String id, String name, ArrayList<Scene> scenes, AssetLib assets, GameController gameController) {
         this.id = id;
         this.name = name;
         this.scenes = scenes;
         this.assets = assets;
-        Environment globalEnvironment = new Environment();
         this.gameController = gameController;
     }
-    public String getId() {
-        return id;
-    }
 
-    public String getName() {
-        return name;
-    }
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public ArrayList<Scene> getScenes() { return scenes; }
+    public AssetLib getAssets() { return assets; }
 
-    public ArrayList<Scene> getScenes() {
-        return scenes;
-    }
-    public AssetLib getAssets() {
-        return assets;
-    }
-
-    @JsonIgnore // stops "game_controller" from appearing in the file
+    @JsonIgnore
     public GameController getGameController() {
         return gameController;
     }
 
-    @JsonProperty("global_environment") // creates the "global_environment" key
+    public void setGameController(GameController gameController) {
+        this.gameController = gameController;
+    }
+
+    @JsonProperty("global_environment")
     public Environment getGlobalEnvironment() {
         if (gameController != null) {
             return gameController.getEnvironment();
@@ -53,12 +64,18 @@ public class Project {
         return null;
     }
 
+    // Jackson calls this when loading. It passes the 'env' from the file.
+    @JsonProperty("global_environment")
+    public void setGlobalEnvironment(Environment env) {
 
-    public void play() {
-        //
+        if (this.gameController == null) {
+            this.gameController = new GameController(env);
+        } else {
+            // Assuming GameController has a setEnvironment method.
+            // If not, you might need to add one to GameController.java!
+            this.gameController.setEnvironment(env);
+        }
     }
 
-    public void save(){
-        //
-    }
+    public void save() {}
 }

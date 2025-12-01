@@ -25,7 +25,8 @@ public class BooleanVariableAssignmentAction extends Action {
         this(new BooleanVariable("_", false), new BooleanValue(false));
     }
 
-    public static String getEventType() {
+    @Override
+    public String getActionType() {
         return ACTION_TYPE;
     }
 
