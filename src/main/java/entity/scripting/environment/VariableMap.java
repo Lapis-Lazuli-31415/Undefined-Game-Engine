@@ -1,6 +1,7 @@
 package entity.scripting.environment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.LinkedHashMap;
@@ -42,6 +43,7 @@ public class VariableMap<T> {
     }
 
     // to iterate through the variables
+    @JsonIgnore
     public Set<String> getNames() {
         return variables.keySet();
     }
