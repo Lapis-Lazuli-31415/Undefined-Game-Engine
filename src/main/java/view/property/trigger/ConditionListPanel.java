@@ -97,7 +97,6 @@ public class ConditionListPanel extends JPanel {
         JComboBox<String> typeBox = new JComboBox<>(availableTypes);
         PropertyPanelUtility.styleCombo(typeBox);
         typeBox.setSelectedItem(currentType);
-        System.out.println(triggerIndex + ", " +  conditionIndex + ", " + currentType);
 
         typeBox.addActionListener(e ->
                 conditionChangeController.execute(triggerIndex, conditionIndex, (String) typeBox.getSelectedItem())
