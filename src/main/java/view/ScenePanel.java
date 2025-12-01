@@ -53,6 +53,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
     // Bind the panel to a Scene entity
     public void setScene(Scene scene) {
         this.currentScene = scene;
+        EditorState.setCurrentScene(currentScene);
         repaint();
     }
 
