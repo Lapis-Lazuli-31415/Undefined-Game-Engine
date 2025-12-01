@@ -79,4 +79,19 @@ public class SpriteRenderer extends Property {
     public int getHeight() {
         return (this.sprite != null) ? this.sprite.getHeight() : 0;
     }
+    // --- Copy method for preview isolation ---
+
+    /**
+     * Create a deep copy of this SpriteRenderer.
+     * Note: The Image (sprite) is shared as it's immutable asset data.
+     *
+     * @return A new SpriteRenderer with copied state
+     */
+    public SpriteRenderer copy() {
+        SpriteRenderer copy = new SpriteRenderer(this.sprite, this.visible);
+        copy.setOpacity(this.opacity);
+        copy.zIndex = this.zIndex;
+        return copy;
+    }
+}
 }

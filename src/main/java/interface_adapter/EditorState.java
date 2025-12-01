@@ -3,6 +3,12 @@ package interface_adapter;
 import entity.Scene;
 import entity.GameObject;
 
+/**
+ * Global editor state management.
+ * Utility class with static methods only - not meant to be instantiated.
+ *
+ * @author Wanru Cheng
+ */
 public class EditorState {
 
     private static Scene currentScene;
