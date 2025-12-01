@@ -32,7 +32,6 @@ public class SpriteRenderer extends Property {
         this.zIndex = zIndex;
     }
 
-    @JsonIgnore // #TODO: IGNORE FOR NOW!! wait till misa does image
     public Image getSprite() {
         return sprite;
     }

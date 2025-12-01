@@ -1,5 +1,6 @@
 package entity.scripting.action;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import entity.Scene;
@@ -17,12 +18,15 @@ import entity.scripting.error.ParseSyntaxException;
         @JsonSubTypes.Type(value = WaitAction.class, name = "WaitAction"),
         @JsonSubTypes.Type(value = NumericVariableAssignmentAction.class, name = "AssignNumeric"),
         @JsonSubTypes.Type(value = BooleanVariableAssignmentAction.class, name = "AssignBoolean"),
-        @JsonSubTypes.Type(value = EmptyAction.class, name = "Empty")
+        @JsonSubTypes.Type(value = EmptyAction.class, name = "Empty"),
+        @JsonSubTypes.Type(value = ChangePositionAction.class, name = "ChangePositionAction"),
+        @JsonSubTypes.Type(value = ChangeVisibilityAction.class, name = "ChangeVisibilityAction")
 })
 public abstract class Action {
     public abstract void execute(Environment globalEnvironment, Environment localEnvironment,
                                  Scene scene) throws Exception;
     public abstract Action parse(String string) throws ParseSyntaxException;
     public abstract String format();
+    @JsonIgnore
     public abstract String getActionType();
 }
