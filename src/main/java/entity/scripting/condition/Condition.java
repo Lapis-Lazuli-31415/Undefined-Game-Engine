@@ -1,5 +1,6 @@
 package entity.scripting.condition;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import entity.scripting.environment.Environment;
@@ -21,5 +22,6 @@ public abstract class Condition {
     public abstract boolean evaluate(Environment globalEnvironment, Environment localEnvironment) throws Exception;
     public abstract Condition parse(String string) throws ParseSyntaxException;
     public abstract String format();
+    @JsonIgnore
     public abstract String getConditionType();
 }

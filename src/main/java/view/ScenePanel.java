@@ -111,7 +111,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             transformViewModel.getState().setX(transform.getX());
             transformViewModel.getState().setY(transform.getY());
             transformViewModel.getState().setRotation(transform.getRotation());
-            transformViewModel.getState().setScale(transform.getScaleX() * 100.0); // Assuming uniform scale
+            transformViewModel.getState().setScale(transform.getScaleX() ); // Assuming uniform scale
 
             transformViewModel.firePropertyChange();
 
@@ -348,7 +348,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         transform.setX(state.getX());
         transform.setY(state.getY());
 
-        double scaleValue = state.getScale() / 100.0;
+        double scaleValue = state.getScale();
         transform.setScaleX(scaleValue);
         transform.setScaleY(scaleValue);
         transform.setRotation(state.getRotation());
