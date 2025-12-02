@@ -483,8 +483,8 @@ public class GameCanvas extends JPanel {
         }
 
         // Apply scale (uniform scale like ScenePanel)
-        int drawW = (int) (spriteW * transform.getScaleX());
-        int drawH = (int) (spriteH * transform.getScaleY());
+        int drawW = (int) (spriteW * transform.getScaleX() / 10);
+        int drawH = (int) (spriteH * transform.getScaleY() / 10);
 
         // Use CENTER-BASED coordinate system (same as ScenePanel)
         int panelW = getWidth();
