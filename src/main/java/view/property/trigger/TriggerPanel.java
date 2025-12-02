@@ -19,7 +19,8 @@ public class TriggerPanel extends JPanel {
             TriggerManagerViewModel triggerManagerViewModel,
             ConditionEditorViewModel conditionEditorViewModel,
             ActionEditorViewModel actionEditorViewModel,
-            TriggerUseCaseFactory factory) {
+            TriggerUseCaseFactory factory,
+            Runnable onChangeCallback) {
 
         triggerDeleteController = factory.createTriggerDeleteController();
 
@@ -53,12 +54,13 @@ public class TriggerPanel extends JPanel {
         // Row 2
         contentGbc.gridy = 2;
         add(new ConditionListPanel(triggerIndex, triggerManagerViewModel,
-                conditionEditorViewModel, factory), contentGbc);
+                conditionEditorViewModel, factory, onChangeCallback), contentGbc);
 
         // 5. Actions Section
         // Row 3
         contentGbc.gridy = 3;
         // Use weightY if you want this to expand, otherwise default is fine
-        add(new ActionListPanel(triggerIndex, triggerManagerViewModel, actionEditorViewModel, factory), contentGbc);
+        add(new ActionListPanel(triggerIndex, triggerManagerViewModel,
+                actionEditorViewModel, factory, onChangeCallback), contentGbc);
     }
 }

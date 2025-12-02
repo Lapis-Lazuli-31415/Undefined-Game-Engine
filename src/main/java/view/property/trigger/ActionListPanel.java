@@ -29,7 +29,8 @@ public class ActionListPanel extends JPanel {
     public ActionListPanel(int triggerIndex,
                            TriggerManagerViewModel viewModel,
                            ActionEditorViewModel actionEditorViewModel,
-                           TriggerUseCaseFactory triggerUseCaseFactory) {
+                           TriggerUseCaseFactory triggerUseCaseFactory,
+                           Runnable onChangeCallback) {
 
         // Initialize triggerUseCaseFactory (or pass it in if available in your architecture)
         actionFactory = triggerUseCaseFactory.getActionFactory();
@@ -68,7 +69,8 @@ public class ActionListPanel extends JPanel {
         // Populate the list
         for (int i = 0; i < actions.size(); i++) {
             String actionType = actions.get(i);
-            JPanel row = createActionRow(triggerIndex, i, actionType, actionEditorViewModel, triggerUseCaseFactory);
+            JPanel row = createActionRow(triggerIndex, i, actionType, actionEditorViewModel,
+                    triggerUseCaseFactory, onChangeCallback);
 
             listContainer.add(row);
             listContainer.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -87,7 +89,8 @@ public class ActionListPanel extends JPanel {
      * Creates a single row for an action: [Dropdown] [Edit Button] [Delete Button]
      */
     private JPanel createActionRow(int triggerIndex, int actionIndex, String currentType,
-                                   ActionEditorViewModel viewModel, TriggerUseCaseFactory factory) {
+                                   ActionEditorViewModel viewModel, TriggerUseCaseFactory factory,
+                                   Runnable onChangeCallback) {
         JPanel row = new JPanel(new GridBagLayout());
         row.setOpaque(false);
 
@@ -130,7 +133,8 @@ public class ActionListPanel extends JPanel {
                     actionIndex,
                     script,
                     viewModel,
-                    factory
+                    factory,
+                    onChangeCallback
             );
             dialog.setVisible(true);
         });
