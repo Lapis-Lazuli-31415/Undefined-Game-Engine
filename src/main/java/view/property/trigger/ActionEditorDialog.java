@@ -19,26 +19,27 @@ public class ActionEditorDialog extends JDialog implements PropertyChangeListene
     private final JTextArea scriptArea;
     private final ActionEditorViewModel actionEditorViewModel;
     private final ActionEditSaveController actionEditSaveController;
-    private final int triggerIndex;
-    private final int actionIndex;
 
     // Flag to prevent reacting to events before Save is clicked (fixes the "Ghost Popup" issue)
     private boolean isSaveClicked = false;
+
+    // NEW: Callback for auto-save
+    private final Runnable onChangeCallback;
 
     public ActionEditorDialog(Window owner,
                               int triggerIndex,
                               int actionIndex,
                               String initialScript,
                               ActionEditorViewModel actionEditorViewModel,
-                              TriggerUseCaseFactory triggerUseCaseFactory) {
+                              TriggerUseCaseFactory triggerUseCaseFactory,
+                              Runnable onChangeCallback) {
         super(owner, "Action Editor", ModalityType.APPLICATION_MODAL);
-        this.triggerIndex = triggerIndex;
-        this.actionIndex = actionIndex;
         this.actionEditorViewModel = actionEditorViewModel;
         this.actionEditSaveController = triggerUseCaseFactory.createActionEditSaveController();
 
         // Register Listener
         this.actionEditorViewModel.addPropertyChangeListener(this);
+        this.onChangeCallback = onChangeCallback;
 
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(45, 45, 45));
@@ -197,6 +198,10 @@ public class ActionEditorDialog extends JDialog implements PropertyChangeListene
                     JOptionPane.INFORMATION_MESSAGE);
 
             actionEditorViewModel.removePropertyChangeListener(this);
+            // NEW: Trigger the callback whenever state changes
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
             dispose();
         }
     }

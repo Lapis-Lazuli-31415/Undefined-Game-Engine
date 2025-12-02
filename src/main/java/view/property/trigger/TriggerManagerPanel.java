@@ -100,14 +100,13 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         }
     }
 
-    // ... (Keep the rest of the file: refresh(), methods, etc.) ...
     private void refresh() {
         triggerListPanel.removeAll();
 
         TriggerManagerState state = triggerManagerViewModel.getState();
         for (int i = 0; i < state.getTriggerCount(); i++) {
             TriggerPanel panel = new TriggerPanel(i, triggerManagerViewModel,
-                    conditionEditorViewModel, actionEditorViewModel, triggerUseCaseFactory);
+                    conditionEditorViewModel, actionEditorViewModel, triggerUseCaseFactory, onChangeCallback);
             panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
 
             triggerListPanel.add(panel);

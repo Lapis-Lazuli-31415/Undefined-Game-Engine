@@ -27,7 +27,8 @@ public class ConditionListPanel extends JPanel {
     public ConditionListPanel(int triggerIndex,
                               TriggerManagerViewModel triggerManagerViewModel,
                               ConditionEditorViewModel conditionEditorViewModel,
-                              TriggerUseCaseFactory triggerUseCaseFactory) {
+                              TriggerUseCaseFactory triggerUseCaseFactory,
+                              Runnable onChangeCallback) {
 
         // Initialize triggerUseCaseFactory
         conditionFactory = triggerUseCaseFactory.getConditionFactory();
@@ -67,7 +68,7 @@ public class ConditionListPanel extends JPanel {
         for (int i = 0; i < conditions.size(); i++) {
             String conditionType = conditions.get(i);
             JPanel row = createConditionRow(triggerIndex, i, conditionType,
-                    conditionEditorViewModel, triggerUseCaseFactory);
+                    conditionEditorViewModel, triggerUseCaseFactory, onChangeCallback);
 
             listContainer.add(row);
             listContainer.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -84,7 +85,7 @@ public class ConditionListPanel extends JPanel {
 
     private JPanel createConditionRow(int triggerIndex, int conditionIndex,
                                       String currentType, ConditionEditorViewModel viewModel,
-                                      TriggerUseCaseFactory factory) {
+                                      TriggerUseCaseFactory factory, Runnable onChangeCallback) {
         JPanel row = new JPanel(new GridBagLayout());
         row.setOpaque(false);
 
@@ -97,7 +98,6 @@ public class ConditionListPanel extends JPanel {
         JComboBox<String> typeBox = new JComboBox<>(availableTypes);
         PropertyPanelUtility.styleCombo(typeBox);
         typeBox.setSelectedItem(currentType);
-        System.out.println(triggerIndex + ", " +  conditionIndex + ", " + currentType);
 
         typeBox.addActionListener(e ->
                 conditionChangeController.execute(triggerIndex, conditionIndex, (String) typeBox.getSelectedItem())
@@ -121,7 +121,8 @@ public class ConditionListPanel extends JPanel {
                     conditionIndex,
                     script,
                     viewModel,
-                    factory
+                    factory,
+                    onChangeCallback
             );
             dialog.setVisible(true);
         });

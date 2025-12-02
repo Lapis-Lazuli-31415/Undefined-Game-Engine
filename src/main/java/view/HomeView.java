@@ -162,10 +162,6 @@ public class HomeView extends javax.swing.JFrame {
             this.assetLibViewModel.setState(this.currentProject.getAssets());
 
             if (!this.currentScene.getGameObjects().isEmpty()) {
-                for (GameObject gameObject : this.currentScene.getGameObjects()) {
-                    System.out.println(gameObject.getName());
-                    System.out.println("2");
-                }
                 //DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
                 //System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
                 this.currentlySelectedObject = this.currentScene.getGameObjects().get(0);
