@@ -103,4 +103,34 @@ You can play the game instantly to test your logic.
 - This project utilizes the Unsplash API to fetch images that can be used within the game engine. 
   - Link to documentation: [Unsplash API Documentation](https://unsplash.com/documentation). 
   - DONT FORGET TO CONFIGURE YOUR API KEY SO THAT ALL FEATURES WORK AS INTENDED
+## Software Design Principles
 
+### 1. Open–Closed Principle (OCP) & Extensibility
+**Goal:** Enable future developers to add gameplay capabilities (Conditions, Actions, Expressions) without modifying existing code.
+
+* **Abstract Base Classes:** The system uses abstract classes to define the required behavior for all gameplay logic elements.
+    * **Implementation:** Every specific logic type inherits from one of these base abstractions:
+        * `Condition` (e.g., `NumericComparisonCondition`)
+        * `Action` (e.g., `WaitAction`, `ChangeVisibilityAction`)
+        * `Expression` (e.g., `NumericExpression`)
+
+* **Factory Design Pattern:** Factories are used to manage the creation of these objects dynamically.
+    * **Registry Map:** Each factory (`ConditionFactory`, `ActionFactory`, `DefaultVariableFactoryRegistry`) maintains a map pairing a unique name (key) with a supplier function (value).
+    * **Functionality:**
+        * Automatically lists available types for the Editor UI to populate menus.
+        * Constructs the correct instance based on user selection without hardcoded `switch` statements in the client code.
+    * **Reference:** See `ConditionFactory` and `ActionFactory`.
+
+* **Workflow for New Features:**
+    1.  **Inherit:** Create a new subclass extending the appropriate abstract base class.
+    2.  **Register:** Add the new type to the Factory’s registry map.
+    * **Result:** The system is **open for extension** (new features can be added) but **closed for modification** (core logic remains untouched).
+
+### 2. Single Responsibility Principle (SRP) & Architecture
+**Context:** Adherence to SRP is a direct result of implementing **Clean Architecture**.
+
+* **Separation of Concerns:** Business logic is strictly separated into distinct Use Case classes, preventing "God classes" that handle too many responsibilities.
+* **Granular Use Cases:** Operations are broken down into specific classes:
+    * **Trigger Management:** Handled by specific interactors like `TriggerCreateInteractor` and `TriggerDeleteInteractor`.
+    * **Scene Management:** Split into isolated actions such as `CreateSceneInteractor`, `ListScenesInteractor`, and `SelectSceneInteractor`.
+## Screenshots/DEMO
