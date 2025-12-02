@@ -2,14 +2,8 @@ package use_case.trigger.event.parameter_change;
 
 import entity.GameObject;
 import entity.scripting.Trigger;
-import entity.scripting.event.DefaultEventFactory;
 import entity.scripting.event.Event;
-import entity.scripting.event.EventFactory;
 import interface_adapter.EditorState;
-import use_case.trigger.event.change.EventChangeInputData;
-import use_case.trigger.event.change.EventChangeOutputBoundary;
-import use_case.trigger.event.change.EventChangeOutputData;
-import view.HomeView;
 
 public class EventParameterChangeInteractor implements EventParameterChangeInputBoundary{
     private final EventParameterChangeOutputBoundary eventParameterChangePresenter;

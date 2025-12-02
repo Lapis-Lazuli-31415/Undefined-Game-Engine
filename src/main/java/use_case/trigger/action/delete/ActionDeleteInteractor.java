@@ -2,7 +2,6 @@ package use_case.trigger.action.delete;
 
 import entity.GameObject;
 import interface_adapter.EditorState;
-import view.HomeView;
 
 public class ActionDeleteInteractor implements ActionDeleteInputBoundary {
 

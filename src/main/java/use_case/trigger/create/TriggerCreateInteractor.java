@@ -4,12 +4,9 @@ import entity.GameObject;
 import entity.scripting.Trigger;
 import entity.scripting.event.EmptyEvent;
 import interface_adapter.EditorState;
-import view.HomeView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 
-public class TriggerCreateInteractor implements ConditionCreateInputBoundary {
+public class TriggerCreateInteractor implements TriggerCreateInputBoundary {
     private final TriggerCreateOutputBoundary triggerCreatePresenter;
 
     public TriggerCreateInteractor(TriggerCreateOutputBoundary triggerCreatePresenter){

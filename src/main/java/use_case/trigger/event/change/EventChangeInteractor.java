@@ -2,11 +2,9 @@ package use_case.trigger.event.change;
 
 import entity.GameObject;
 import entity.scripting.Trigger;
-import entity.scripting.event.DefaultEventFactory;
 import entity.scripting.event.Event;
 import entity.scripting.event.EventFactory;
 import interface_adapter.EditorState;
-import view.HomeView;
 
 
 public class EventChangeInteractor implements EventChangeInputBoundary {
