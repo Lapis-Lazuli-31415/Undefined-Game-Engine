@@ -366,7 +366,6 @@ public class HomeView extends javax.swing.JFrame {
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(new JMenu("Project"));
         menuBar.add(new JMenu("Scene"));
-        menuBar.add(new JMenu("Save"));
         menuBar.add(new JMenu("Help"));
         setJMenuBar(menuBar);
 
@@ -919,9 +918,6 @@ public class HomeView extends javax.swing.JFrame {
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      */
     private Scene getCurrentScene() {
-//        if (editorState == null) {
-//            return null;
-//        }
         return editorState.getCurrentScene();
 //        return createTestScene();
     }

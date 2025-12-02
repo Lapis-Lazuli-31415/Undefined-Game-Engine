@@ -4,8 +4,7 @@ import entity.Scene;
 import entity.GameObject;
 import entity.scripting.environment.Environment;
 import entity.scripting.TriggerManager;
-import interface_adapter.preview.EventListenerFactory;
-import view.InputManager;
+import app.EventListenerFactory;
 
 import javax.swing.*;
 import java.awt.*;
