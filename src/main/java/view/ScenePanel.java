@@ -111,7 +111,7 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             transformViewModel.getState().setX(transform.getX());
             transformViewModel.getState().setY(transform.getY());
             transformViewModel.getState().setRotation(transform.getRotation());
-            transformViewModel.getState().setScale(transform.getScaleX() ); // Assuming uniform scale
+            transformViewModel.getState().setScale(transform.getScaleX()); // Assuming uniform scale
 
             transformViewModel.firePropertyChange();
 
@@ -205,8 +205,8 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
         int spriteW = spriteRenderer.getWidth();
         int spriteH = spriteRenderer.getHeight();
 
-        int drawW = (int) (spriteW * transform.getScaleX());
-        int drawH = (int) (spriteH * transform.getScaleY());
+        int drawW = (int) (spriteW * transform.getScaleX() / 10);
+        int drawH = (int) (spriteH * transform.getScaleY() / 10);
 
         int panelW = getWidth();
         int panelH = getHeight();
@@ -300,8 +300,8 @@ public class ScenePanel extends JPanel implements PropertyChangeListener {
             float rotationDeg = transform.getRotation();
             int spriteW = spriteRenderer.getWidth();
             int spriteH = spriteRenderer.getHeight();
-            int drawW = (int) (spriteW * transform.getScaleX());
-            int drawH = (int) (spriteH * transform.getScaleY());
+            int drawW = (int) (spriteW * transform.getScaleX() / 10);
+            int drawH = (int) (spriteH * transform.getScaleY() / 10);
 
             int centerX = (panelW - drawW) / 2;
             int centerY = (panelH - drawH) / 2;
