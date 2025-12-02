@@ -6,7 +6,7 @@ import entity.scripting.TriggerManager;
 import entity.scripting.event.OnClickEvent;
 import entity.event_listener.ClickListener;
 import entity.scripting.environment.Environment;
-import interface_adapter.preview.EventListenerFactory;
+import app.EventListenerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -92,7 +92,6 @@ public class GameCanvas extends JPanel {
         clickListeners.clear();
 
         if (useButtonMode) {
-            // ✅ 使用 scene 如果可用，否则用 gameObjects
             ArrayList<GameObject> objsToProcess = (scene != null)
                     ? new ArrayList<>(scene.getGameObjects())
                     : gameObjects;
@@ -296,8 +295,7 @@ public class GameCanvas extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Update InputManager with current canvas size
-// Update InputManager with current canvas size
+
         // Update InputManager with current canvas size
         if (inputManager != null) {
             inputManager.setCanvasDimensions(getWidth(), getHeight());
@@ -323,13 +321,13 @@ public class GameCanvas extends JPanel {
      * @param g2d Graphics2D context
      */
     private void renderGameObjects(Graphics2D g2d) {
-        // ✅ 使用 scene 而不是 gameObjects！
+
         if (scene == null || scene.getGameObjects() == null) {
             return;
         }
 
         // Create a copy and sort by zIndex
-        ArrayList<GameObject> sortedObjects = new ArrayList<>(scene.getGameObjects());  // ✅ 从scene获取
+        ArrayList<GameObject> sortedObjects = new ArrayList<>(scene.getGameObjects());
         sortedObjects.sort((a, b) -> {
             int zA = getZIndex(a);
             int zB = getZIndex(b);
@@ -356,102 +354,6 @@ public class GameCanvas extends JPanel {
         return 0;  // Default zIndex
     }
 
-//    /**
-//     * Render a single game object (SPRITE MODE).
-//     * Uses the SAME coordinate system as ScenePanel (center-based).
-//     *
-//     * @param g2d Graphics2D context
-//     * @param obj The game object
-//     */
-//    private void renderGameObject(Graphics2D g2d, GameObject obj) {
-//        if (!obj.isActive()) {
-//            return;
-//        }
-//
-//        Transform transform = obj.getTransform();
-//        if (transform == null) return;
-//
-//        SpriteRenderer spriteRenderer = getSpriteRenderer(obj);
-//
-//        if (spriteRenderer != null && !spriteRenderer.getVisible()) {
-//            return;
-//        }
-//
-//// NEW CODE - check if sprite is null before getting dimensions
-//        int spriteW = 50;  // default
-//        int spriteH = 50;  // default
-//
-//        if (spriteRenderer != null && spriteRenderer.getSprite() != null) {
-//            spriteW = spriteRenderer.getWidth();
-//            spriteH = spriteRenderer.getHeight();
-//        }
-//
-//        // Apply scale (uniform scale like ScenePanel)
-//        int drawW = (int) (spriteW * transform.getScaleX());
-//        int drawH = (int) (spriteH * transform.getScaleY());
-//
-//        // ✅ Use CENTER-BASED coordinate system (same as ScenePanel)
-//        int panelW = getWidth();
-//        int panelH = getHeight();
-//
-//        int centerX = (panelW - drawW) / 2;
-//        int centerY = (panelH - drawH) / 2;
-//
-//        int drawX = centerX + (int) transform.getX();
-//        int drawY = centerY + (int) transform.getY();
-//
-//        // ✅ Support rotation (same as ScenePanel)
-//        Graphics2D g2Copy = (Graphics2D) g2d.create();
-//        try {
-//            float rotationDeg = transform.getRotation();
-//            double theta = Math.toRadians(rotationDeg);
-//            double pivotX = drawX + drawW / 2.0;
-//            double pivotY = drawY + drawH / 2.0;
-//
-//            g2Copy.rotate(theta, pivotX, pivotY);
-//
-//            // Draw sprite or placeholder
-//            if (spriteRenderer != null && spriteRenderer.getSprite() != null) {
-//                // Has actual sprite image
-//                try {
-//                    entity.Image spriteImage = spriteRenderer.getSprite();
-//                    String filePath = spriteImage.getLocalpath().toString();
-//                    Image image = new ImageIcon(filePath).getImage();
-//
-//                    if (image != null) {
-//                        // Apply opacity
-//                        float opacity = spriteRenderer.getOpacity() / 100.0f;
-//                        g2Copy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-//
-//                        g2Copy.drawImage(image, drawX, drawY, drawW, drawH, this);
-//                    }
-//                } catch (Exception ex) {
-//                    // Fallback to gray rectangle if image fails
-//                    g2Copy.setColor(Color.GRAY);
-//                    g2Copy.fillRect(drawX, drawY, drawW, drawH);
-//                }
-//            } else {
-//                // No sprite - draw gray placeholder (for testing)
-//                g2Copy.setColor(Color.GRAY);
-//                g2Copy.fillRect(drawX, drawY, drawW, drawH);
-//            }
-//
-//            // Draw bounding box (debug mode)
-//            if (showBoundingBoxes) {
-//                g2Copy.setColor(Color.GREEN);
-//                g2Copy.setStroke(new BasicStroke(2));
-//                g2Copy.drawRect(drawX, drawY, drawW, drawH);
-//            }
-//
-//            // Draw object name
-//            g2Copy.setColor(Color.WHITE);
-//            g2Copy.setFont(new Font("Arial", Font.PLAIN, 12));
-//            g2Copy.drawString(obj.getName(), drawX, drawY - 5);
-//
-//        } finally {
-//            g2Copy.dispose();
-//        }
-//    }
     /**
      * Render a single game object (SPRITE MODE).
      * Uses the SAME coordinate system as ScenePanel (center-based).
@@ -483,8 +385,8 @@ public class GameCanvas extends JPanel {
         }
 
         // Apply scale (uniform scale like ScenePanel)
-        int drawW = (int) (spriteW * transform.getScaleX());
-        int drawH = (int) (spriteH * transform.getScaleY());
+        int drawW = (int) (spriteW * transform.getScaleX() / 10);
+        int drawH = (int) (spriteH * transform.getScaleY() / 10);
 
         // Use CENTER-BASED coordinate system (same as ScenePanel)
         int panelW = getWidth();
@@ -494,7 +396,7 @@ public class GameCanvas extends JPanel {
         int centerY = (panelH - drawH) / 2;
 
         int drawX = centerX + (int) transform.getX();
-        int drawY = centerY + (int) transform.getY();
+        int drawY = centerY - (int) transform.getY();
 
         // Support rotation (same as ScenePanel)
         Graphics2D g2Copy = (Graphics2D) g2d.create();
@@ -632,7 +534,7 @@ public class GameCanvas extends JPanel {
      */
     public void setScene(Scene scene) {
         this.scene = scene;
-        repaint();  // ✅ This works because GameCanvas extends JPanel
+        repaint();
     }
 
     public Scene getScene() {

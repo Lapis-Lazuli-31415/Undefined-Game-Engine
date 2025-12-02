@@ -18,7 +18,7 @@ public class BooleanVariable extends Variable<Boolean> implements BooleanExpress
 
     @JsonCreator
     public BooleanVariable(@JsonProperty("name") String name,
-                           @JsonProperty("isGlobal") boolean isGlobal) {
+                           @JsonProperty("global") boolean isGlobal) {
         super(name, isGlobal);
     }
 

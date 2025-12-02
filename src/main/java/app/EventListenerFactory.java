@@ -1,4 +1,4 @@
-package interface_adapter.preview;
+package app;
 
 import entity.GameObject;
 import entity.InputState;

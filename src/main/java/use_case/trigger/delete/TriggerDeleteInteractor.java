@@ -2,7 +2,6 @@ package use_case.trigger.delete;
 
 import entity.GameObject;
 import interface_adapter.EditorState;
-import view.HomeView;
 
 public class TriggerDeleteInteractor implements TriggerDeleteInputBoundary {
     private final TriggerDeleteOutputBoundary triggerDeletePresenter;

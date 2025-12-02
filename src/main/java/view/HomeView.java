@@ -114,6 +114,8 @@ public class HomeView extends javax.swing.JFrame {
     public static GameObject getDemoGameObject() {
         return DEMO_OBJECT;
     }
+    private GameObject currentlySelectedObject;
+
 
     public HomeView(
             interface_adapter.assets.AssetLibViewModel assetLibViewModel,
@@ -160,11 +162,16 @@ public class HomeView extends javax.swing.JFrame {
             this.assetLibViewModel.setState(this.currentProject.getAssets());
 
             if (!this.currentScene.getGameObjects().isEmpty()) {
-                DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
-                System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
+                //DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
+                //System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
+                this.currentlySelectedObject = this.currentScene.getGameObjects().get(0);
+                System.out.println("Selected object from save: " + this.currentlySelectedObject.getName());
+
             } else {
-                DEMO_OBJECT = createDefaultGameObject();
-                this.currentScene.getGameObjects().add(DEMO_OBJECT);
+//                DEMO_OBJECT = createDefaultGameObject();
+//                this.currentScene.getGameObjects().add(DEMO_OBJECT);
+                this.currentlySelectedObject = null;
+                System.out.println("No objects in scene");
             }
 
         } else {
@@ -176,8 +183,10 @@ public class HomeView extends javax.swing.JFrame {
 
             this.currentProject = new Project("proj-1", "My Game Project", scenes, assetLibViewModel.getAssetLib(), gameController);
 
-            DEMO_OBJECT = createDefaultGameObject();
-            this.currentScene.getGameObjects().add(DEMO_OBJECT);
+//            DEMO_OBJECT = createDefaultGameObject();
+//            this.currentScene.getGameObjects().add(DEMO_OBJECT);
+            this.currentlySelectedObject = null;
+            System.out.println("Created new project with empty scene");
         }
 
         // 2. INITIALIZE SAVE SYSTEM
@@ -206,13 +215,26 @@ public class HomeView extends javax.swing.JFrame {
         return new GameObject(
                 "demo-1", "Demo Sprite", true, null,
                 new Transform(new Vector<>(Arrays.asList(0.0, 0.0)), 0f, new Vector<>(Arrays.asList(1.0, 1.0))),
-                new TriggerManager()
+                null, new TriggerManager()
         );
     }
 
     private void rewireLocalVariablesFor(GameObject target) {
         if (target == null) {
-            target = DEMO_OBJECT;
+            VariableUseCaseFactory.VariableWiring wiring =
+                    VariableUseCaseFactory.create(globalEnvironment, new Environment(), globalVariableViewModel);
+
+            localVariableViewModel = wiring.getLocalViewModel();
+            updateVariableController = wiring.getUpdateController();
+            deleteVariableController = wiring.getDeleteController();
+            getAllVariablesController = wiring.getGetAllController();
+
+            if (propertiesPanel instanceof PropertiesPanel props) {
+                props.setLocalVariableViewModel(localVariableViewModel);
+                props.setVariableController(updateVariableController);
+                props.setDeleteVariableController(deleteVariableController);
+            }
+            getAllVariablesController.refreshGlobalVariables();
         }
 
         Environment localEnv = target.getEnvironment();
@@ -237,6 +259,47 @@ public class HomeView extends javax.swing.JFrame {
 
         getAllVariablesController.refreshGlobalVariables();
         getAllVariablesController.refreshLocalVariables();
+    }
+
+    private void rewireTransformFor(GameObject target) {
+        if (target == null){
+            transformController = null;
+            if (propertiesPanel instanceof PropertiesPanel props) {
+                props.bindTransform(transformViewModel, null, () -> scenePanel.repaint());
+            }
+            return;
+        }
+        Transform transform = target.getTransform();
+        if (transform == null) {
+            Vector<Double> pos = new Vector<>();
+            pos.add(0.0);
+            pos.add(0.0);
+            Vector<Double> scale = new Vector<>();
+            scale.add(1.0);
+            scale.add(1.0);
+            transform = new Transform(pos, 0f, scale);
+            target.setTransform(transform);
+        }
+
+        transformController = TransformUseCaseFactory.create(target, transformViewModel);
+
+        transformController.updateTransform(
+                transform.getX(),
+                transform.getY(),
+                transform.getScaleX(),
+                transform.getRotation()
+        );
+
+        if (propertiesPanel instanceof PropertiesPanel props) {
+            props.bindTransform(
+                    transformViewModel,
+                    transformController,
+                    () -> {
+                        scenePanel.repaint();
+                        triggerAutoSave();
+                    }
+            );
+        }
     }
 
     private void triggerAutoSave() {
@@ -303,7 +366,6 @@ public class HomeView extends javax.swing.JFrame {
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(new JMenu("Project"));
         menuBar.add(new JMenu("Scene"));
-        menuBar.add(new JMenu("Save"));
         menuBar.add(new JMenu("Help"));
         setJMenuBar(menuBar);
 
@@ -423,27 +485,31 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.setBorder(null);
 
         // ====== ENTITY + LAYERS WIRING ======
-        Transform transform = DEMO_OBJECT.getTransform();
-        if (transform == null) {
-            java.util.Vector<Double> pos = new java.util.Vector<>(); pos.add(0.0); pos.add(0.0);
-            java.util.Vector<Double> scale = new java.util.Vector<>(); scale.add(1.0); scale.add(1.0);
-            transform = new Transform(pos, 0f, scale);
-            DEMO_OBJECT.setTransform(transform);
-        }
+//        Transform transform = DEMO_OBJECT.getTransform();
+//        if (transform == null) {
+//            java.util.Vector<Double> pos = new java.util.Vector<>(); pos.add(0.0); pos.add(0.0);
+//            java.util.Vector<Double> scale = new java.util.Vector<>(); scale.add(1.0); scale.add(1.0);
+//            transform = new Transform(pos, 0f, scale);
+//            DEMO_OBJECT.setTransform(transform);
+//        }
 
         transformViewModel = new TransformViewModel();
-        transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
+        // transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
         scenePanel = new ScenePanel(transformViewModel, triggerManagerViewModel);
         scenePanel.setScene(currentScene);
         scenePanel.setOnSceneChangeCallback(() -> triggerAutoSave());
 
-        transformController.updateTransform(
-                transform.getX(),
-                transform.getY(),
-                transform.getScaleX(),
-                transform.getRotation()
-        );
+//        transformController.updateTransform(
+//                transform.getX(),
+//                transform.getY(),
+//                transform.getScaleX(),
+//                transform.getRotation()
+//        );
+
+        if (currentlySelectedObject != null){
+            rewireTransformFor(currentlySelectedObject);
+        }
 
         centerPanel.add(tabBar, BorderLayout.NORTH);
         centerPanel.add(scenePanel, BorderLayout.CENTER);
@@ -461,56 +527,76 @@ public class HomeView extends javax.swing.JFrame {
                     }
             );
             props.setAutoSaveCallback(() -> triggerAutoSave());
-
-            if (DEMO_OBJECT != null && DEMO_OBJECT.getTriggerManager() != null) {
-                System.out.println("Loading triggers for: " + DEMO_OBJECT.getName());
-                props.loadTriggerManager(DEMO_OBJECT.getTriggerManager());
-            }
         }
 
         // rewire variables when selection changes
         scenePanel.setOnSelectionChangeCallback(() -> {
             GameObject selectedObject = scenePanel.getSelectedObject();
 
-            // Rewire variables for the newly selected object
-            rewireLocalVariablesFor(selectedObject);
+            this.currentlySelectedObject = selectedObject;
+            if (selectedObject != null){
+                rewireTransformFor(selectedObject);
+                rewireLocalVariablesFor(selectedObject);
 
-            // Also update sprite renderer binding
-            if (propertiesPanel instanceof PropertiesPanel props && selectedObject != null) {
-                props.bindSpriteRenderer(selectedObject, assetLibViewModel, () -> {
-                    scenePanel.repaint();
-                    triggerAutoSave();
-                });
-                if (selectedObject.getTriggerManager() != null) {
-                    props.loadTriggerManager(selectedObject.getTriggerManager());
+                // Also update sprite renderer binding
+                if (propertiesPanel instanceof PropertiesPanel props) {
+                    props.bindSpriteRenderer(selectedObject, assetLibViewModel, () -> {
+                        scenePanel.repaint();
+                        triggerAutoSave();
+                    });
                 }
+            } else {
+                rewireTransformFor(null);
+                rewireLocalVariablesFor(null);
             }
+
         });
 
         // Variable Wiring
-        if (DEMO_OBJECT.getEnvironment() == null) {
-            DEMO_OBJECT.setEnvironment(new Environment());
+        if (currentlySelectedObject != null) {
+            if (currentlySelectedObject.getEnvironment() == null) {
+                currentlySelectedObject.setEnvironment(new Environment());
+            }
+            Environment localEnvironment = currentlySelectedObject.getEnvironment();
+
+            VariableUseCaseFactory.VariableWiring variableWiring =
+                    VariableUseCaseFactory.create(globalEnvironment, localEnvironment, null);
+
+            globalVariableViewModel = variableWiring.getGlobalViewModel();
+            localVariableViewModel = variableWiring.getLocalViewModel();
+            updateVariableController = variableWiring.getUpdateController();
+            deleteVariableController = variableWiring.getDeleteController();
+            getAllVariablesController = variableWiring.getGetAllController();
+
+            if (propertiesPanel instanceof PropertiesPanel props) {
+                props.setLocalVariableViewModel(localVariableViewModel);
+                props.setGlobalVariableViewModel(globalVariableViewModel);
+                props.setVariableController(updateVariableController);
+                props.setDeleteVariableController(deleteVariableController);
+            }
+
+            getAllVariablesController.refreshGlobalVariables();
+            getAllVariablesController.refreshLocalVariables();
+
+        } else {
+
+            VariableUseCaseFactory.VariableWiring variableWiring =
+                    VariableUseCaseFactory.create(globalEnvironment, new Environment(), null);
+
+            globalVariableViewModel = variableWiring.getGlobalViewModel();
+            localVariableViewModel = variableWiring.getLocalViewModel();
+            updateVariableController = variableWiring.getUpdateController();
+            deleteVariableController = variableWiring.getDeleteController();
+            getAllVariablesController = variableWiring.getGetAllController();
+
+            if (propertiesPanel instanceof PropertiesPanel props) {
+                props.setGlobalVariableViewModel(globalVariableViewModel);
+                props.setLocalVariableViewModel(localVariableViewModel);
+                props.setVariableController(updateVariableController);
+                props.setDeleteVariableController(deleteVariableController);
+            }
+            getAllVariablesController.refreshGlobalVariables();
         }
-        Environment localEnvironment = DEMO_OBJECT.getEnvironment();
-
-        VariableUseCaseFactory.VariableWiring variableWiring =
-                VariableUseCaseFactory.create(globalEnvironment, localEnvironment, null);
-
-        globalVariableViewModel = variableWiring.getGlobalViewModel();
-        localVariableViewModel = variableWiring.getLocalViewModel();
-        updateVariableController = variableWiring.getUpdateController();
-        deleteVariableController = variableWiring.getDeleteController();
-        getAllVariablesController = variableWiring.getGetAllController();
-
-        if (propertiesPanel instanceof PropertiesPanel props) {
-            props.setLocalVariableViewModel(localVariableViewModel);
-            props.setGlobalVariableViewModel(globalVariableViewModel);
-            props.setVariableController(updateVariableController);
-            props.setDeleteVariableController(deleteVariableController);
-        }
-
-        getAllVariablesController.refreshGlobalVariables();
-        getAllVariablesController.refreshLocalVariables();
 
         homeTabContent.add(leftSidebar, BorderLayout.WEST);
         homeTabContent.add(centerPanel, BorderLayout.CENTER);
@@ -832,9 +918,6 @@ public class HomeView extends javax.swing.JFrame {
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      */
     private Scene getCurrentScene() {
-//        if (editorState == null) {
-//            return null;
-//        }
         return editorState.getCurrentScene();
 //        return createTestScene();
     }

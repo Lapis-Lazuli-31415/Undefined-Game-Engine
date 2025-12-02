@@ -2,7 +2,6 @@ package use_case.trigger.condition.delete;
 
 import entity.GameObject;
 import interface_adapter.EditorState;
-import view.HomeView;
 
 public class ConditionDeleteInteractor implements ConditionDeleteInputBoundary {
     private final ConditionDeleteOutputBoundary conditionDeletePresenter;

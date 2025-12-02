@@ -21,23 +21,25 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
     // Callback for when 'Save' is clicked
     private final ConditionEditorViewModel conditionEditorViewModel;
     private final ConditionEditSaveController conditionEditSaveController;
-    private final int triggerIndex;
-    private final int conditionIndex;
+
+    // NEW: Callback for auto-save
+    private final Runnable onChangeCallback;
 
     public ConditionEditorDialog(Window owner,
                                  int triggerIndex,
                                  int conditionIndex,
                                  String initialScript,
                                  ConditionEditorViewModel conditionEditorViewModel,
-                                 TriggerUseCaseFactory triggerUseCaseFactory) {
+                                 TriggerUseCaseFactory triggerUseCaseFactory,
+                                 Runnable onChangeCallback) {
         super(owner, "Condition Editor", ModalityType.APPLICATION_MODAL);
-        this.triggerIndex = triggerIndex;
-        this.conditionIndex = conditionIndex;
         this.conditionEditSaveController =
                 triggerUseCaseFactory.createConditionEditSaveController();
         this.conditionEditorViewModel = conditionEditorViewModel;
 
         this.conditionEditorViewModel.addPropertyChangeListener(this);
+
+        this.onChangeCallback = onChangeCallback;
 
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(45, 45, 45));
@@ -192,6 +194,10 @@ public class ConditionEditorDialog extends JDialog implements PropertyChangeList
                     JOptionPane.INFORMATION_MESSAGE);
 
             conditionEditorViewModel.removePropertyChangeListener(this);
+            // NEW: Trigger the callback whenever state changes
+            if (onChangeCallback != null) {
+                onChangeCallback.run();
+            }
             dispose(); // Close window only on success
         }
     }

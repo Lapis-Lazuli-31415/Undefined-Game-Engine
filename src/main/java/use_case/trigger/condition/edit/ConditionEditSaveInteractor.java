@@ -4,9 +4,7 @@ import entity.GameObject;
 import entity.scripting.condition.Condition;
 import entity.scripting.error.ParseSyntaxException;
 import interface_adapter.EditorState;
-import view.HomeView;
 
-import java.text.ParseException;
 
 public class ConditionEditSaveInteractor implements ConditionEditSaveInputBoundary{
     private final ConditionEditSaveOutputBoundary conditionEditSavePresenter;
