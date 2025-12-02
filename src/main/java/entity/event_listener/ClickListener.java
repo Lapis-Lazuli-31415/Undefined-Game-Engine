@@ -108,8 +108,8 @@ public class ClickListener implements EventListener {
             height = spriteRenderer.getHeight();
         }
 
-        int drawW = (int) (width * transform.getScaleX());
-        int drawH = (int) (height * transform.getScaleY());
+        int drawW = (int) (width * transform.getScaleX() / 10);
+        int drawH = (int) (height * transform.getScaleY() / 10);
 
         int panelW = inputState.getCanvasWidth();
         int panelH = inputState.getCanvasHeight();
@@ -119,7 +119,7 @@ public class ClickListener implements EventListener {
         int centerY = (panelH - drawH) / 2;
 
         int drawX = centerX + (int) transform.getX();
-        int drawY = centerY + (int) transform.getY();
+        int drawY = centerY - (int) transform.getY();
 
         System.out.println("   " + buttonLabel + " bounds: [" + drawX + "," + drawY + " to " + (drawX+drawW) + "," + (drawY+drawH) + "]");
 
