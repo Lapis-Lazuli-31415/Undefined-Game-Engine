@@ -20,38 +20,26 @@ public class GameObject {
     private final String id;
     private String name;
     private boolean active;
-    private ArrayList<Property> properties;
     private Environment environments;
     private Transform transform;
     private SpriteRenderer spriteRenderer;
     private TriggerManager triggerManager;
 
-    public GameObject(String id, String name, boolean active, Environment environment, Transform transform,
-                      SpriteRenderer spriteRenderer, TriggerManager triggerManager) {
-        this.id = id;
-        this.name = name;
-        this.active = active;
-        this.transform = transform;
-        this.spriteRenderer = spriteRenderer;
-        this.triggerManager = triggerManager;
-        this.environments = environment;
-        this.properties = new ArrayList<>();
-    }
-
     @com.fasterxml.jackson.annotation.JsonCreator
     public GameObject(@com.fasterxml.jackson.annotation.JsonProperty("id") String id,
                       @com.fasterxml.jackson.annotation.JsonProperty("name") String name,
                       @com.fasterxml.jackson.annotation.JsonProperty("active") boolean active,
-                      @com.fasterxml.jackson.annotation.JsonProperty("environment") Environment environments, // Map "environment" key to this param
+                      @com.fasterxml.jackson.annotation.JsonProperty("environment") Environment environments,
                       @com.fasterxml.jackson.annotation.JsonProperty("transform") Transform transform,
+                      @com.fasterxml.jackson.annotation.JsonProperty("sprite_renderer") SpriteRenderer spriteRenderer,
                       @com.fasterxml.jackson.annotation.JsonProperty("trigger_manager") TriggerManager triggerManager) {
         this.id = id;
         this.name = name;
         this.active = active;
         this.environments = environments;
         this.transform = transform;
+        this.spriteRenderer = spriteRenderer;
         this.triggerManager = triggerManager;
-        this.properties = new ArrayList<>();
     }
 
     // --- Basic getters/setters ---
@@ -108,22 +96,6 @@ public class GameObject {
         this.spriteRenderer = spriteRenderer;
     }
 
-
-    // --- Property helpers ---
-
-    public List<Property> getProperties() {
-        return new ArrayList<>(properties);
-    }
-
-    public void addProperty(Property property) {
-        // If your Property has a key, you can de-duplicate by key:
-        properties.add(property);
-    }
-
-    public void removeProperty(Property property) {
-        properties.remove(property);
-    }
-
 // --- Copy method for preview isolation ---
 
     /**
@@ -132,15 +104,6 @@ public class GameObject {
      * @return A new GameObject with copied state
      */
     public GameObject copy() {
-        // Copy properties
-        ArrayList<Property> copiedProperties = new ArrayList<>();
-        for (Property prop : this.properties) {
-            if (prop instanceof SpriteRenderer) {
-                copiedProperties.add(((SpriteRenderer) prop).copy());
-            } else {
-                copiedProperties.add(prop);
-            }
-        }
 
         // Copy transform
         Transform copiedTransform = (this.transform != null) ? this.transform.copy() : null;

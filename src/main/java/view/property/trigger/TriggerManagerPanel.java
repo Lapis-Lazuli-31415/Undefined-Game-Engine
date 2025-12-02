@@ -80,40 +80,6 @@ public class TriggerManagerPanel extends JPanel implements PropertyChangeListene
         this.onChangeCallback = callback;
     }
 
-    // load data from the Entity to the UI
-    public void loadTriggerManager(entity.scripting.TriggerManager manager) {
-        // 1. Reset the View Model to a clean state
-        triggerManagerViewModel.setState(new TriggerManagerState());
-        TriggerManagerState state = triggerManagerViewModel.getState();
-
-        if (manager != null) {
-            // 2. Loop through loaded Entities
-            for (Trigger t : manager.getTriggers()) {
-                String event = t.getEvent().getEventLabel();
-                Map<String, String> params = t.getEvent().getEventParameters();
-
-                // Convert Conditions to Scripts
-                List<String> conditions = new ArrayList<>();
-                for (Condition c : t.getConditions()) {
-                    conditions.add(c.format());
-                }
-
-                // Convert Actions to Scripts
-                List<String> actions = new ArrayList<>();
-                for (Action a : t.getActions()) {
-                    actions.add(a.format());
-                }
-
-                // 3. Add to View State
-                state.addTrigger(event, params, conditions, actions);
-            }
-        }
-
-        // 4. Trigger UI Refresh
-        triggerManagerViewModel.firePropertyChange();
-        refresh();
-    }
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         TriggerManagerState state = (TriggerManagerState) evt.getNewValue();

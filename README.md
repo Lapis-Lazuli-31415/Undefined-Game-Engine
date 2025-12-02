@@ -5,6 +5,82 @@ Undefined is a 2D Game Engine built in Java, designed to allow users to create, 
 ## How to Run Game
 - To run the program, run HomeView
 
+## Game Engine Capabilities Guide
+
+### 1. Asset Management (Adding Images)
+You can import images to be used as sprites for your game objects.
+
+**What you can do:**
+* **Import Local Files:** Load images (`.png`, `.jpg`, `.jpeg`) from your computer.
+* **Import from Unsplash:** Search for and download images directly from the Unsplash API.
+* **Manage Assets:** View a list of imported sprites in the "Assets" panel.
+
+**How to do it (in the Editor):**
+1.  Look for the **"Assets"** panel on the left sidebar.
+2.  Click the **"+" (Add)** button in the Sprites header.
+3.  Select either **"Import from Local"** to browse files or **"Import from Unsplash"** to search online.
+4.  Once imported, the sprite appears as a card in the list. Clicking it adds it to the scene as a new GameObject.
+
+### 2. Game Object Properties
+You can modify the physical and visual attributes of Game Objects in the scene.
+
+**What you can do:**
+* **Transform:** Change position (X, Y), rotation, and scale.
+* **Sprite Rendering:** Change the sprite image, toggle visibility, adjust opacity, and set Z-Index (layering).
+
+**How to do it:**
+1.  **Select** a GameObject in the Scene view (center panel) by clicking on it.
+2.  The **Properties Panel** on the right side will update.
+3.  Edit the fields in the **Transform** section to move/resize the object.
+4.  Use the **Sprite Renderer** section to swap the image or change opacity.
+
+### 3. Game Logic (Scripting)
+You can define interactive behavior using a Trigger system without writing raw code.
+
+**What you can do:**
+* **Create Triggers:** Define "When [Event] happens, if [Condition] is true, do [Actions]".
+* **Events:** `On Click`, `On Key Press`.
+* **Conditions:** Compare numbers (`>`, `=`, etc.) or booleans to decide if actions should run.
+* **Actions:**
+    * `Wait`: Pause execution.
+    * `Assign`: Change variable values.
+    * `Change Position`: Move objects.
+    * `Change Visibility`: Hide/show objects.
+
+**How to do it:**
+1.  With an object selected, look at the **Trigger Manager** in the Properties Panel.
+2.  Click **"+"** to add a new Trigger.
+3.  Select an **Event** (e.g., "On Click").
+4.  Add **Conditions** (optional) and **Actions** using their respective "+" buttons.
+5.  Click the **Edit (Pencil)** button on an action/condition to open the script editor dialog and define the logic.
+
+### 4. Variables
+You can store data (like health, score, or flags) to manage game state.
+
+**What you can do:**
+* **Global Variables:** Shared across the entire game (e.g., `PlayerScore`).
+* **Local Variables:** Specific to a single object (e.g., `MyHealth`).
+* **Types:** Supports `Numeric` (doubles) and `Boolean` (true/false).
+
+**How to do it:**
+1.  In the **Properties Panel**, scroll to the **Variable Section**.
+2.  Click the **"+"** button next to "Global Variables" or "Local Variables".
+3.  Enter a name and initial value.
+
+### 5. Preview & Testing
+You can play the game instantly to test your logic.
+
+**What you can do:**
+* Launch a standalone window running the current scene.
+* Interact with objects using the defined Events (Click, Key Press).
+* Switch between **Sprite Mode** (visuals) and **Button Mode** (debug buttons).
+
+**How to do it:**
+1.  Click the **Green Play Button (▶)** in the top toolbar of the editor.
+2.  A new window will open running the game loop.
+3.  Click the **Stop Button (■)** to close the preview.
+
+
 ## Core Project Data Hierarchy
  - **Project**: The root container, managing Scenes, Assets, and a Global Environment.
  - **Scene**: Contains a list of GameObjects. 

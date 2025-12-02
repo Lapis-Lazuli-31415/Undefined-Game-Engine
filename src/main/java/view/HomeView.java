@@ -160,6 +160,10 @@ public class HomeView extends javax.swing.JFrame {
             this.assetLibViewModel.setState(this.currentProject.getAssets());
 
             if (!this.currentScene.getGameObjects().isEmpty()) {
+                for (GameObject gameObject : this.currentScene.getGameObjects()) {
+                    System.out.println(gameObject.getName());
+                    System.out.println("2");
+                }
                 DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
                 System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
             } else {
@@ -206,7 +210,7 @@ public class HomeView extends javax.swing.JFrame {
         return new GameObject(
                 "demo-1", "Demo Sprite", true, null,
                 new Transform(new Vector<>(Arrays.asList(0.0, 0.0)), 0f, new Vector<>(Arrays.asList(1.0, 1.0))),
-                new TriggerManager()
+                null, new TriggerManager()
         );
     }
 
@@ -461,11 +465,6 @@ public class HomeView extends javax.swing.JFrame {
                     }
             );
             props.setAutoSaveCallback(() -> triggerAutoSave());
-
-            if (DEMO_OBJECT != null && DEMO_OBJECT.getTriggerManager() != null) {
-                System.out.println("Loading triggers for: " + DEMO_OBJECT.getName());
-                props.loadTriggerManager(DEMO_OBJECT.getTriggerManager());
-            }
         }
 
         // rewire variables when selection changes
@@ -481,9 +480,6 @@ public class HomeView extends javax.swing.JFrame {
                     scenePanel.repaint();
                     triggerAutoSave();
                 });
-                if (selectedObject.getTriggerManager() != null) {
-                    props.loadTriggerManager(selectedObject.getTriggerManager());
-                }
             }
         });
 
