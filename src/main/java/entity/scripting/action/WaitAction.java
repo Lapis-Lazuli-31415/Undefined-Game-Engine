@@ -60,10 +60,10 @@ public class WaitAction extends Action{
 
         Expression<?> secondsResult = ExpressionFactory.parse(seconds);
 
-        if (!(secondsResult instanceof NumericVariable)) {
-            throw new ParseSyntaxException("Invalid Syntax: " + seconds + " does not evaluate to a NumericVariable");
+        if (!(secondsResult instanceof NumericExpression)) {
+            throw new ParseSyntaxException("Invalid Syntax: " + seconds + " does not evaluate to a NumericExpression");
         } else {
-            this.secondsExpression = (NumericVariable) secondsResult;
+            this.secondsExpression = (NumericExpression) secondsResult;
         }
         return null;
     }

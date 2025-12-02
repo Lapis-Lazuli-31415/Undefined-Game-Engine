@@ -3,9 +3,7 @@ package use_case.trigger.condition.change;
 import entity.GameObject;
 import entity.scripting.condition.Condition;
 import entity.scripting.condition.ConditionFactory;
-import entity.scripting.condition.DefaultConditionFactory;
 import interface_adapter.EditorState;
-import view.HomeView;
 
 public class ConditionChangeInteractor implements ConditionChangeInputBoundary {
 

@@ -4,7 +4,6 @@ import entity.GameObject;
 import entity.scripting.action.Action;
 import entity.scripting.error.ParseSyntaxException;
 import interface_adapter.EditorState;
-import view.HomeView;
 
 public class ActionEditSaveInteractor implements ActionEditSaveInputBoundary {
     private final ActionEditSaveOutputBoundary actionEditSavePresenter;
