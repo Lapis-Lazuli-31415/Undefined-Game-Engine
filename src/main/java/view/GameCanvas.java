@@ -6,7 +6,7 @@ import entity.scripting.TriggerManager;
 import entity.scripting.event.OnClickEvent;
 import entity.event_listener.ClickListener;
 import entity.scripting.environment.Environment;
-import interface_adapter.preview.EventListenerFactory;
+import app.EventListenerFactory;
 
 import javax.swing.*;
 import java.awt.*;
