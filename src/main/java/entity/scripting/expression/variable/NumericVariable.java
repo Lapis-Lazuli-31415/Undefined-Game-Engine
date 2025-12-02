@@ -20,7 +20,7 @@ public class NumericVariable extends Variable<Double> implements NumericExpressi
 
     @JsonCreator
     public NumericVariable(@JsonProperty("name") String name,
-                           @JsonProperty("isGlobal") boolean isGlobal) {
+                           @JsonProperty("global") boolean isGlobal) {
         super(name, isGlobal);
     }
 
