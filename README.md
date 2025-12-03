@@ -5,7 +5,7 @@ Undefined is a 2D Game Engine built in Java, designed to allow users to create, 
 ## <img width="1292" height="689" alt="Screenshot 2025-12-01 at 6 59 27 PM" src="https://github.com/user-attachments/assets/a8122bc3-dafa-4c2d-a548-85c29bcb9d14" />
 ## How to Run Game
 - To run the program, run app/Main
-- **IMPORTANT**: UNSPLASH_ACCESS_KEY=OSHzuf4ybMZXfL1ddpzvxGCZ-yMMfcb2TmY2ys7VpTM needed for Unsplash API to work
+- **IMPORTANT**: need to add "UNSPLASH_ACCESS_KEY=OSHzuf4ybMZXfL1ddpzvxGCZ-yMMfcb2TmY2ys7VpTM" in environment variables for Unsplash API to work
 
 ## Game Engine Capabilities Guide
 
