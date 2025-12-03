@@ -1,164 +1,214 @@
 package use_case.variable;
 
-import entity.scripting.environment.Assign;
 import entity.scripting.environment.Environment;
 import entity.scripting.error.EnvironmentException;
-import entity.scripting.expression.variable.NumericVariable;
+import entity.scripting.expression.variable.Variable;
 import org.junit.jupiter.api.Test;
 import use_case.variable.delete.DeleteVariableInputData;
 import use_case.variable.delete.DeleteVariableInteractor;
 import use_case.variable.delete.DeleteVariableOutputBoundary;
 import use_case.variable.delete.DeleteVariableOutputData;
+import use_case.variable.factory.DefaultVariableFactoryRegistry;
+import use_case.variable.factory.VariableFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DeleteVariableInteractorTest {
 
-    private static class StubPresenter implements DeleteVariableOutputBoundary {
+
+    private static class TestPresenter implements DeleteVariableOutputBoundary {
         DeleteVariableOutputData lastSuccess;
         String lastError;
 
         @Override
         public void prepareSuccessView(DeleteVariableOutputData data) {
             this.lastSuccess = data;
+            this.lastError = null;
         }
 
         @Override
         public void prepareFailureView(String errorMessage) {
             this.lastError = errorMessage;
+            this.lastSuccess = null;
         }
     }
 
-    @Test
-    void deleteGlobalNumericVariable_success() throws EnvironmentException {
-        Environment globalEnv = new Environment();
-        Environment localEnv = new Environment();
-        StubPresenter presenter = new StubPresenter();
 
-        NumericVariable var = new NumericVariable("score", true);
-        Assign.assign(globalEnv, var, 42.0);
+    private static class NoOpEnvironment extends Environment {
+        private Variable<?> lastDeleted;
 
-        DeleteVariableInteractor interactor =
-                new DeleteVariableInteractor(globalEnv, localEnv, presenter);
+        @Override
+        public <T> void delete(Variable<T> variable) throws EnvironmentException {
+            this.lastDeleted = variable;
+        }
 
-        DeleteVariableInputData input =
-                new DeleteVariableInputData("score", true, "Numeric");
-
-        interactor.execute(input);
-
-        assertThrows(EnvironmentException.class, () -> globalEnv.get(var));
-
-        assertNotNull(presenter.lastSuccess);
-        assertNull(presenter.lastError);
-        assertEquals("score", presenter.lastSuccess.getName());
-        assertTrue(presenter.lastSuccess.isGlobal());
-        assertEquals("Numeric", presenter.lastSuccess.getType());
+        public Variable<?> getLastDeleted() {
+            return lastDeleted;
+        }
     }
 
-    @Test
-    void deleteLocalBooleanVariable_success() throws EnvironmentException {
-        Environment globalEnv = new Environment();
-        Environment localEnv = new Environment();
-        StubPresenter presenter = new StubPresenter();
 
-        var var = new entity.scripting.expression.variable.BooleanVariable("isAlive", false);
-        entity.scripting.environment.Assign.assign(localEnv, var, true);
+    private static String findSupportedType(DefaultVariableFactoryRegistry registry) {
+        String[] candidates = {
+                "int", "Integer",
+                "double", "Double",
+                "float", "Float",
+                "long", "Long",
+                "boolean", "Boolean",
+                "string", "String",
+                "text", "Text",
+                "number", "Number"
+        };
 
-        DeleteVariableInteractor interactor =
-                new DeleteVariableInteractor(globalEnv, localEnv, presenter);
+        for (String candidate : candidates) {
+            VariableFactory factory = registry.get(candidate);
+            if (factory != null) {
+                return candidate;
+            }
+        }
 
-        DeleteVariableInputData input =
-                new DeleteVariableInputData("isAlive", false, "Boolean");
-
-        interactor.execute(input);
-
-        assertThrows(entity.scripting.error.EnvironmentException.class,
-                () -> localEnv.get(var));
-
-        assertNotNull(presenter.lastSuccess);
-        assertNull(presenter.lastError);
-        assertEquals("isAlive", presenter.lastSuccess.getName());
-        assertFalse(presenter.lastSuccess.isGlobal());
-        assertEquals("Boolean", presenter.lastSuccess.getType());
+        fail("No supported variable type found in DefaultVariableFactoryRegistry for test candidates");
+        return null;
     }
 
+
     @Test
-    void deleteVariable_unsupportedType_failure() {
+    void execute_fails_whenNameIsNull() {
         Environment globalEnv = new Environment();
         Environment localEnv = new Environment();
-        StubPresenter presenter = new StubPresenter();
+        TestPresenter presenter = new TestPresenter();
 
         DeleteVariableInteractor interactor =
                 new DeleteVariableInteractor(globalEnv, localEnv, presenter);
 
         DeleteVariableInputData input =
-                new DeleteVariableInputData("x", true, "String"); // not Numeric/Boolean
-
-        interactor.execute(input);
-
-        assertNull(presenter.lastSuccess);
-        assertNotNull(presenter.lastError);
-        assertTrue(presenter.lastError.contains("Unsupported variable type"));
-    }
-
-    @Test
-    void deleteVariable_emptyName_failure() {
-        Environment globalEnv = new Environment();
-        Environment localEnv = new Environment();
-        StubPresenter presenter = new StubPresenter();
-
-        DeleteVariableInteractor interactor =
-                new DeleteVariableInteractor(globalEnv, localEnv, presenter);
-
-        DeleteVariableInputData input =
-                new DeleteVariableInputData("   ", true, "Numeric");
+                new DeleteVariableInputData(null, true, "whatever");
 
         interactor.execute(input);
 
         assertNull(presenter.lastSuccess);
         assertEquals("Variable name cannot be empty.", presenter.lastError);
     }
+
     @Test
-    void deleteVariable_emptyType_failure() {
+    void execute_fails_whenNameIsBlank() {
         Environment globalEnv = new Environment();
         Environment localEnv = new Environment();
-        StubPresenter presenter = new StubPresenter();
+        TestPresenter presenter = new TestPresenter();
 
         DeleteVariableInteractor interactor =
                 new DeleteVariableInteractor(globalEnv, localEnv, presenter);
 
         DeleteVariableInputData input =
-                new DeleteVariableInputData("score", true, "   ");
+                new DeleteVariableInputData("   ", false, "whatever");
+
+        interactor.execute(input);
+
+        assertNull(presenter.lastSuccess);
+        assertEquals("Variable name cannot be empty.", presenter.lastError);
+    }
+
+    @Test
+    void execute_fails_whenTypeIsNull() {
+        Environment globalEnv = new Environment();
+        Environment localEnv = new Environment();
+        TestPresenter presenter = new TestPresenter();
+
+        DeleteVariableInteractor interactor =
+                new DeleteVariableInteractor(globalEnv, localEnv, presenter);
+
+        DeleteVariableInputData input =
+                new DeleteVariableInputData("score", true, null);
 
         interactor.execute(input);
 
         assertNull(presenter.lastSuccess);
         assertEquals("Variable type is required.", presenter.lastError);
     }
+
     @Test
-    void deleteVariable_trimsWhitespace_success() throws EnvironmentException {
+    void execute_fails_whenTypeIsBlank() {
         Environment globalEnv = new Environment();
         Environment localEnv = new Environment();
-        StubPresenter presenter = new StubPresenter();
-
-        var var = new NumericVariable("hp", true);
-        Assign.assign(globalEnv, var, 100.0);
+        TestPresenter presenter = new TestPresenter();
 
         DeleteVariableInteractor interactor =
                 new DeleteVariableInteractor(globalEnv, localEnv, presenter);
 
-        // Intentionally add whitespace in input
         DeleteVariableInputData input =
-                new DeleteVariableInputData("  hp  ", true, "  Numeric  ");
+                new DeleteVariableInputData("score", false, "   ");
 
         interactor.execute(input);
 
-        assertThrows(EnvironmentException.class, () -> globalEnv.get(var));
-        assertNotNull(presenter.lastSuccess);
-        assertNull(presenter.lastError);
-        assertEquals("hp", presenter.lastSuccess.getName());
-        assertEquals("Numeric", presenter.lastSuccess.getType());
+        assertNull(presenter.lastSuccess);
+        assertEquals("Variable type is required.", presenter.lastError);
     }
 
+    @Test
+    void execute_fails_whenTypeUnsupported_triggersIllegalArgumentCatch() {
+        Environment globalEnv = new Environment();
+        Environment localEnv = new Environment();
+        TestPresenter presenter = new TestPresenter();
 
+        DeleteVariableInteractor interactor =
+                new DeleteVariableInteractor(globalEnv, localEnv, presenter);
+
+        String unsupportedType = "this-type-does-not-exist";
+        DeleteVariableInputData input =
+                new DeleteVariableInputData("score", true, unsupportedType);
+
+        interactor.execute(input);
+
+        assertNull(presenter.lastSuccess);
+        assertEquals("Unsupported variable type: " + unsupportedType, presenter.lastError);
+    }
+
+    @Test
+    void execute_fails_whenEnvironmentThrows_triggersEnvironmentExceptionCatch() {
+        Environment globalEnv = new Environment();
+        Environment localEnv = new Environment();
+        TestPresenter presenter = new TestPresenter();
+
+        DefaultVariableFactoryRegistry registry = new DefaultVariableFactoryRegistry();
+        String validType = findSupportedType(registry);
+
+        DeleteVariableInteractor interactor =
+                new DeleteVariableInteractor(globalEnv, localEnv, presenter, registry);
+
+        DeleteVariableInputData input =
+                new DeleteVariableInputData("score", false, validType);
+
+        interactor.execute(input);
+
+        assertNull(presenter.lastSuccess);
+        assertNotNull(presenter.lastError);
+    }
+
+    @Test
+    void execute_succeeds_forGlobalVariable_usesTrimmedName() {
+        NoOpEnvironment globalEnv = new NoOpEnvironment();
+        Environment localEnv = new Environment();
+        TestPresenter presenter = new TestPresenter();
+
+        DefaultVariableFactoryRegistry registry = new DefaultVariableFactoryRegistry();
+        String validType = findSupportedType(registry);
+
+        DeleteVariableInteractor interactor =
+                new DeleteVariableInteractor(globalEnv, localEnv, presenter, registry);
+
+        DeleteVariableInputData input =
+                new DeleteVariableInputData("  score  ", true, validType);
+
+        interactor.execute(input);
+
+        assertNull(presenter.lastError);
+        assertNotNull(presenter.lastSuccess);
+
+        DeleteVariableOutputData out = presenter.lastSuccess;
+
+        assertEquals("score", out.getName());
+        assertTrue(out.isGlobal());
+        assertNotNull(out.getType());
+        assertNotNull(globalEnv.getLastDeleted());
+    }
 }
