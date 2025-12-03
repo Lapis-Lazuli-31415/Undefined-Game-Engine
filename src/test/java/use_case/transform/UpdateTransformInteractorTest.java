@@ -67,7 +67,6 @@ class UpdateTransformInteractorTest {
     void updateTransform_updatesTransformAndCallsPresenter() {
         SpyPresenter presenter = new SpyPresenter();
 
-        // initial transform values
         Transform initialTransform;
         initialTransform = new Transform(
                 0.0,

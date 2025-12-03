@@ -165,7 +165,7 @@ class DeleteVariableInteractorTest {
 
     @Test
     void execute_fails_whenEnvironmentThrows_triggersEnvironmentExceptionCatch() {
-        Environment globalEnv = new Environment(); // real env that *will* throw on delete
+        Environment globalEnv = new Environment();
         Environment localEnv = new Environment();
         TestPresenter presenter = new TestPresenter();
 
