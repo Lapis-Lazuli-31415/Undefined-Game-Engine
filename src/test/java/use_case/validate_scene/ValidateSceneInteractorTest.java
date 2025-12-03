@@ -2,12 +2,16 @@ package use_case.validate_scene;
 
 import entity.GameObject;
 import entity.Scene;
+import entity.Transform;
+import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -126,8 +130,8 @@ class ValidateSceneInteractorTest {
         // Arrange
         ArrayList<GameObject> objects = new ArrayList<>();
         objects.add(createTestGameObject());
-        objects.add(new GameObject("obj-2", "Object2", true, new ArrayList<>(), null));
-        objects.add(new GameObject("obj-3", "Object3", true, new ArrayList<>(), null));
+        objects.add(new GameObject("obj-2", "Object2", true, new Environment(), createDefaultTransform(), null, new TriggerManager()));
+        objects.add(new GameObject("obj-3", "Object3", true, new Environment(), createDefaultTransform(), null, new TriggerManager()));
         Scene scene = new Scene(UUID.randomUUID(), "Test Scene", objects);
 
         // Act
@@ -151,8 +155,16 @@ class ValidateSceneInteractorTest {
                 "obj-1",
                 "TestObject",
                 true,
-                new ArrayList<>(),
-                new Environment()
+                new Environment(),
+                createDefaultTransform(),
+                null,  // spriteRenderer
+                new TriggerManager()
         );
+    }
+
+    private Transform createDefaultTransform() {
+        Vector<Double> position = new Vector<>(Arrays.asList(0.0, 0.0));
+        Vector<Double> scale = new Vector<>(Arrays.asList(1.0, 1.0));
+        return new Transform(position, 0f, scale);
     }
 }

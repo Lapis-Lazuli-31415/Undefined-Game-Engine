@@ -29,18 +29,24 @@ public class PreviewInteractor implements PreviewInputBoundary {
     public void execute(PreviewInputData inputData) {
         Scene scene = inputData.getScene();
 
-        // Validate scene
+        // ✅ Step 1: Validate scene FIRST
         ValidationResult result = validator.validate(scene);
 
-        // Extract simple types from Scene
+        // ✅ Step 2: Check for errors BEFORE accessing scene
+        if (result.isError()) {
+            // Validation failed - DON'T access scene properties!
+            outputBoundary.presentError(result.getMessage());
+            return;  // Exit early
+        }
+
+        // ✅ Step 3: NOW it's safe to extract scene properties
+        // (We know scene is not null and has valid ID, name, objects)
         String sceneId = scene.getId() != null ? scene.getId().toString() : "unknown";
         String sceneName = scene.getName() != null ? scene.getName() : "Untitled";
         int gameObjectCount = scene.getGameObjects() != null ? scene.getGameObjects().size() : 0;
 
-        if (result.isError()) {
-            // Validation failed
-            outputBoundary.presentError(result.getMessage());
-        } else if (result.isWarning()) {
+        // ✅ Step 4: Handle warning or success
+        if (result.isWarning()) {
             // Validation passed with warning
             PreviewOutputData outputData = new PreviewOutputData(
                     sceneId,

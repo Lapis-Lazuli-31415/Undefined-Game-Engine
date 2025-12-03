@@ -4,7 +4,6 @@ import entity.GameObject;
 import entity.scripting.action.Action;
 import entity.scripting.action.ActionFactory;
 import interface_adapter.EditorState;
-import view.HomeView;
 
 public class ActionChangeInteractor implements ActionChangeInputBoundary {
 

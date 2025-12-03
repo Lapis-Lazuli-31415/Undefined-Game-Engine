@@ -3,8 +3,6 @@ package use_case.trigger.condition.edit;
 import entity.GameObject;
 import entity.scripting.condition.Condition;
 import interface_adapter.EditorState;
-import use_case.trigger.condition.delete.ConditionDeleteOutputData;
-import view.HomeView;
 
 public class ConditionEditInteractor implements ConditionEditInputBoundary{
     private final ConditionEditOutputBoundary conditionEditPresenter;

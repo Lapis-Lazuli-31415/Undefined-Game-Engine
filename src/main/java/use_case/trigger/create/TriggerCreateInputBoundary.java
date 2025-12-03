@@ -1,5 +1,5 @@
 package use_case.trigger.create;
 
-public interface ConditionCreateInputBoundary {
+public interface TriggerCreateInputBoundary {
     void execute();
 }

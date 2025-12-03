@@ -54,6 +54,17 @@ public class GameObject {
         this.properties = new ArrayList<>();
     }
 
+    // This constructor is for testing
+    public GameObject(String id) {
+        this.id = id;
+        this.name = id;
+        this.active = true;
+        this.environments = new Environment();
+        this.transform = new Transform(0, 0, 0, 1, 1);
+        this.spriteRenderer = new SpriteRenderer(null, true);
+        this.triggerManager = new TriggerManager();
+    }
+
     // --- Basic getters/setters ---
 
     public String getId() {

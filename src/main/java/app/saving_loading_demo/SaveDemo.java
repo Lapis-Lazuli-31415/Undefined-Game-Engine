@@ -1,4 +1,4 @@
-package app.SavingAndLoadingDemo;
+package app.saving_loading_demo;
 
 import data_access.saving.JsonProjectDataAccess;
 import entity.*;
