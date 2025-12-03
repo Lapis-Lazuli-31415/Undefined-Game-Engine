@@ -59,17 +59,17 @@ public class HomeView extends JFrame {
     private Environment globalEnvironment;
 
     // asset manager
-    private final interface_adapter.assets.AssetLibViewModel assetLibViewModel;
+    private final AssetLibViewModel assetLibViewModel;
     private JPanel spritesContent;
     private JButton spritesAddButton;
 
     // sprite import
-    private interface_adapter.sprites.ImportSpriteController importSpriteController;
-    private interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel;
+    private ImportSpriteController importSpriteController;
+    private ImportSpriteViewModel importSpriteViewModel;
 
     // unsplash import
-    private interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController;
-    private interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
+    private ImportSpriteFromUnsplashController unsplashController;
+    private ImportSpriteFromUnsplashViewModel unsplashViewModel;
     private ImportSpriteFromUnsplashView unsplashView;
 
     // trigger manager
