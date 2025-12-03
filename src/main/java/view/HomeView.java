@@ -2,7 +2,6 @@ package view;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.Vector;
 import java.beans.PropertyChangeEvent;
@@ -10,26 +9,20 @@ import java.beans.PropertyChangeListener;
 import javax.swing.*;
 
 
+import app.use_case_factory.SpriteImportUseCaseFactory;
 import entity.GameObject;
 import entity.Scene;
 import entity.Transform;
-import javax.swing.tree.DefaultTreeModel;
 
-import entity.GameObject;
-import entity.Scene;
-import entity.Transform;
 import interface_adapter.EditorState;
 import entity.*;
-import entity.scripting.TriggerManager;
 import entity.scripting.environment.Environment;
-import interface_adapter.EditorState;
-import interface_adapter.preview.PreviewController;
-import interface_adapter.preview.PreviewState;
-import interface_adapter.preview.PreviewViewModel;
-import interface_adapter.transform.TransformViewModel;
-import interface_adapter.transform.TransformController;
-import app.TransformUseCaseFactory;
-import app.VariableUseCaseFactory;
+import interface_adapter.assets.AssetLibViewModel;
+import interface_adapter.preview.*;
+import interface_adapter.sprites.*;
+import interface_adapter.transform.*;
+import app.use_case_factory.TransformUseCaseFactory;
+import app.use_case_factory.VariableUseCaseFactory;
 import interface_adapter.trigger.TriggerManagerViewModel;
 import interface_adapter.variable.delete.DeleteVariableController;
 import interface_adapter.variable.update.UpdateVariableController;
@@ -38,24 +31,14 @@ import interface_adapter.variable.GlobalVariableViewModel;
 import interface_adapter.variable.LocalVariableViewModel;
 
 
-import entity.SpriteRenderer;
-import entity.scripting.Trigger;
-
-
-import entity.SpriteRenderer;
-import entity.scripting.Trigger;
-
 import view.property.PropertiesPanel;
 
 import data_access.saving.JsonProjectDataAccess;
 import use_case.saving.SaveProjectInteractor;
-import interface_adapter.saving.SaveProjectController;
-import interface_adapter.saving.SaveProjectPresenter;
-import interface_adapter.saving.SaveProjectViewModel;
-import interface_adapter.saving.SaveProjectState;
+import interface_adapter.saving.*;
 import view.util.PropertyPanelUtility;
 
-public class HomeView extends javax.swing.JFrame {
+public class HomeView extends JFrame {
 
     // ====== FIELDS ======
     private JPanel leftSidebar;
@@ -76,17 +59,17 @@ public class HomeView extends javax.swing.JFrame {
     private Environment globalEnvironment;
 
     // asset manager
-    private final interface_adapter.assets.AssetLibViewModel assetLibViewModel;
+    private final AssetLibViewModel assetLibViewModel;
     private JPanel spritesContent;
     private JButton spritesAddButton;
 
     // sprite import
-    private interface_adapter.sprites.ImportSpriteController importSpriteController;
-    private interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel;
+    private ImportSpriteController importSpriteController;
+    private ImportSpriteViewModel importSpriteViewModel;
 
     // unsplash import
-    private interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController;
-    private interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel;
+    private ImportSpriteFromUnsplashController unsplashController;
+    private ImportSpriteFromUnsplashViewModel unsplashViewModel;
     private ImportSpriteFromUnsplashView unsplashView;
 
     // trigger manager
@@ -101,35 +84,35 @@ public class HomeView extends javax.swing.JFrame {
 
     // Demo wiring
     private ScenePanel scenePanel;
-    private static GameObject DEMO_OBJECT;
     private TransformViewModel transformViewModel;
     private TransformController transformController;
     // ===== ADDED BY CHENG: Preview system fields =====
     private PreviewController previewController;
     private PreviewViewModel previewViewModel;
     private PreviewWindow currentPreview;  // Track current preview window
-    private EditorState editorState;
-// ===== END ADDED BY CHENG =====
 
-    public static GameObject getDemoGameObject() {
-        return DEMO_OBJECT;
-    }
+
     private GameObject currentlySelectedObject;
 
 
-    public HomeView(
-            interface_adapter.assets.AssetLibViewModel assetLibViewModel,
-            interface_adapter.sprites.ImportSpriteController importSpriteController,
-            interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel,
-            interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController,
-            interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel) {
+    public HomeView() {
 
-        this.assetLibViewModel = assetLibViewModel;
+        AssetLib assetLib = new AssetLib();
+
+        assetLibViewModel = new AssetLibViewModel(assetLib);
+        importSpriteViewModel = new ImportSpriteViewModel();
+        unsplashViewModel = new ImportSpriteFromUnsplashViewModel();
+
+        SpriteImportUseCaseFactory.loadExistingAssets(assetLib);
+
+        importSpriteController = SpriteImportUseCaseFactory.createLocalImportUseCase(
+                        assetLibViewModel, importSpriteViewModel);
+
+        String unsplashApiKey = System.getenv("UNSPLASH_ACCESS_KEY");
+        unsplashController = SpriteImportUseCaseFactory.createUnsplashImportUseCase(
+                        assetLibViewModel, unsplashViewModel, unsplashApiKey);
+
         initializePreviewSystem();
-        this.importSpriteController = importSpriteController;
-        this.importSpriteViewModel = importSpriteViewModel;
-        this.unsplashController = unsplashController;
-        this.unsplashViewModel = unsplashViewModel;
 
         // 1. ATTEMPT TO LOAD PROJECT FROM JSON
         JsonProjectDataAccess dataAccess = new JsonProjectDataAccess();
@@ -162,14 +145,10 @@ public class HomeView extends javax.swing.JFrame {
             this.assetLibViewModel.setState(this.currentProject.getAssets());
 
             if (!this.currentScene.getGameObjects().isEmpty()) {
-                //DEMO_OBJECT = this.currentScene.getGameObjects().get(0);
-                //System.out.println("Selected object from save: " + DEMO_OBJECT.getName());
                 this.currentlySelectedObject = this.currentScene.getGameObjects().get(0);
                 System.out.println("Selected object from save: " + this.currentlySelectedObject.getName());
 
             } else {
-//                DEMO_OBJECT = createDefaultGameObject();
-//                this.currentScene.getGameObjects().add(DEMO_OBJECT);
                 this.currentlySelectedObject = null;
                 System.out.println("No objects in scene");
             }
@@ -181,10 +160,9 @@ public class HomeView extends javax.swing.JFrame {
             ArrayList<Scene> scenes = new ArrayList<>();
             scenes.add(this.currentScene);
 
-            this.currentProject = new Project("proj-1", "My Game Project", scenes, assetLibViewModel.getAssetLib(), gameController);
+            this.currentProject = new Project("proj-1", "My Game Project", scenes,
+                    assetLibViewModel.getAssetLib(), gameController);
 
-//            DEMO_OBJECT = createDefaultGameObject();
-//            this.currentScene.getGameObjects().add(DEMO_OBJECT);
             this.currentlySelectedObject = null;
             System.out.println("Created new project with empty scene");
         }
@@ -209,14 +187,6 @@ public class HomeView extends javax.swing.JFrame {
         initComponents();
         setupAssetLibListener();
         setupImportSpriteListener();
-    }
-
-    private GameObject createDefaultGameObject() {
-        return new GameObject(
-                "demo-1", "Demo Sprite", true, null,
-                new Transform(new Vector<>(Arrays.asList(0.0, 0.0)), 0f, new Vector<>(Arrays.asList(1.0, 1.0))),
-                null, new TriggerManager()
-        );
     }
 
     private void rewireLocalVariablesFor(GameObject target) {
@@ -485,27 +455,12 @@ public class HomeView extends javax.swing.JFrame {
         propertiesScroll.setBorder(null);
 
         // ====== ENTITY + LAYERS WIRING ======
-//        Transform transform = DEMO_OBJECT.getTransform();
-//        if (transform == null) {
-//            java.util.Vector<Double> pos = new java.util.Vector<>(); pos.add(0.0); pos.add(0.0);
-//            java.util.Vector<Double> scale = new java.util.Vector<>(); scale.add(1.0); scale.add(1.0);
-//            transform = new Transform(pos, 0f, scale);
-//            DEMO_OBJECT.setTransform(transform);
-//        }
 
         transformViewModel = new TransformViewModel();
-        // transformController = TransformUseCaseFactory.create(DEMO_OBJECT, transformViewModel);
 
         scenePanel = new ScenePanel(transformViewModel, triggerManagerViewModel);
         scenePanel.setScene(currentScene);
         scenePanel.setOnSceneChangeCallback(() -> triggerAutoSave());
-
-//        transformController.updateTransform(
-//                transform.getX(),
-//                transform.getY(),
-//                transform.getScaleX(),
-//                transform.getRotation()
-//        );
 
         if (currentlySelectedObject != null){
             rewireTransformFor(currentlySelectedObject);
@@ -918,278 +873,9 @@ public class HomeView extends javax.swing.JFrame {
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
      */
     private Scene getCurrentScene() {
-        return editorState.getCurrentScene();
-//        return createTestScene();
+        return EditorState.getCurrentScene();
     }
-//private Scene createTestScene() {
-//    Scene scene = Scene.create("DragonTamingDemo");
-//    // ========== LOAD IMAGES ==========
-//    entity.Image keyImage = loadDemoImage("/Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/src/main/resources/demo_assets/key.png");
-//    entity.Image chestImage = loadDemoImage("/Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/src/main/resources/demo_assets/chest.png");
-//    entity.Image dragonImage = loadDemoImage("/Users/chengguanru/Fall_CSC207/Undefined-Game-Engine2/src/main/resources/demo_assets/dragon.png");
-//    // ========== 1. KEY 🔑 ==========
-//    Transform keyTransform = new Transform(
-//        new Vector<>(Arrays.asList(-200.0, -80.0)),
-//        0f,
-//        new Vector<>(Arrays.asList(0.1, 0.1))
-//    );
-//
-//    SpriteRenderer keySprite = new SpriteRenderer(keyImage, true);
-//    TriggerManager keyTriggerManager = new TriggerManager();
-//
-//    GameObject key = new GameObject(
-//            "Key",
-//            "Key",
-//            true,
-//            new Environment(),
-//            keyTransform,
-//            keySprite,
-//            keyTriggerManager
-//    );
-//
-//    // Trigger: Click to pick up key
-//    Trigger keyClickTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
-//
-//    keyClickTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-//            "Key",
-//            new entity.scripting.expression.value.BooleanValue(false)
-//    ));
-//
-//    entity.scripting.expression.variable.BooleanVariable hasKeyVar =
-//        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
-//    keyClickTrigger.addAction(
-//        new entity.scripting.action.BooleanVariableAssignmentAction(
-//            hasKeyVar,
-//            new entity.scripting.expression.value.BooleanValue(true)
-//        )
-//    );
-//
-//    key.getTriggerManager().addTrigger(keyClickTrigger);
-//    scene.addGameObject(key);
-//
-//    // ========== 2. CHEST 📦 ==========
-//    Transform chestTransform = new Transform(
-//        new Vector<>(Arrays.asList(0.0, -80.0)),
-//        0f,
-//        new Vector<>(Arrays.asList(0.1, 0.1))
-//    );
-//
-//    SpriteRenderer chestSprite = new SpriteRenderer(chestImage, true);
-//    TriggerManager chestTriggerManager = new TriggerManager();
-//
-//    GameObject chest = new GameObject(
-//            "Chest",
-//            "Chest",
-//            true,
-//            new Environment(),
-//            chestTransform,
-//            chestSprite,
-//            chestTriggerManager
-//    );
-//
-//    Trigger openChestTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
-//
-//    entity.scripting.expression.variable.BooleanVariable keyCheck =
-//        new entity.scripting.expression.variable.BooleanVariable("hasKey", true);
-//    entity.scripting.condition.BooleanComparisonCondition keyCondition =
-//        new entity.scripting.condition.BooleanComparisonCondition(
-//            keyCheck,
-//            new entity.scripting.expression.value.BooleanValue(true)
-//        );
-//    openChestTrigger.addCondition(keyCondition);
-//
-//    openChestTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-//            "Chest",
-//            new entity.scripting.expression.value.BooleanValue(false)
-//    ));
-//
-//    entity.scripting.expression.variable.BooleanVariable tamingSkillVar =
-//        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
-//    openChestTrigger.addAction(
-//        new entity.scripting.action.BooleanVariableAssignmentAction(
-//            tamingSkillVar,
-//            new entity.scripting.expression.value.BooleanValue(true)
-//        )
-//    );
-//
-//    entity.scripting.expression.variable.NumericVariable skillPointsVar =
-//        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
-//    openChestTrigger.addAction(
-//        new entity.scripting.action.NumericVariableAssignmentAction(
-//            skillPointsVar,
-//            new entity.scripting.expression.value.NumericValue(100.0)
-//        )
-//    );
-//
-//    chest.getTriggerManager().addTrigger(openChestTrigger);
-//    scene.addGameObject(chest);
-//
-//    // ========== 3. DRAGON 🐉 ==========
-//    Transform dragonTransform = new Transform(
-//        new Vector<>(Arrays.asList(180.0, 80.0)),
-//        -15f,
-//        new Vector<>(Arrays.asList(0.5, 0.5))
-//    );
-//
-//    SpriteRenderer dragonSprite = new SpriteRenderer(dragonImage, true);
-//    TriggerManager dragonTriggerManager = new TriggerManager();
-//
-//    GameObject dragon = new GameObject(
-//            "Dragon",
-//            "Dragon",
-//            true,
-//            new Environment(),
-//            dragonTransform,
-//            dragonSprite,
-//            dragonTriggerManager
-//    );
-//
-//    // Trigger 1: Click Dragon - TAME IT
-//    Trigger tameDragonTrigger = new Trigger(new entity.scripting.event.OnClickEvent(), true);
-//
-//    entity.scripting.expression.variable.BooleanVariable tamingSkillCheck =
-//        new entity.scripting.expression.variable.BooleanVariable("tamingSkillLearned", true);
-//    entity.scripting.condition.BooleanComparisonCondition tamingCondition =
-//        new entity.scripting.condition.BooleanComparisonCondition(
-//            tamingSkillCheck,
-//            new entity.scripting.expression.value.BooleanValue(true)
-//        );
-//    tameDragonTrigger.addCondition(tamingCondition);
-//
-//    tameDragonTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.NumericValue(0.0),
-//            new entity.scripting.expression.value.NumericValue(0.0)
-//    ));
-//
-//    entity.scripting.expression.variable.BooleanVariable tamedVar =
-//        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
-//    tameDragonTrigger.addAction(
-//        new entity.scripting.action.BooleanVariableAssignmentAction(
-//            tamedVar,
-//            new entity.scripting.expression.value.BooleanValue(true)
-//        )
-//    );
-//
-//    dragon.getTriggerManager().addTrigger(tameDragonTrigger);
-//
-//    // Trigger 2: Press W - FLY UP
-//    entity.scripting.event.OnKeyPressEvent flyUpEvent = new entity.scripting.event.OnKeyPressEvent();
-//    flyUpEvent.addEventParameter("Key", "W");
-//
-//    Trigger flyUpTrigger = new Trigger(flyUpEvent, true);
-//
-//    entity.scripting.expression.variable.BooleanVariable tamedCheck =
-//        new entity.scripting.expression.variable.BooleanVariable("dragonTamed", true);
-//    entity.scripting.condition.BooleanComparisonCondition tamedCondition =
-//        new entity.scripting.condition.BooleanComparisonCondition(
-//            tamedCheck,
-//            new entity.scripting.expression.value.BooleanValue(true)
-//        );
-//    flyUpTrigger.addCondition(tamedCondition);
-//
-//    flyUpTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.NumericValue(0.0),
-//            new entity.scripting.expression.value.NumericValue(-150.0)
-//    ));
-//
-//    dragon.getTriggerManager().addTrigger(flyUpTrigger);
-//
-//    // Trigger 3: Press S - FLY DOWN
-//    entity.scripting.event.OnKeyPressEvent flyDownEvent = new entity.scripting.event.OnKeyPressEvent();
-//    flyDownEvent.addEventParameter("Key", "S");
-//
-//    Trigger flyDownTrigger = new Trigger(flyDownEvent, true);
-//    flyDownTrigger.addCondition(tamedCondition);
-//
-//    flyDownTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.NumericValue(0.0),
-//            new entity.scripting.expression.value.NumericValue(80.0)
-//    ));
-//
-//    dragon.getTriggerManager().addTrigger(flyDownTrigger);
-//
-//    // Trigger 4: Press A - FLY LEFT (advanced)
-//    entity.scripting.event.OnKeyPressEvent flyLeftEvent = new entity.scripting.event.OnKeyPressEvent();
-//    flyLeftEvent.addEventParameter("Key", "A");
-//
-//    Trigger flyLeftTrigger = new Trigger(flyLeftEvent, true);
-//    flyLeftTrigger.addCondition(tamedCondition);
-//
-//    entity.scripting.expression.variable.NumericVariable skillCheck =
-//        new entity.scripting.expression.variable.NumericVariable("skillPoints", true);
-//    entity.scripting.condition.NumericComparisonCondition skillCondition =
-//        new entity.scripting.condition.NumericComparisonCondition(
-//            skillCheck,
-//            ">",
-//            new entity.scripting.expression.value.NumericValue(50.0)
-//        );
-//    flyLeftTrigger.addCondition(skillCondition);
-//
-//    flyLeftTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.NumericValue(-200.0),
-//            new entity.scripting.expression.value.NumericValue(0.0)
-//    ));
-//
-//    dragon.getTriggerManager().addTrigger(flyLeftTrigger);
-//
-//    // Trigger 5: Press D - RELEASE
-//    entity.scripting.event.OnKeyPressEvent releaseEvent = new entity.scripting.event.OnKeyPressEvent();
-//    releaseEvent.addEventParameter("Key", "D");
-//
-//    Trigger releaseTrigger = new Trigger(releaseEvent, true);
-//    releaseTrigger.addCondition(tamedCondition);
-//
-//    releaseTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.NumericValue(0.0),
-//            new entity.scripting.expression.value.NumericValue(-250.0)
-//    ));
-//
-//    releaseTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.BooleanValue(false)
-//    ));
-//
-//    dragon.getTriggerManager().addTrigger(releaseTrigger);
-//
-//    // Trigger 6: Press R - RESET
-//    entity.scripting.event.OnKeyPressEvent resetEvent = new entity.scripting.event.OnKeyPressEvent();
-//    resetEvent.addEventParameter("Key", "R");
-//
-//    Trigger resetTrigger = new Trigger(resetEvent, true);
-//
-//    resetTrigger.addAction(new entity.scripting.action.ChangePositionAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.NumericValue(180.0),
-//            new entity.scripting.expression.value.NumericValue(80.0)
-//    ));
-//
-//    resetTrigger.addAction(new entity.scripting.action.ChangeVisibilityAction(
-//            "Dragon",
-//            new entity.scripting.expression.value.BooleanValue(true)
-//    ));
-//
-//    dragon.getTriggerManager().addTrigger(resetTrigger);
-//
-//    scene.addGameObject(dragon);
-//
-//    // Print guide
-//    System.out.println("\n╔════════════════════════════════════════════════════════════╗");
-//    System.out.println("║           🐉 DRAGON TAMING ADVENTURE 🐉                   ║");
-//    System.out.println("╚════════════════════════════════════════════════════════════╝");
-//    System.out.println("\n🎮 QUEST: Tame the Wild Dragon!");
-//    System.out.println("\n📍 STEP 1: Click Key 🔑 → Pick it up");
-//    System.out.println("📍 STEP 2: Click Chest 📦 → Learn taming skill (requires key)");
-//    System.out.println("📍 STEP 3: Click Dragon 🐉 → Tame it (requires skill)");
-//    System.out.println("📍 STEP 4: Press W/S/A → Control dragon");
-//    System.out.println("📍 STEP 5: Press D → Release dragon\n");
-//
-//    return scene;
-//}
+
 /**
      * Load an image for demo scene
      * ADDED BY CHENG for Use Case 5: Preview/Testing Feature
@@ -1225,39 +911,5 @@ public class HomeView extends javax.swing.JFrame {
     private Environment createGlobalEnvironment() {
         Environment env = new Environment();
         return env;
-    }
-    // ========== END PREVIEW SYSTEM METHODS - ADDED BY CHENG ==========
-
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> {
-            entity.AssetLib assetLib = new entity.AssetLib();
-
-            interface_adapter.assets.AssetLibViewModel assetLibViewModel =
-                    new interface_adapter.assets.AssetLibViewModel(assetLib);
-            interface_adapter.sprites.ImportSpriteViewModel importSpriteViewModel =
-                    new interface_adapter.sprites.ImportSpriteViewModel();
-            interface_adapter.sprites.ImportSpriteFromUnsplashViewModel unsplashViewModel =
-                    new interface_adapter.sprites.ImportSpriteFromUnsplashViewModel();
-
-            app.use_case_factory.SpriteImportUseCaseFactory.loadExistingAssets(assetLib);
-
-            interface_adapter.sprites.ImportSpriteController importSpriteController =
-                    app.use_case_factory.SpriteImportUseCaseFactory.createLocalImportUseCase(
-                            assetLibViewModel, importSpriteViewModel);
-
-            String unsplashApiKey = System.getenv("UNSPLASH_ACCESS_KEY");
-            interface_adapter.sprites.ImportSpriteFromUnsplashController unsplashController =
-                    app.use_case_factory.SpriteImportUseCaseFactory.createUnsplashImportUseCase(
-                            assetLibViewModel, unsplashViewModel, unsplashApiKey);
-
-            HomeView view = new HomeView(
-                    assetLibViewModel,
-                    importSpriteController,
-                    importSpriteViewModel,
-                    unsplashController,
-                    unsplashViewModel
-            );
-            view.setVisible(true);
-        });
     }
 }

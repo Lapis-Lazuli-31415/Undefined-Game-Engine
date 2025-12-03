@@ -1,4 +1,4 @@
-package app;
+package app.use_case_factory;
 
 import entity.scripting.environment.Environment;
 import interface_adapter.variable.*;
