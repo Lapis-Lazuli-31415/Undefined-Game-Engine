@@ -1,4 +1,4 @@
-package app;
+package app.use_case_factory;
 
 import entity.GameObject;
 import interface_adapter.transform.TransformController;
